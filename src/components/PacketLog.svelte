@@ -37,7 +37,7 @@
     store.packetLog.filter((entry) => store.logFilters[entry.type] !== false)
   );
 
-  // oxlint-ignore-next-line no-unassigned-vars -- Svelteのbind:thisで代入される
+  // oxlint-disable-next-line no-unassigned-vars -- Svelteのbind:thisで代入される
   let logContainer: HTMLDivElement;
 
   // 新しいログエントリ追加時に自動スクロールする

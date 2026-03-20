@@ -24,6 +24,7 @@ export function parseMixerData(buffer: Buffer): MixerData {
     mixerName: buffer
       .slice(29, 45)
       .toString("ascii")
+      // oxlint-disable-next-line no-control-regex -- NULLバイト以降を切り捨てる意図的なパターン
       .replace(/\x00.*$/g, ""),
     masterAudioLevel: buffer.readUInt8(61),
     masterFaderLevel: buffer.readUInt8(62),
