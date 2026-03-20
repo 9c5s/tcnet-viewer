@@ -1,22 +1,31 @@
 # tcnet-viewer
 
 TCNetプロトコルのリアルタイムデバッグビューワー。
-@s0/node-tcnet ライブラリを使用し、全パケットデータをブラウザで可視化する。
+@9c5s/node-tcnet ライブラリを使用し、全パケットデータをブラウザで可視化する。
 
 ## 起動
 
+`.env` に `TCNET_INTERFACE` を設定:
+
+```
+TCNET_INTERFACE=10GbE
+```
+
 ```bash
-TCNET_INTERFACE=10GbE npm run dev
+vp dev
 ```
 
 http://localhost:5180 で開く。`TCNET_INTERFACE` は必須 (ネットワークインターフェース名)。
+`pnpm dev` でも起動可能。
 
 ## 技術スタック
 
-- Svelte 5 + Vite 6 + TypeScript
+- Svelte 5 + Vite 8 + TypeScript
 - WebSocket (ws) によるリアルタイム通信
 - Canvas API (波形描画)
-- @s0/node-tcnet (ローカル依存: `file:../node-tcnet`)
+- @9c5s/node-tcnet (GitHub依存: `github:9c5s/node-tcnet`)
+- pnpm (パッケージマネージャー)
+- vite-plus (CLIツールチェーン: dev/check/test)
 
 ## アーキテクチャ
 
@@ -54,4 +63,6 @@ TCNet UDP → server/tcnet-bridge.ts → WebSocket (/ws) → src/lib/ws-client.t
 - Svelte 5の$stateルーンは.svelte.tsファイルでのみ使用可能
 - Bridgeは曲変更直後のメタデータリクエストに空を返すことがある。500ms間隔で最大6回リトライする
 - stateCache (server/index.ts) で最新メッセージをキャッシュし、新規WSクライアントに即送信する
-- @s0/node-tcnetはローカルパス依存。src/network.tsのTCNetDataPacketsで未実装タイプをTCNetDataPacket基底クラスに変更済み
+- @9c5s/node-tcnetはGitHub依存。ローカル開発時にnode-tcnetを修正する場合は`pnpm add link:../node-tcnet`で一時的にローカルリンクに切り替え可能
+- .envファイルはprocess.envに自動ロードされない。vite.config.tsでloadEnvを明示的に呼び出してマージしている
+- vite-plusはimport元に`vite-plus`を使用する (`vite`ではなく`vite-plus`からimport)
