@@ -22,15 +22,7 @@ import { parseCueData } from "./parsers/cue-data.js";
 import { parseSmallWaveform, parseBigWaveform } from "./parsers/waveform.js";
 import { parseMixerData } from "./parsers/mixer.js";
 import { MultiPacketAssembler } from "./parsers/multi-packet.js";
-
-export type WSMessage = {
-  type: string;
-  timestamp: number;
-  layer?: number;
-  data: Record<string, unknown>;
-};
-
-type BroadcastFn = (msg: WSMessage) => void;
+import type { WSMessage, BroadcastFn } from "./types.js";
 
 export class TCNetBridge {
   private client: TCNetClient;
@@ -166,7 +158,6 @@ export class TCNetBridge {
               this.broadcast({
                 type: "mixer",
                 timestamp: Date.now(),
-                layer,
                 data: mixer as unknown as Record<string, unknown>,
               });
               break;

@@ -1,4 +1,5 @@
 import { store } from "./stores.svelte.js";
+import type { WSMessage } from "./types.js";
 import { STATUS_MAP } from "./types.js";
 
 let ws: WebSocket | null = null;
@@ -29,13 +30,9 @@ export function disconnect(): void {
 }
 
 // サーバーから受信したメッセージをストアに反映する
-function handleMessage(msg: {
-  type: string;
-  timestamp: number;
-  layer?: number;
-  data: Record<string, unknown>;
-}): void {
-  const { type, layer, data } = msg;
+function handleMessage(msg: WSMessage): void {
+  const { type, data } = msg;
+  const layer = "layer" in msg ? msg.layer : undefined;
 
   switch (type) {
     case "optin":
