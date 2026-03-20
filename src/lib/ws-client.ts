@@ -19,8 +19,12 @@ export function connect(): void {
   };
 
   ws.onmessage = (event) => {
-    const msg = JSON.parse(event.data);
-    handleMessage(msg);
+    try {
+      const msg: WSMessage = JSON.parse(event.data as string);
+      handleMessage(msg);
+    } catch (err) {
+      console.error("[WS] メッセージのパースに失敗:", err);
+    }
   };
 }
 
