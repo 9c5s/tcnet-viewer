@@ -7,7 +7,7 @@ TCNetプロトコルのリアルタイムデバッグビューワー。
 
 `.env` に `TCNET_INTERFACE` を設定:
 
-```
+```dotenv
 TCNET_INTERFACE=10GbE
 ```
 
