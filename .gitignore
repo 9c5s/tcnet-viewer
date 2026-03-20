@@ -30,6 +30,7 @@ test-results/
 # Environment
 .env
 .env.*
+!.env.example
 
 # Documentation
 docs/
