@@ -8,6 +8,7 @@
   }
   let { bars, currentPosition, trackLength }: Props = $props();
 
+  // oxlint-ignore-next-line no-unassigned-vars -- Svelteのbind:thisで代入される
   let canvas: HTMLCanvasElement;
 
   // 波形とプレイヘッドをCanvasに描画する
