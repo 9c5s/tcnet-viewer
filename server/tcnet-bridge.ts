@@ -22,7 +22,7 @@ import { parseCueData } from "./parsers/cue-data.js";
 import { parseSmallWaveform, parseBigWaveform } from "./parsers/waveform.js";
 import { parseMixerData } from "./parsers/mixer.js";
 import { MultiPacketAssembler } from "./parsers/multi-packet.js";
-import type { WSMessage, BroadcastFn } from "./types.js";
+import type { BroadcastFn } from "./types.js";
 
 export class TCNetBridge {
   private client: TCNetClient;
