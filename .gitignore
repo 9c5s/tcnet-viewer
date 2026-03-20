@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Vite
+dist/
+*.local
+
+# Svelte
+.svelte-kit/
+
+# TypeScript
+*.tsbuildinfo
+
+# Editor
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug screenshots
+*.png
+
+# Playwright
+test-results/
+
+# Environment
+.env
+.env.*
