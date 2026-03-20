@@ -227,8 +227,9 @@ export class TCNetBridge {
             break;
           }
         }
-      } catch {
-        console.debug(`[TCNet] メタデータ取得タイムアウト (レイヤー${layer}, 試行${attempt}/6)`);
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : String(err);
+        console.debug(`[TCNet] メタデータ取得失敗 (レイヤー${layer}, 試行${attempt}/6): ${reason}`);
       }
       if (attempt < 6) await new Promise((r) => setTimeout(r, 500));
     }
@@ -236,15 +237,17 @@ export class TCNetBridge {
     // CUEData
     try {
       await this.client.requestData(TCNetDataPacketType.CUEData, layer);
-    } catch {
-      console.debug(`[TCNet] CUEデータ取得タイムアウト (レイヤー${layer})`);
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err);
+      console.debug(`[TCNet] CUEデータ取得失敗 (レイヤー${layer}): ${reason}`);
     }
 
     // SmallWaveFormData
     try {
       await this.client.requestData(TCNetDataPacketType.SmallWaveFormData, layer);
-    } catch {
-      console.debug(`[TCNet] 小波形データ取得タイムアウト (レイヤー${layer})`);
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err);
+      console.debug(`[TCNet] 小波形データ取得失敗 (レイヤー${layer}): ${reason}`);
     }
   }
 }
