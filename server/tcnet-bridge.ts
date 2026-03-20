@@ -42,12 +42,12 @@ export class TCNetBridge {
   async connect(): Promise<void> {
     await this.client.connect();
     this.setupListeners();
-    console.log("[TCNet] Connected");
+    console.log("[TCNet] 接続完了");
   }
 
   async disconnect(): Promise<void> {
     await this.client.disconnect();
-    console.log("[TCNet] Disconnected");
+    console.log("[TCNet] 切断完了");
   }
 
   private setupListeners(): void {
@@ -198,7 +198,7 @@ export class TCNetBridge {
     for (let i = 0; i < packet.layers.length; i++) {
       const layer = packet.layers[i];
       if (layer && layer.trackID !== 0 && layer.trackID !== this.trackIds[i]) {
-        console.log(`[TCNet] Layer ${i}: trackID ${this.trackIds[i]} -> ${layer.trackID}`);
+        console.log(`[TCNet] レイヤー${i}: トラックID ${this.trackIds[i]} -> ${layer.trackID}`);
         this.trackIds[i] = layer.trackID;
         this.requestLayerData(i);
       }
@@ -206,7 +206,7 @@ export class TCNetBridge {
   }
 
   private async requestLayerData(layer: number): Promise<void> {
-    console.log(`[TCNet] Requesting data for layer ${layer}`);
+    console.log(`[TCNet] レイヤー${layer}のデータを要求中`);
 
     // MetaData (500ms間隔で最大6回リトライ、Bridgeのメタデータ準備を待つ)
     for (let attempt = 1; attempt <= 6; attempt++) {
@@ -215,7 +215,9 @@ export class TCNetBridge {
         if (packet instanceof TCNetDataPacketMetadata && packet.info) {
           const info = packet.info;
           if (info.trackTitle || info.trackArtist) {
-            console.log(`[TCNet] Metadata L${layer} (attempt ${attempt}): "${info.trackTitle}"`);
+            console.log(
+              `[TCNet] メタデータ取得 レイヤー${layer} (試行${attempt}): "${info.trackTitle}"`,
+            );
             this.broadcast({
               type: "metadata",
               timestamp: Date.now(),
