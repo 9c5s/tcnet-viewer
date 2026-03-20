@@ -33,7 +33,7 @@ export function tcnetPlugin(): Plugin {
       const iface = process.env.TCNET_INTERFACE;
 
       if (!iface) {
-        console.error("[TCNet Plugin] TCNET_INTERFACE required. Set TCNET_INTERFACE in .env file.");
+        console.error("[TCNet] TCNET_INTERFACEが未設定です. .envファイルに設定してください");
         process.exit(1);
       }
 
@@ -52,7 +52,7 @@ export function tcnetPlugin(): Plugin {
       wss.on("connection", (ws) => {
         clients.add(ws);
         console.log(
-          `[WS] Client connected (total: ${clients.size}), sending ${stateCache.size} cached messages`,
+          `[WS] クライアント接続 (合計: ${clients.size}), キャッシュ ${stateCache.size}件を送信`,
         );
         // キャッシュ済みの最新状態を新規クライアントに送信する
         for (const json of stateCache.values()) {
@@ -60,7 +60,7 @@ export function tcnetPlugin(): Plugin {
         }
         ws.on("close", () => {
           clients.delete(ws);
-          console.log(`[WS] Client disconnected (total: ${clients.size})`);
+          console.log(`[WS] クライアント切断 (合計: ${clients.size})`);
         });
       });
 
@@ -71,7 +71,7 @@ export function tcnetPlugin(): Plugin {
       const TCNetBridge = bridgeModule.TCNetBridge;
       bridge = new TCNetBridge(iface, broadcast);
       bridge.connect().catch((err: Error) => {
-        console.error("[TCNet] Connection failed:", err.message);
+        console.error("[TCNet] 接続失敗:", err.message);
       });
 
       server.httpServer!.on("close", () => {
