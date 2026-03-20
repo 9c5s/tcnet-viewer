@@ -1,0 +1,28 @@
+colors: false
+no_tty: true
+
+pre-commit:
+  parallel: true
+  jobs:
+    # - name: protect-branch
+    #   run: >
+    #     d=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null|sed 's#^origin/##')&&
+    #     [ $(git symbolic-ref --short HEAD) = $d ]&&
+    #     echo Direct commits to $d are not allowed. Use a feature branch.&&
+    #     exit 1;true
+
+    - name: ignored-files
+      run: "! git check-ignore {staged_files}"
+
+    - name: lefthook
+      glob: lefthook.yml
+      run: bunx lefthook validate
+
+    - name: actionlint
+      glob: ".github/workflows/*.{yml,yaml}"
+      run: bunx actionlint {staged_files}
+
+    - name: zizmor
+      glob: ".github/workflows/*.{yml,yaml}"
+      run: bunx zizmor --fix --pedantic {staged_files}
+      stage_fixed: true

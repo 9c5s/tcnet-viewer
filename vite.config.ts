@@ -1,15 +1,18 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vite-plus";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { tcnetPlugin } from "./server/index.js";
+import { tcnetPlugin } from "./server/index.ts";
 
 export default defineConfig({
+  staged: {
+    "*": "vp check --fix",
+  },
   plugins: [svelte(), tcnetPlugin()],
   server: {
     port: 5180,
   },
   resolve: {
     alias: {
-      "$lib": "/src/lib",
+      $lib: "/src/lib",
     },
   },
   ssr: {
