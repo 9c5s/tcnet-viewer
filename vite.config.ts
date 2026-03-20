@@ -17,6 +17,6 @@ export default defineConfig({
   },
   ssr: {
     // node-tcnetはNode.jsの標準importで解決し、ViteのSSR変換を通さない
-    external: ["@s0/node-tcnet"],
+    external: ["@9c5s/node-tcnet"],
   },
 });
