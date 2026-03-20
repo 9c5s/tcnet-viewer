@@ -29,7 +29,12 @@ export function disconnect(): void {
 }
 
 // サーバーから受信したメッセージをストアに反映する
-function handleMessage(msg: { type: string; timestamp: number; layer?: number; data: Record<string, unknown> }): void {
+function handleMessage(msg: {
+  type: string;
+  timestamp: number;
+  layer?: number;
+  data: Record<string, unknown>;
+}): void {
   const { type, layer, data } = msg;
 
   switch (type) {
@@ -51,7 +56,12 @@ function handleMessage(msg: { type: string; timestamp: number; layer?: number; d
 
     case "status":
       if (data.layers) {
-        const layers = data.layers as Array<{ source: number; status: number; trackID: number; name: string }>;
+        const layers = data.layers as Array<{
+          source: number;
+          status: number;
+          trackID: number;
+          name: string;
+        }>;
         for (let i = 0; i < layers.length; i++) {
           const l = layers[i];
           store.layers[i] = {
@@ -69,7 +79,7 @@ function handleMessage(msg: { type: string; timestamp: number; layer?: number; d
       if (data.layers) {
         const layers = data.layers as Array<Record<string, unknown>>;
         for (let i = 0; i < layers.length; i++) {
-          store.time[i] = layers[i] as unknown as typeof store.time[number];
+          store.time[i] = layers[i] as unknown as (typeof store.time)[number];
         }
       }
       store.generalSMPTEMode = data.generalSMPTEMode as number;
@@ -78,21 +88,23 @@ function handleMessage(msg: { type: string; timestamp: number; layer?: number; d
 
     case "metrics":
       if (typeof layer === "number") {
-        store.metrics[layer] = data as unknown as typeof store.metrics[number];
+        store.metrics[layer] = data as unknown as (typeof store.metrics)[number];
         store.addLogEntry(type, layer, `bpm=${((data.bpm as number) / 100).toFixed(2)}`);
       }
       break;
 
     case "metadata":
       if (typeof layer === "number") {
-        store.metadata[layer] = data as unknown as typeof store.metadata[number];
+        store.metadata[layer] = data as unknown as (typeof store.metadata)[number];
         store.addLogEntry(type, layer, `"${data.trackTitle}"`);
       }
       break;
 
     case "cue":
       if (typeof layer === "number") {
-        store.cues[layer] = (data.cues as Array<Record<string, unknown>>) as unknown as typeof store.cues[number];
+        store.cues[layer] = data.cues as Array<
+          Record<string, unknown>
+        > as unknown as (typeof store.cues)[number];
         const cues = data.cues as Array<unknown> | undefined;
         store.addLogEntry(type, layer, `${cues?.length ?? 0} cues`);
       }
@@ -100,7 +112,9 @@ function handleMessage(msg: { type: string; timestamp: number; layer?: number; d
 
     case "waveform-small":
       if (typeof layer === "number") {
-        store.waveformSmall[layer] = (data.bars as Array<Record<string, unknown>>) as unknown as typeof store.waveformSmall[number];
+        store.waveformSmall[layer] = data.bars as Array<
+          Record<string, unknown>
+        > as unknown as (typeof store.waveformSmall)[number];
         const bars = data.bars as Array<unknown> | undefined;
         store.addLogEntry(type, layer, `${bars?.length ?? 0} bars`);
       }
@@ -108,7 +122,9 @@ function handleMessage(msg: { type: string; timestamp: number; layer?: number; d
 
     case "waveform-big":
       if (typeof layer === "number") {
-        store.waveformBig[layer] = (data.bars as Array<Record<string, unknown>>) as unknown as typeof store.waveformBig[number];
+        store.waveformBig[layer] = data.bars as Array<
+          Record<string, unknown>
+        > as unknown as (typeof store.waveformBig)[number];
         const bars = data.bars as Array<unknown> | undefined;
         store.addLogEntry(type, layer, `${bars?.length ?? 0} bars`);
       }
