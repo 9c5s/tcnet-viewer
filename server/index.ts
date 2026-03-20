@@ -38,9 +38,7 @@ export function tcnetPlugin(): Plugin {
       const iface = process.env.TCNET_INTERFACE;
 
       if (!iface) {
-        console.error(
-          "[TCNet Plugin] TCNET_INTERFACE required. Usage: TCNET_INTERFACE=10GbE npm run dev",
-        );
+        console.error("[TCNet Plugin] TCNET_INTERFACE required. Set TCNET_INTERFACE in .env file.");
         process.exit(1);
       }
 
