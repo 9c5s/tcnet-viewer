@@ -12,6 +12,7 @@ TCNET_INTERFACE=10GbE
 ```
 
 ```bash
+pnpm install   # 初回のみ (prepare hookでvp configが自動実行される)
 vp dev
 ```
 
