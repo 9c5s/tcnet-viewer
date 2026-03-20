@@ -33,7 +33,7 @@ export function tcnetPlugin(): Plugin {
       const iface = process.env.TCNET_INTERFACE;
 
       if (!iface) {
-        console.error("[TCNet] TCNET_INTERFACEが未設定です. .envファイルに設定してください");
+        console.error("[TCNet] TCNET_INTERFACE未設定 -- .envファイルに設定してください");
         process.exit(1);
       }
 
