@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
   return {
     staged: {
       "*": ["bash -c '! git check-ignore'", "vp check --fix"],
-      ".github/workflows/*.{yml,yaml}": ["bunx actionlint", "bunx zizmor --fix --pedantic"],
+      ".github/workflows/*.{yml,yaml}": ["npx actionlint", "npx zizmor --fix --pedantic"],
     },
     plugins: [svelte(), tcnetPlugin()],
     server: {
