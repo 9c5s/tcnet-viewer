@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     staged: {
-      "*": "vp check --fix",
+      "*": ["bash -c '! git check-ignore'", "vp check --fix"],
       ".github/workflows/*.{yml,yaml}": ["bunx actionlint", "bunx zizmor --fix --pedantic"],
     },
     plugins: [svelte(), tcnetPlugin()],
