@@ -1,15 +1,10 @@
 import type { Plugin, ViteDevServer } from "vite-plus";
+import type { WSMessage } from "./types.js";
 import { WebSocketServer, WebSocket } from "ws";
 import { fileURLToPath } from "url";
 import { resolve, dirname } from "path";
 
-// WSMessage型はtype-onlyなのでバンドルから除外される
-export type WSMessage = {
-  type: string;
-  timestamp: number;
-  layer?: number;
-  data: Record<string, unknown>;
-};
+export type { WSMessage } from "./types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
