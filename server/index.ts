@@ -70,8 +70,8 @@ export function tcnetPlugin(): Plugin {
       const bridgeModule = await server.ssrLoadModule(bridgePath);
       const TCNetBridge = bridgeModule.TCNetBridge;
       bridge = new TCNetBridge(iface, broadcast);
-      bridge.connect().catch((err: Error) => {
-        console.error("[TCNet] 接続失敗:", err.message);
+      bridge.connect().catch((err: unknown) => {
+        console.error("[TCNet] 接続失敗:", err);
       });
 
       server.httpServer!.on("close", () => {
