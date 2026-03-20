@@ -1,4 +1,4 @@
-import type { Plugin, ViteDevServer } from "vite";
+import type { Plugin, ViteDevServer } from "vite-plus";
 import { WebSocketServer, WebSocket } from "ws";
 import { fileURLToPath } from "url";
 import { resolve, dirname } from "path";
@@ -58,7 +58,9 @@ export function tcnetPlugin(): Plugin {
 
       wss.on("connection", (ws) => {
         clients.add(ws);
-        console.log(`[WS] Client connected (total: ${clients.size}), sending ${stateCache.size} cached messages`);
+        console.log(
+          `[WS] Client connected (total: ${clients.size}), sending ${stateCache.size} cached messages`,
+        );
         // キャッシュ済みの最新状態を新規クライアントに送信する
         for (const json of stateCache.values()) {
           ws.send(json);
