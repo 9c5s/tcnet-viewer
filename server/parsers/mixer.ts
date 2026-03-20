@@ -21,7 +21,10 @@ export function parseMixerData(buffer: Buffer): MixerData {
   return {
     mixerId: buffer.readUInt8(25),
     mixerType: buffer.readUInt8(26),
-    mixerName: buffer.slice(29, 45).toString("ascii").replace(/\0.*$/g, ""),
+    mixerName: buffer
+      .slice(29, 45)
+      .toString("ascii")
+      .replace(/\x00.*$/g, ""),
     masterAudioLevel: buffer.readUInt8(61),
     masterFaderLevel: buffer.readUInt8(62),
     masterFilter: buffer.readUInt8(69),

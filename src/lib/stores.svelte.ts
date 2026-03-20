@@ -17,20 +17,28 @@ class ViewerStore {
   layoutMode: LayoutMode = $state("detail");
 
   layers: LayerInfo[] = $state(
-    new Array(8).fill(null).map(() => ({
+    Array.from({ length: 8 }, () => ({
       source: 0,
       status: "IDLE" as const,
       trackID: 0,
       name: "",
     })),
   );
-  time: (TimeInfo | null)[] = $state(new Array(8).fill(null));
-  metrics: (MetricsInfo | null)[] = $state(new Array(8).fill(null));
-  metadata: (MetadataInfo | null)[] = $state(new Array(8).fill(null));
-  cues: (CuePoint[] | null)[] = $state(new Array(8).fill(null));
-  waveformSmall: (WaveformBar[] | null)[] = $state(new Array(8).fill(null));
-  waveformBig: (WaveformBar[] | null)[] = $state(new Array(8).fill(null));
-  artwork: (string | null)[] = $state(new Array(8).fill(null));
+  time: (TimeInfo | null)[] = $state(Array.from<TimeInfo | null>({ length: 8 }, () => null));
+  metrics: (MetricsInfo | null)[] = $state(
+    Array.from<MetricsInfo | null>({ length: 8 }, () => null),
+  );
+  metadata: (MetadataInfo | null)[] = $state(
+    Array.from<MetadataInfo | null>({ length: 8 }, () => null),
+  );
+  cues: (CuePoint[] | null)[] = $state(Array.from<CuePoint[] | null>({ length: 8 }, () => null));
+  waveformSmall: (WaveformBar[] | null)[] = $state(
+    Array.from<WaveformBar[] | null>({ length: 8 }, () => null),
+  );
+  waveformBig: (WaveformBar[] | null)[] = $state(
+    Array.from<WaveformBar[] | null>({ length: 8 }, () => null),
+  );
+  artwork: (string | null)[] = $state(Array.from<string | null>({ length: 8 }, () => null));
   mixer: Record<string, unknown> | null = $state(null);
   generalSMPTEMode = $state(0);
 

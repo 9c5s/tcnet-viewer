@@ -27,7 +27,7 @@ import type { WSMessage, BroadcastFn } from "./types.js";
 export class TCNetBridge {
   private client: TCNetClient;
   private broadcast: BroadcastFn;
-  private trackIds: (number | null)[] = new Array(8).fill(null);
+  private trackIds: (number | null)[] = Array.from({ length: 8 }, () => null);
   private beatGridAssembler = new MultiPacketAssembler();
   private bigWaveformAssembler = new MultiPacketAssembler();
 
