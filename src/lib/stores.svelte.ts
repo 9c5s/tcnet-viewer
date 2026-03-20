@@ -16,9 +16,14 @@ class ViewerStore {
   connected = $state(false);
   layoutMode: LayoutMode = $state("detail");
 
-  layers: LayerInfo[] = $state(new Array(8).fill(null).map(() => ({
-    source: 0, status: "IDLE" as const, trackID: 0, name: "",
-  })));
+  layers: LayerInfo[] = $state(
+    new Array(8).fill(null).map(() => ({
+      source: 0,
+      status: "IDLE" as const,
+      trackID: 0,
+      name: "",
+    })),
+  );
   time: (TimeInfo | null)[] = $state(new Array(8).fill(null));
   metrics: (MetricsInfo | null)[] = $state(new Array(8).fill(null));
   metadata: (MetadataInfo | null)[] = $state(new Array(8).fill(null));
@@ -33,9 +38,18 @@ class ViewerStore {
 
   packetLog: PacketLogEntry[] = $state([]);
   logFilters: Record<string, boolean> = $state({
-    time: false, status: true, metrics: true, metadata: true,
-    optin: false, optout: true, cue: true, beatgrid: true,
-    "waveform-small": true, "waveform-big": true, mixer: true, artwork: true,
+    time: false,
+    status: true,
+    metrics: true,
+    metadata: true,
+    optin: false,
+    optout: true,
+    cue: true,
+    beatgrid: true,
+    "waveform-small": true,
+    "waveform-big": true,
+    mixer: true,
+    artwork: true,
   });
   private logIdCounter = 0;
 

@@ -1,5 +1,14 @@
-export type LayerStatus = "IDLE" | "PLAYING" | "LOOPING" | "PAUSED" | "STOPPED" |
-  "CUEDOWN" | "PLATTERDOWN" | "FFWD" | "FFRV" | "HOLD";
+export type LayerStatus =
+  | "IDLE"
+  | "PLAYING"
+  | "LOOPING"
+  | "PAUSED"
+  | "STOPPED"
+  | "CUEDOWN"
+  | "PLATTERDOWN"
+  | "FFWD"
+  | "FFRV"
+  | "HOLD";
 
 export type LayerInfo = {
   source: number;
@@ -90,6 +99,14 @@ export type PacketLogEntry = {
 export const LAYER_NAMES = ["L1", "L2", "L3", "L4", "LA", "LB", "LM", "LC"] as const;
 
 export const STATUS_MAP: Record<number, LayerStatus> = {
-  0: "IDLE", 3: "PLAYING", 4: "LOOPING", 5: "PAUSED", 6: "STOPPED",
-  7: "CUEDOWN", 8: "PLATTERDOWN", 9: "FFWD", 10: "FFRV", 11: "HOLD",
+  0: "IDLE",
+  3: "PLAYING",
+  4: "LOOPING",
+  5: "PAUSED",
+  6: "STOPPED",
+  7: "CUEDOWN",
+  8: "PLATTERDOWN",
+  9: "FFWD",
+  10: "FFRV",
+  11: "HOLD",
 };
