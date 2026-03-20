@@ -226,7 +226,7 @@ export class TCNetBridge {
           }
         }
       } catch {
-        // タイムアウトは無視してリトライ
+        console.debug(`[TCNet] メタデータ取得タイムアウト (レイヤー${layer}, 試行${attempt}/6)`);
       }
       if (attempt < 6) await new Promise((r) => setTimeout(r, 500));
     }
@@ -235,14 +235,14 @@ export class TCNetBridge {
     try {
       await this.client.requestData(TCNetDataPacketType.CUEData, layer);
     } catch {
-      // タイムアウトは無視する
+      console.debug(`[TCNet] CUEデータ取得タイムアウト (レイヤー${layer})`);
     }
 
     // SmallWaveFormData
     try {
       await this.client.requestData(TCNetDataPacketType.SmallWaveFormData, layer);
     } catch {
-      // タイムアウトは無視する
+      console.debug(`[TCNet] 小波形データ取得タイムアウト (レイヤー${layer})`);
     }
   }
 }
