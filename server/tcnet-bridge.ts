@@ -3,7 +3,7 @@
 // createRequireを使ってCJSとしてロードすることで回避する
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
-const tcnet = require("@s0/node-tcnet");
+const tcnet = require("@9c5s/node-tcnet");
 const {
   TCNetClient,
   TCNetConfiguration,
@@ -220,10 +220,7 @@ export class TCNetBridge {
     // MetaData (500ms間隔で最大6回リトライ、Bridgeのメタデータ準備を待つ)
     for (let attempt = 1; attempt <= 6; attempt++) {
       try {
-        const packet = await this.client.requestData(
-          TCNetDataPacketType.MetaData,
-          layer,
-        );
+        const packet = await this.client.requestData(TCNetDataPacketType.MetaData, layer);
         if (packet instanceof TCNetDataPacketMetadata && packet.info) {
           const info = packet.info;
           if (info.trackTitle || info.trackArtist) {
@@ -240,7 +237,7 @@ export class TCNetBridge {
       } catch {
         // タイムアウトは無視してリトライ
       }
-      if (attempt < 6) await new Promise(r => setTimeout(r, 500));
+      if (attempt < 6) await new Promise((r) => setTimeout(r, 500));
     }
 
     // CUEData

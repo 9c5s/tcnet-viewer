@@ -7,7 +7,7 @@
     "prepare": "vp config"
   },
   "dependencies": {
-    "@s0/node-tcnet": "file:../node-tcnet",
+    "@9c5s/node-tcnet": "link:..\\node-tcnet",
     "ws": "^8.18.0"
   },
   "devDependencies": {
