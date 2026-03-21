@@ -12,10 +12,16 @@ import type {
 
 export type LayoutMode = "cards" | "detail" | "table";
 
+export type Theme = "tokyo-night" | "tokyo-night-storm" | "tokyo-night-light";
+
 class ViewerStore {
   node: NodeInfo | null = $state(null);
   connected = $state(false);
   layoutMode: LayoutMode = $state("detail");
+  theme: Theme = $state(
+    (typeof localStorage !== "undefined" && (localStorage.getItem("theme") as Theme)) ||
+      "tokyo-night",
+  );
 
   layers: LayerInfo[] = $state(
     Array.from({ length: 8 }, () => ({

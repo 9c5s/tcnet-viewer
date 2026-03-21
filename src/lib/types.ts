@@ -100,3 +100,33 @@ type ExtractWSData<T extends WSMessage["type"]> = Extract<WSMessage, { type: T }
 
 export type MetricsData = ExtractWSData<"metrics">;
 export type MetadataData = ExtractWSData<"metadata">;
+
+// レイヤーステータスに対応するTailwindクラスを返す
+export function statusClass(status: LayerStatus): string {
+  switch (status) {
+    case "PLAYING":
+    case "LOOPING":
+      return "text-success";
+    case "PAUSED":
+      return "text-warning";
+    case "STOPPED":
+      return "text-error";
+    default:
+      return "text-base-content/40";
+  }
+}
+
+// レイヤーステータスに対応するbadgeバリアントクラスを返す
+export function statusBadgeClass(status: LayerStatus): string {
+  switch (status) {
+    case "PLAYING":
+    case "LOOPING":
+      return "badge-success";
+    case "PAUSED":
+      return "badge-warning";
+    case "STOPPED":
+      return "badge-error";
+    default:
+      return "";
+  }
+}
