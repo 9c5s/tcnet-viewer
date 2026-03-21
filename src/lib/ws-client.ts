@@ -85,7 +85,11 @@ function handleMessage(msg: WSMessage): void {
 
     case "metrics":
       store.metrics[msg.layer] = msg.data;
-      store.addLogEntry(msg.type, msg.layer, `bpm=${((msg.data.bpm as number) / 100).toFixed(2)}`);
+      store.addLogEntry(
+        msg.type,
+        msg.layer,
+        `bpm=${msg.data.bpm != null ? (msg.data.bpm / 100).toFixed(2) : "N/A"}`,
+      );
       break;
 
     case "metadata":

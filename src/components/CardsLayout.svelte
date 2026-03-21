@@ -162,8 +162,8 @@
         XFader: {toPercent(store.mixer.crossFader as number)}%
       </span>
       <span class="mixer-sep">|</span>
-      <span class="mixer-item" class:fx-active={(store.mixer.beatFxOn as number) === 1}>
-        BeatFX: {(store.mixer.beatFxOn as number) === 1 ? "ON" : "OFF"}
+      <span class="mixer-item" class:fx-active={store.mixer.beatFxOn}>
+        BeatFX: {store.mixer.beatFxOn ? "ON" : "OFF"}
       </span>
     </div>
   {/if}

@@ -36,8 +36,8 @@
     <div class="mixer-group">
       <div class="mixer-row">
         <span class="label">BeatFX</span>
-        <span class="value" class:fx-on={(store.mixer.beatFxOn as number) === 1}>
-          {(store.mixer.beatFxOn as number) === 1 ? "ON" : "OFF"}
+        <span class="value" class:fx-on={store.mixer.beatFxOn}>
+          {store.mixer.beatFxOn ? "ON" : "OFF"}
         </span>
       </div>
       <div class="mixer-row">
