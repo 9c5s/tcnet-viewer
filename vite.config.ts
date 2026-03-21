@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => {
   return {
     staged: {
       "*": ["bash -c '! git check-ignore'", "vp check --fix"],
+      "*.svelte": ["svelte-check --fail-on-warnings"],
       ".github/workflows/*.{yml,yaml}": ["npx actionlint", "npx zizmor --fix --pedantic"],
     },
     plugins: [tailwindcss(), svelte(), tcnetPlugin()],
