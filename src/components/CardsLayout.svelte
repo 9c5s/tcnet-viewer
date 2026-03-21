@@ -91,7 +91,7 @@
               <div class="card-metrics">
                 <div class="metric bpm">
                   <span class="metric-label">BPM</span>
-                  <span class="metric-value">{formatBPM(metrics.bpm)}</span>
+                  <span class="metric-value">{metrics.bpm != null ? formatBPM(metrics.bpm) : "N/A"}</span>
                 </div>
                 <div class="metric">
                   <span class="metric-label">Speed</span>
