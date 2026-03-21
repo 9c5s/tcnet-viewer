@@ -41,13 +41,13 @@
       {@const waveform = store.waveformSmall[i]}
       {@const artworkBase64 = store.artwork[i]}
 
-      <div class="card bg-base-200 border border-base-content/12 overflow-hidden {active ? 'border-accent/50' : ''} {layer.status === 'IDLE' ? 'opacity-50' : ''}">
+      <div class="card bg-base-200 border border-base-content/12 overflow-hidden {active ? 'border-accent/50' : ''} {layer.status === 'IDLE' && !metadata && !metrics ? 'opacity-50' : ''}">
         <div class="flex justify-between items-center px-2.5 py-1 bg-base-300 border-b border-base-content/10 flex-shrink-0">
           <span class="text-xs font-bold text-base-content">{LAYER_NAMES[i]}</span>
           <span class="badge badge-xs {statusBadgeClass(layer.status)}">{layer.status}</span>
         </div>
 
-        {#if layer.status !== "IDLE"}
+        {#if layer.status !== "IDLE" || metadata || metrics}
           <div class="flex-1 flex flex-col gap-1 px-2 py-1.5 overflow-hidden min-h-0">
             {#if metadata}
               <div class="flex gap-2 items-center flex-shrink-0">
