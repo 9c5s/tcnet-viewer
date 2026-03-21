@@ -7,105 +7,41 @@
   }
 </script>
 
-<section class="mixer-view">
-  <h3 class="section-title">MIXER</h3>
+<section class="p-3 border-b border-base-content/20">
+  <h3 class="text-[10px] text-base-content/40 uppercase tracking-wider mb-2">Mixer</h3>
   {#if store.mixer}
-    <div class="mixer-group">
-      <div class="mixer-row">
-        <span class="label">Master Audio</span>
-        <div class="bar-container">
-          <div class="bar-fill" style="width: {toPercent(store.mixer.masterAudioLevel)}%"></div>
+    <div class="space-y-1.5">
+      <div class="space-y-0.5">
+        <div class="flex justify-between text-[10px]">
+          <span class="text-base-content/40">Master</span>
+          <span class="text-base-content" style="font-variant-numeric: tabular-nums">{toPercent(store.mixer.masterAudioLevel)}%</span>
         </div>
-        <span class="value">{store.mixer.masterAudioLevel}</span>
+        <progress class="progress progress-success h-1.5 w-full" value={store.mixer.masterAudioLevel} max="255"></progress>
       </div>
-      <div class="mixer-row">
-        <span class="label">Master Fader</span>
-        <div class="bar-container">
-          <div class="bar-fill" style="width: {toPercent(store.mixer.masterFaderLevel)}%"></div>
+      <div class="space-y-0.5">
+        <div class="flex justify-between text-[10px]">
+          <span class="text-base-content/40">Fader</span>
+          <span class="text-base-content" style="font-variant-numeric: tabular-nums">{toPercent(store.mixer.masterFaderLevel)}%</span>
         </div>
-        <span class="value">{store.mixer.masterFaderLevel}</span>
+        <progress class="progress progress-success h-1.5 w-full" value={store.mixer.masterFaderLevel} max="255"></progress>
       </div>
-      <div class="mixer-row">
-        <span class="label">Cross Fader</span>
-        <div class="bar-container">
-          <div class="bar-fill crossfader" style="width: {toPercent(store.mixer.crossFader)}%"></div>
+      <div class="space-y-0.5">
+        <div class="flex justify-between text-[10px]">
+          <span class="text-base-content/40">CrossFader</span>
+          <span class="text-base-content" style="font-variant-numeric: tabular-nums">{toPercent(store.mixer.crossFader)}%</span>
         </div>
-        <span class="value">{store.mixer.crossFader}</span>
+        <progress class="progress progress-warning h-1.5 w-full" value={store.mixer.crossFader} max="255"></progress>
       </div>
-    </div>
-    <div class="mixer-group">
-      <div class="mixer-row">
-        <span class="label">BeatFX</span>
-        <span class="value" class:fx-on={store.mixer.beatFxOn}>
-          {store.mixer.beatFxOn ? "ON" : "OFF"}
-        </span>
+      <div class="flex justify-between items-center text-[10px]">
+        <span class="text-base-content/40">BeatFX</span>
+        <span class="badge badge-xs {store.mixer.beatFxOn ? 'badge-success' : ''}">{store.mixer.beatFxOn ? "ON" : "OFF"}</span>
       </div>
-      <div class="mixer-row">
-        <span class="label">FX Select</span>
-        <span class="value">{store.mixer.beatFxSelect ?? "-"}</span>
+      <div class="flex justify-between text-[10px]">
+        <span class="text-base-content/40">FX Select</span>
+        <span class="text-base-content">{store.mixer.beatFxSelect ?? "-"}</span>
       </div>
     </div>
   {:else}
-    <p class="no-data">No mixer data</p>
+    <div class="text-base-content/40 text-[11px]">No mixer data</div>
   {/if}
 </section>
-
-<style>
-  .mixer-view {
-    padding: 12px;
-    border-bottom: 1px solid var(--border);
-  }
-  .section-title {
-    font-size: 10px;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-  }
-  .mixer-group {
-    margin-bottom: 8px;
-  }
-  .mixer-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 0;
-  }
-  .label {
-    color: var(--text-muted);
-    font-size: 10px;
-    min-width: 80px;
-    flex-shrink: 0;
-  }
-  .bar-container {
-    flex: 1;
-    height: 6px;
-    background: var(--bg-tertiary);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .bar-fill {
-    height: 100%;
-    background: var(--green);
-    border-radius: 3px;
-    transition: width 0.1s ease;
-  }
-  .bar-fill.crossfader {
-    background: var(--yellow);
-  }
-  .value {
-    color: var(--text-secondary);
-    font-size: 10px;
-    min-width: 24px;
-    text-align: right;
-  }
-  .fx-on {
-    color: var(--green);
-    font-weight: bold;
-  }
-  .no-data {
-    color: var(--text-muted);
-    font-size: 11px;
-    font-style: italic;
-  }
-</style>
