@@ -36,79 +36,27 @@
   }
 </script>
 
-<div class="cue-points">
-  <h3 class="section-title">CUE POINTS</h3>
+<div class="p-3">
+  <h3 class="text-[10px] text-base-content/40 uppercase tracking-wider mb-2">Cue Points</h3>
   {#if cues && cues.length > 0}
-    <div class="cue-list">
-      {#each cues as cue}
-        <div class="cue-item">
-          <span
-            class="cue-color"
-            style="background: rgb({cue.color.r}, {cue.color.g}, {cue.color.b})"
-          ></span>
-          <span class="cue-index">#{cue.index}</span>
-          <span class="cue-type">{cueTypeName(cue.type)}</span>
-          <span class="cue-time">{formatMmSs(cue.inTime)}</span>
-          {#if cue.outTime > 0}
-            <span class="cue-out">- {formatMmSs(cue.outTime)}</span>
-          {/if}
-        </div>
-      {/each}
-    </div>
+    <table class="table table-xs">
+      <tbody>
+        {#each cues as cue}
+          <tr>
+            <td class="w-4 px-0">
+              <span class="inline-block w-2.5 h-2.5 rounded-full" style="background: rgb({cue.color.r}, {cue.color.g}, {cue.color.b})"></span>
+            </td>
+            <td class="text-base-content/70 px-1">#{cue.index}</td>
+            <td class="text-base-content/70 px-1">{cueTypeName(cue.type)}</td>
+            <td class="text-base-content" style="font-variant-numeric: tabular-nums">{formatMmSs(cue.inTime)}</td>
+            {#if cue.outTime > 0}
+              <td class="text-base-content/40" style="font-variant-numeric: tabular-nums">- {formatMmSs(cue.outTime)}</td>
+            {/if}
+          </tr>
+        {/each}
+      </tbody>
+    </table>
   {:else}
-    <p class="no-data">No cue points</p>
+    <div class="text-base-content/40 text-[11px]">No cue points</div>
   {/if}
 </div>
-
-<style>
-  .cue-points {
-    flex: 1;
-    min-width: 0;
-  }
-  .section-title {
-    font-size: 10px;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-  }
-  .cue-list {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  .cue-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 2px 0;
-    font-size: 10px;
-  }
-  .cue-color {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .cue-index {
-    color: var(--text-muted);
-    min-width: 18px;
-  }
-  .cue-type {
-    color: var(--text-secondary);
-    min-width: 32px;
-  }
-  .cue-time {
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-  }
-  .cue-out {
-    color: var(--text-muted);
-    font-variant-numeric: tabular-nums;
-  }
-  .no-data {
-    color: var(--text-muted);
-    font-size: 11px;
-    font-style: italic;
-  }
-</style>
