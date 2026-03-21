@@ -1,5 +1,71 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "daisyui" {
+  themes:
+    tokyo-night --default,
+    tokyo-night-storm,
+    tokyo-night-light;
+}
+
+@plugin "daisyui/theme" {
+  name: "tokyo-night";
+  default: true;
+  --color-base-100: #1a1b26;
+  --color-base-200: #16161e;
+  --color-base-300: #101014;
+  --color-base-content: #a9b1d6;
+  --color-primary: #3d59a1;
+  --color-primary-content: #c0caf5;
+  --color-secondary: #bb9af7;
+  --color-secondary-content: #1a1b26;
+  --color-accent: #7aa2f7;
+  --color-accent-content: #1a1b26;
+  --color-neutral: #565f89;
+  --color-neutral-content: #c0caf5;
+  --color-info: #2ac3de;
+  --color-success: #9ece6a;
+  --color-warning: #e0af68;
+  --color-error: #f7768e;
+}
+
+@plugin "daisyui/theme" {
+  name: "tokyo-night-storm";
+  --color-base-100: #24283b;
+  --color-base-200: #1f2335;
+  --color-base-300: #1a1e30;
+  --color-base-content: #a9b1d6;
+  --color-primary: #3d59a1;
+  --color-primary-content: #c0caf5;
+  --color-secondary: #bb9af7;
+  --color-secondary-content: #1a1b26;
+  --color-accent: #7aa2f7;
+  --color-accent-content: #1a1b26;
+  --color-neutral: #565f89;
+  --color-neutral-content: #c0caf5;
+  --color-info: #2ac3de;
+  --color-success: #9ece6a;
+  --color-warning: #e0af68;
+  --color-error: #f7768e;
+}
+
+@plugin "daisyui/theme" {
+  name: "tokyo-night-light";
+  --color-base-100: #d5d6db;
+  --color-base-200: #cbccd1;
+  --color-base-300: #c1c2c7;
+  --color-base-content: #363c4d;
+  --color-primary: #2959aa;
+  --color-primary-content: #ffffff;
+  --color-secondary: #653595;
+  --color-secondary-content: #ffffff;
+  --color-accent: #006c86;
+  --color-accent-content: #ffffff;
+  --color-neutral: #888b94;
+  --color-neutral-content: #363c4d;
+  --color-info: #0da0ba;
+  --color-success: #385f0d;
+  --color-warning: #8f5e15;
+  --color-error: #942f2f;
+}
 
 :root {
   --bg-primary: #0d1117;
