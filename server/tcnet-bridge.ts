@@ -190,7 +190,7 @@ export class TCNetBridge {
       timestamp: Date.now(),
       data: {
         ...packet.data,
-        layers: packet.layers,
+        layers: packet.layers.filter((l): l is NonNullable<typeof l> => l != null),
       },
     });
 
