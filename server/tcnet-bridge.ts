@@ -125,7 +125,7 @@ export class TCNetBridge {
                 type: "cue",
                 timestamp: Date.now(),
                 layer,
-                data: cue as unknown as Record<string, unknown>,
+                data: cue,
               });
               break;
             }
@@ -135,7 +135,7 @@ export class TCNetBridge {
                 type: "waveform-small",
                 timestamp: Date.now(),
                 layer,
-                data: waveform as unknown as Record<string, unknown>,
+                data: waveform,
               });
               break;
             }
@@ -147,7 +147,7 @@ export class TCNetBridge {
                   type: "waveform-big",
                   timestamp: Date.now(),
                   layer,
-                  data: waveform as unknown as Record<string, unknown>,
+                  data: waveform,
                 });
                 this.bigWaveformAssembler.reset();
               }
@@ -158,7 +158,7 @@ export class TCNetBridge {
               this.broadcast({
                 type: "mixer",
                 timestamp: Date.now(),
-                data: mixer as unknown as Record<string, unknown>,
+                data: mixer,
               });
               break;
             }
@@ -170,7 +170,7 @@ export class TCNetBridge {
                   type: "beatgrid",
                   timestamp: Date.now(),
                   layer,
-                  data: { entries: beatgrid } as unknown as Record<string, unknown>,
+                  data: { entries: beatgrid },
                 });
                 this.beatGridAssembler.reset();
               }
@@ -222,7 +222,7 @@ export class TCNetBridge {
               type: "metadata",
               timestamp: Date.now(),
               layer,
-              data: info as unknown as Record<string, unknown>,
+              data: info,
             });
             break;
           }
