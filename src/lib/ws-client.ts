@@ -118,6 +118,7 @@ function handleMessage(msg: WSMessage): void {
       break;
 
     case "artwork":
+      // サーバー側のartworkパーサーは未実装だが、UIコンポーネントが表示機能を持つ
       store.artwork[msg.layer] = msg.data.base64;
       store.addLogEntry(msg.type, msg.layer, `received`);
       break;

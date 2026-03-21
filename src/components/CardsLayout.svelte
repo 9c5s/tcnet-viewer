@@ -151,15 +151,15 @@
     <div class="mixer-bar">
       <span class="mixer-label">MIXER</span>
       <span class="mixer-item">
-        Master: {toPercent(store.mixer.masterAudioLevel as number)}%
+        Master: {toPercent(store.mixer.masterAudioLevel)}%
       </span>
       <span class="mixer-sep">|</span>
       <span class="mixer-item">
-        Fader: {toPercent(store.mixer.masterFaderLevel as number)}%
+        Fader: {toPercent(store.mixer.masterFaderLevel)}%
       </span>
       <span class="mixer-sep">|</span>
       <span class="mixer-item">
-        XFader: {toPercent(store.mixer.crossFader as number)}%
+        XFader: {toPercent(store.mixer.crossFader)}%
       </span>
       <span class="mixer-sep">|</span>
       <span class="mixer-item" class:fx-active={store.mixer.beatFxOn}>
