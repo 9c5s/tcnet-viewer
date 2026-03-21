@@ -40,6 +40,7 @@ import type { BroadcastFn } from "./types.js";
 export class TCNetBridge {
   private client: TCNetClientType;
   private broadcast: BroadcastFn;
+  private nodeName: string;
   private trackIds: (number | null)[] = Array.from({ length: 8 }, () => null);
   private beatGridAssembler = new MultiPacketAssembler();
   private bigWaveformAssembler = new MultiPacketAssembler();
@@ -48,6 +49,7 @@ export class TCNetBridge {
     this.broadcast = broadcast;
     const config = new TCNetConfiguration();
     config.broadcastInterface = iface;
+    this.nodeName = config.nodeName;
     this.client = new TCNetClient(config);
   }
 
@@ -66,6 +68,8 @@ export class TCNetBridge {
     this.client.on("broadcast", (packet: unknown) => {
       if (packet instanceof TCNetOptInPacket) {
         const p = packet as TCNetOptInPacketType;
+        // 自ノードのoptinはクライアントに転送しない
+        if (p.header.nodeName === this.nodeName) return;
         this.broadcast({
           type: "optin",
           timestamp: Date.now(),
