@@ -14,21 +14,21 @@
       <div class="mixer-row">
         <span class="label">Master Audio</span>
         <div class="bar-container">
-          <div class="bar-fill" style="width: {toPercent(store.mixer.masterAudioLevel as number)}%"></div>
+          <div class="bar-fill" style="width: {toPercent(store.mixer.masterAudioLevel)}%"></div>
         </div>
         <span class="value">{store.mixer.masterAudioLevel}</span>
       </div>
       <div class="mixer-row">
         <span class="label">Master Fader</span>
         <div class="bar-container">
-          <div class="bar-fill" style="width: {toPercent(store.mixer.masterFaderLevel as number)}%"></div>
+          <div class="bar-fill" style="width: {toPercent(store.mixer.masterFaderLevel)}%"></div>
         </div>
         <span class="value">{store.mixer.masterFaderLevel}</span>
       </div>
       <div class="mixer-row">
         <span class="label">Cross Fader</span>
         <div class="bar-container">
-          <div class="bar-fill crossfader" style="width: {toPercent(store.mixer.crossFader as number)}%"></div>
+          <div class="bar-fill crossfader" style="width: {toPercent(store.mixer.crossFader)}%"></div>
         </div>
         <span class="value">{store.mixer.crossFader}</span>
       </div>
