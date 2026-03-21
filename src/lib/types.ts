@@ -45,35 +45,16 @@ export type MetadataInfo = {
   trackID: number;
 };
 
-export type CuePoint = {
-  index: number;
-  type: number;
-  inTime: number;
-  outTime: number;
-  color: { r: number; g: number; b: number };
-};
-
-export type WaveformBar = {
-  level: number;
-  color: number;
-};
-
-export type MixerChannel = {
-  sourceSelect: number;
-  audioLevel: number;
-  faderLevel: number;
-  trimLevel: number;
-  compLevel: number;
-  eqHi: number;
-  eqHiMid: number;
-  eqLowMid: number;
-  eqLow: number;
-  filterColor: number;
-  send: number;
-  cueA: number;
-  cueB: number;
-  crossfaderAssign: number;
-};
+// server/parsers/types.ts から共通型を再エクスポートする
+export type {
+  CuePoint,
+  WaveformBar,
+  MixerChannel,
+  CueData,
+  WaveformData,
+  MixerData,
+  BeatGridEntry,
+} from "../../server/parsers/types.js";
 
 export type NodeInfo = {
   nodeName: string;
