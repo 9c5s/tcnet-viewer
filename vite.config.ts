@@ -1,4 +1,5 @@
 import { defineConfig, loadEnv } from "vite-plus";
+import tailwindcss from "@tailwindcss/vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { tcnetPlugin } from "./server/index.ts";
 
@@ -13,7 +14,7 @@ export default defineConfig(({ mode }) => {
       "*": ["bash -c '! git check-ignore'", "vp check --fix"],
       ".github/workflows/*.{yml,yaml}": ["npx actionlint", "npx zizmor --fix --pedantic"],
     },
-    plugins: [svelte(), tcnetPlugin()],
+    plugins: [tailwindcss(), svelte(), tcnetPlugin()],
     server: {
       port: 5180,
     },
