@@ -4,17 +4,8 @@
   import MixerView from "./MixerView.svelte";
 </script>
 
-<aside class="sidebar">
+<aside class="bg-base-200 border-r border-base-content/20 overflow-y-auto row-span-2">
   <NodeInfo />
   <TimecodeDisplay />
   <MixerView />
 </aside>
-
-<style>
-  .sidebar {
-    background: var(--bg-secondary);
-    border-right: 1px solid var(--border);
-    overflow-y: auto;
-    grid-row: 1 / -1;
-  }
-</style>
