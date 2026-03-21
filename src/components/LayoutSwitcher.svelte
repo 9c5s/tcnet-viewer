@@ -15,7 +15,7 @@
   ];
 </script>
 
-<div class="fixed top-2 right-2 z-[1000] flex items-center gap-2">
+<div class="fixed top-1 right-2 z-[1000] flex items-center gap-2">
   <div class="join">
     {#each modes as mode}
       <button
