@@ -35,7 +35,6 @@ export class TCNetBridge {
     this.broadcast = broadcast;
     const config = new TCNetConfiguration();
     config.broadcastInterface = iface;
-    config.brodcastListeningAddress = "0.0.0.0";
     this.client = new TCNetClient(config);
   }
 
