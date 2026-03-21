@@ -8,10 +8,10 @@
     { key: "table", label: "Table", icon: "\u2261" },
   ];
 
-  const themes: { key: Theme; label: string }[] = [
-    { key: "tokyo-night", label: "Night" },
-    { key: "tokyo-night-storm", label: "Storm" },
-    { key: "tokyo-night-light", label: "Light" },
+  const themes: { key: Theme; label: string; icon: string }[] = [
+    { key: "tokyo-night", label: "Night", icon: "\u263D" },
+    { key: "tokyo-night-storm", label: "Storm", icon: "\u2601" },
+    { key: "tokyo-night-light", label: "Light", icon: "\u2600" },
   ];
 </script>
 
@@ -31,9 +31,7 @@
 
   <div class="dropdown dropdown-end">
     <div tabindex="0" role="button" class="btn btn-xs btn-ghost">
-      <span class="text-[10px] uppercase tracking-wider">
-        {themes.find((t) => t.key === store.theme)?.label ?? "Night"}
-      </span>
+      <span class="text-sm leading-none">{themes.find((t) => t.key === store.theme)?.icon ?? "\u263D"}</span>
     </div>
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <ul tabindex="0" class="dropdown-content menu bg-base-200 rounded-box z-1 w-28 p-1 shadow-lg border border-base-content/20">
@@ -43,7 +41,7 @@
             class="text-[11px] {store.theme === t.key ? 'active' : ''}"
             onclick={() => (store.theme = t.key)}
           >
-            {t.label}
+            {t.icon} {t.label}
           </button>
         </li>
       {/each}
