@@ -7,6 +7,11 @@
   import TableLayout from "./components/TableLayout.svelte";
   import LayoutSwitcher from "./components/LayoutSwitcher.svelte";
 
+  $effect(() => {
+    document.documentElement.dataset.theme = store.theme;
+    localStorage.setItem("theme", store.theme);
+  });
+
   onMount(() => connect());
   onDestroy(() => disconnect());
 </script>

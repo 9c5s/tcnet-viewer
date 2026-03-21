@@ -84,21 +84,11 @@
   --font-mono: "JetBrains Mono", "Fira Code", "Consolas", monospace;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: var(--font-mono);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-size: 12px;
-  overflow: hidden;
-  height: 100vh;
-}
-
-#app {
-  height: 100vh;
+@layer base {
+  body {
+    @apply font-mono text-xs overflow-hidden h-screen;
+  }
+  #app {
+    @apply h-screen;
+  }
 }
