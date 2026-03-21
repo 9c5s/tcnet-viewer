@@ -5,31 +5,13 @@
   import PacketLog from "./PacketLog.svelte";
 </script>
 
-<div class="dashboard">
+<div class="grid grid-cols-[200px_1fr] grid-rows-[1fr_200px] h-screen w-screen overflow-hidden">
   <Sidebar />
-  <div class="main-top">
+  <div class="flex overflow-hidden">
     <LayerList />
     <LayerDetail />
   </div>
-  <div class="main-bottom">
+  <div class="overflow-hidden">
     <PacketLog />
   </div>
 </div>
-
-<style>
-  .dashboard {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    grid-template-rows: 1fr 200px;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-  }
-  .main-top {
-    display: flex;
-    overflow: hidden;
-  }
-  .main-bottom {
-    overflow: hidden;
-  }
-</style>
