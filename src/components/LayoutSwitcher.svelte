@@ -1,71 +1,52 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
-  import type { LayoutMode } from "$lib/stores.svelte.js";
+  import type { LayoutMode, Theme } from "$lib/stores.svelte.js";
 
   const modes: { key: LayoutMode; label: string; icon: string }[] = [
     { key: "cards", label: "Cards", icon: "\u25A6" },
     { key: "detail", label: "Detail", icon: "\u25A3" },
     { key: "table", label: "Table", icon: "\u2261" },
   ];
+
+  const themes: { key: Theme; label: string }[] = [
+    { key: "tokyo-night", label: "Night" },
+    { key: "tokyo-night-storm", label: "Storm" },
+    { key: "tokyo-night-light", label: "Light" },
+  ];
 </script>
 
-<div class="layout-switcher">
-  {#each modes as mode}
-    <button
-      class="switcher-btn"
-      class:active={store.layoutMode === mode.key}
-      onclick={() => (store.layoutMode = mode.key)}
-      title="{mode.label} layout"
-    >
-      <span class="btn-icon">{mode.icon}</span>
-      <span class="btn-label">{mode.label}</span>
-    </button>
-  {/each}
-</div>
+<div class="fixed top-2 right-2 z-[1000] flex items-center gap-2">
+  <div class="join">
+    {#each modes as mode}
+      <button
+        class="join-item btn btn-xs {store.layoutMode === mode.key ? 'btn-accent' : 'btn-ghost'}"
+        onclick={() => (store.layoutMode = mode.key)}
+        title="{mode.label} layout"
+      >
+        <span class="text-sm leading-none">{mode.icon}</span>
+        <span class="text-[10px] uppercase tracking-wider">{mode.label}</span>
+      </button>
+    {/each}
+  </div>
 
-<style>
-  .layout-switcher {
-    position: fixed;
-    top: 8px;
-    right: 8px;
-    z-index: 1000;
-    display: flex;
-    gap: 2px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 2px;
-  }
-  .switcher-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    border: none;
-    border-radius: 4px;
-    background: transparent;
-    color: var(--text-secondary);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    white-space: nowrap;
-  }
-  .switcher-btn:hover {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-  }
-  .switcher-btn.active {
-    background: var(--accent);
-    color: #0d1117;
-  }
-  .btn-icon {
-    font-size: 13px;
-    line-height: 1;
-  }
-  .btn-label {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-</style>
+  <div class="dropdown dropdown-end">
+    <div tabindex="0" role="button" class="btn btn-xs btn-ghost">
+      <span class="text-[10px] uppercase tracking-wider">
+        {themes.find((t) => t.key === store.theme)?.label ?? "Night"}
+      </span>
+    </div>
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+    <ul tabindex="0" class="dropdown-content menu bg-base-200 rounded-box z-1 w-28 p-1 shadow-lg border border-base-content/20">
+      {#each themes as t}
+        <li>
+          <button
+            class="text-[11px] {store.theme === t.key ? 'active' : ''}"
+            onclick={() => (store.theme = t.key)}
+          >
+            {t.label}
+          </button>
+        </li>
+      {/each}
+    </ul>
+  </div>
+</div>
