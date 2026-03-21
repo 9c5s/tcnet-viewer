@@ -24,112 +24,51 @@
   }
 </script>
 
-<div class="metrics-view">
-  <h3 class="section-title">METRICS</h3>
+<div class="p-3 border-b border-base-content/20">
+  <h3 class="text-[10px] text-base-content/40 uppercase tracking-wider mb-2">Metrics</h3>
   {#if metrics}
-    <div class="metrics-grid">
-      <div class="metric-item">
-        <span class="metric-label">BPM</span>
-        <span class="metric-value bpm">{(metrics.bpm / 100).toFixed(2)}</span>
+    <div class="space-y-0.5 text-[10px]">
+      <div class="flex justify-between">
+        <span class="text-base-content/40">BPM</span>
+        <span class="text-accent font-bold text-[11px]" style="font-variant-numeric: tabular-nums">
+          {(metrics.bpm / 100).toFixed(2)}
+        </span>
       </div>
-      <div class="metric-item">
-        <span class="metric-label">Speed</span>
-        <span class="metric-value">{(metrics.speed / 32768 * 100).toFixed(1)}%</span>
+      <div class="flex justify-between">
+        <span class="text-base-content/40">Speed</span>
+        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{(metrics.speed / 32768 * 100).toFixed(1)}%</span>
       </div>
-      <div class="metric-item">
-        <span class="metric-label">Pitch</span>
-        <span class="metric-value">{(metrics.pitchBend / 32768 * 100).toFixed(1)}%</span>
+      <div class="flex justify-between">
+        <span class="text-base-content/40">Pitch</span>
+        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{(metrics.pitchBend / 32768 * 100).toFixed(1)}%</span>
       </div>
-      <div class="metric-item">
-        <span class="metric-label">Position</span>
-        <span class="metric-value">{formatMmSs(metrics.currentPosition)}</span>
+      <div class="flex justify-between">
+        <span class="text-base-content/40">Position</span>
+        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{formatMmSs(metrics.currentPosition)}</span>
       </div>
-      <div class="metric-item">
-        <span class="metric-label">Length</span>
-        <span class="metric-value">{formatMmSs(metrics.trackLength)}</span>
+      <div class="flex justify-between">
+        <span class="text-base-content/40">Length</span>
+        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{formatMmSs(metrics.trackLength)}</span>
       </div>
-      <div class="metric-item">
-        <span class="metric-label">Beat</span>
-        <span class="metric-value">
+      <div class="flex justify-between">
+        <span class="text-base-content/40">Beat</span>
+        <span class="text-base-content">
           {metrics.beatNumber}
-          <span class="beat-indicator">
+          <span class="inline-flex items-center gap-0.5 ml-1">
             {#each [1, 2, 3, 4] as b}
-              <span class="beat-pip" class:active={metrics.beatMarker === b}></span>
+              <span class="w-[5px] h-[5px] rounded-full {metrics.beatMarker === b ? 'bg-accent' : 'bg-base-300'}"></span>
             {/each}
           </span>
         </span>
       </div>
-      <div class="metric-item">
-        <span class="metric-label">Sync</span>
-        <span class="metric-value" class:sync-master={metrics.syncMaster === 1}>
+      <div class="flex justify-between">
+        <span class="text-base-content/40">Sync</span>
+        <span class="{metrics.syncMaster === 1 ? 'text-warning font-bold' : 'text-base-content'}">
           {metrics.syncMaster === 1 ? "Master" : "Slave"}
         </span>
       </div>
     </div>
   {:else}
-    <p class="no-data">No metrics data</p>
+    <div class="text-base-content/40 text-[11px]">No metrics data</div>
   {/if}
 </div>
-
-<style>
-  .metrics-view {
-    flex: 1;
-    min-width: 0;
-  }
-  .section-title {
-    font-size: 10px;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-  }
-  .metrics-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  .metric-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2px 0;
-  }
-  .metric-label {
-    color: var(--text-muted);
-    font-size: 10px;
-  }
-  .metric-value {
-    color: var(--text-primary);
-    font-size: 11px;
-    font-variant-numeric: tabular-nums;
-  }
-  .metric-value.bpm {
-    color: var(--accent);
-    font-weight: bold;
-  }
-  .beat-indicator {
-    display: inline-flex;
-    gap: 2px;
-    margin-left: 4px;
-    vertical-align: middle;
-  }
-  .beat-pip {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--bg-tertiary);
-  }
-  .beat-pip.active {
-    background: var(--accent);
-  }
-  .sync-master {
-    color: var(--yellow);
-    font-weight: bold;
-  }
-  .no-data {
-    color: var(--text-muted);
-    font-size: 11px;
-    font-style: italic;
-  }
-</style>
