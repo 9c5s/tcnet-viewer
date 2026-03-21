@@ -1,7 +1,6 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
-  import { LAYER_NAMES } from "$lib/types.js";
-  import type { LayerStatus } from "$lib/types.js";
+  import { LAYER_NAMES, STATUS_MAP, statusClass } from "$lib/types.js";
   import NodeInfoBar from "./NodeInfoBar.svelte";
   import PacketLog from "./PacketLog.svelte";
 
@@ -48,21 +47,6 @@
     }
   }
 
-  // レイヤーの状態に応じたカラーを返す
-  function statusColor(status: LayerStatus): string {
-    switch (status) {
-      case "PLAYING":
-      case "LOOPING":
-        return "var(--green)";
-      case "PAUSED":
-        return "var(--yellow)";
-      case "STOPPED":
-        return "var(--red)";
-      default:
-        return "var(--text-muted)";
-    }
-  }
-
   // ミリ秒をMM:SS.mmm形式に変換する
   function formatMs(ms: number): string {
     const totalSec = Math.floor(ms / 1000);
@@ -95,20 +79,17 @@
   }
 </script>
 
-<div class="table-layout">
+<div class="flex flex-col h-screen w-screen overflow-hidden">
   <NodeInfoBar />
 
-  <div class="table-container">
-    <table class="data-table">
+  <div class="flex-1 overflow-auto">
+    <table class="table table-xs table-fixed w-full">
       <thead>
-        <tr>
-          <th class="row-header-col">Property</th>
+        <tr class="sticky top-0 bg-base-300 z-10">
+          <th class="text-left w-[100px]">Property</th>
           {#each LAYER_NAMES as name, i}
-            <th class="layer-col">
-              <span
-                class="layer-col-name"
-                style="color: {statusColor(store.layers[i].status)}"
-              >
+            <th class="text-center">
+              <span class={`font-bold ${statusClass(store.layers[i].status)}`}>
                 {name}
               </span>
             </th>
@@ -118,18 +99,19 @@
       <tbody>
         {#each ROW_DEFS as row}
           <tr>
-            <td class="row-header">{row}</td>
+            <td class="font-bold text-left text-xs uppercase text-base-content/60 bg-base-200">{row}</td>
             {#each LAYER_NAMES as _, i}
               {@const value = getCellValue(row, i)}
               {@const isHighlighted = checkHighlight(row, i, value)}
               <td
-                class="data-cell"
-                class:highlight={isHighlighted}
-                class:cell-status={row === "Status"}
-                class:cell-on-air={row === "OnAir" && value === "ON"}
-                class:cell-sync={row === "Sync" && value === "Master"}
-                class:cell-bpm={row === "BPM" && value !== "-"}
-                style={row === "Status" ? `color: ${statusColor(store.layers[i].status)}` : ""}
+                class={[
+                  "text-center tabular-nums",
+                  row === "Status" ? `font-bold uppercase ${statusClass(store.layers[i].status)}` : "",
+                  row === "OnAir" && value === "ON" ? "text-success font-bold" : "",
+                  row === "Sync" && value === "Master" ? "text-warning font-bold" : "",
+                  row === "BPM" && value !== "-" ? "text-accent font-bold" : "",
+                  isHighlighted ? "bg-accent/20 transition-colors duration-300" : "transition-colors duration-300",
+                ].filter(Boolean).join(" ")}
               >
                 {value}
               </td>
@@ -140,123 +122,7 @@
     </table>
   </div>
 
-  <div class="table-packet-log">
+  <div class="h-[200px] flex-shrink-0 overflow-hidden">
     <PacketLog />
   </div>
 </div>
-
-<style>
-  .table-layout {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-  }
-
-  .table-container {
-    flex: 1;
-    overflow: auto;
-    padding: 8px;
-    min-height: 0;
-  }
-
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    font-size: 11px;
-  }
-
-  .data-table th,
-  .data-table td {
-    padding: 5px 8px;
-    border: 1px solid var(--border);
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .data-table thead {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  .data-table th {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    font-size: 12px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .row-header-col {
-    width: 100px;
-    text-align: left !important;
-  }
-
-  .layer-col {
-    width: calc((100% - 100px) / 8);
-  }
-
-  .layer-col-name {
-    font-weight: bold;
-  }
-
-  .row-header {
-    background: var(--bg-secondary);
-    color: var(--text-secondary);
-    font-weight: bold;
-    text-align: left !important;
-    font-size: 10px;
-    text-transform: uppercase;
-  }
-
-  .data-cell {
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-    transition: background-color 0.3s ease;
-  }
-
-  .data-cell.highlight {
-    background-color: rgba(88, 166, 255, 0.2);
-  }
-
-  .data-cell.cell-status {
-    font-weight: bold;
-    text-transform: uppercase;
-  }
-
-  .data-cell.cell-on-air {
-    color: var(--green);
-    font-weight: bold;
-  }
-
-  .data-cell.cell-sync {
-    color: var(--yellow);
-    font-weight: bold;
-  }
-
-  .data-cell.cell-bpm {
-    color: var(--accent);
-    font-weight: bold;
-  }
-
-  .data-table tbody tr:hover .data-cell {
-    background: var(--bg-tertiary);
-  }
-
-  .data-table tbody tr:hover .data-cell.highlight {
-    background-color: rgba(88, 166, 255, 0.3);
-  }
-
-  .table-packet-log {
-    height: 180px;
-    flex-shrink: 0;
-    overflow: hidden;
-  }
-</style>
