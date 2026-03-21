@@ -46,7 +46,7 @@ class ViewerStore {
   packetLog: PacketLogEntry[] = $state([]);
   logFilters: Record<string, boolean> = $state({
     time: false,
-    status: true,
+    status: false,
     metrics: true,
     metadata: true,
     optin: false,
