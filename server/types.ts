@@ -37,13 +37,25 @@ type TimeData = {
   generalSMPTEMode: number;
 };
 
-// node-tcnetのTCNetDataPacketMetrics.dataがunknown型のため具体化困難
-type MetricsData = Record<string, unknown>;
+// node-tcnetのTCNetDataPacketMetrics.dataがunknown型のため、フィールドはoptionalにする
+type MetricsData = {
+  state?: number;
+  syncMaster?: number;
+  beatMarker?: number;
+  trackLength?: number;
+  currentPosition?: number;
+  speed?: number;
+  beatNumber?: number;
+  bpm?: number;
+  pitchBend?: number;
+  trackID?: number;
+  [key: string]: unknown;
+};
 
 type MetadataData = {
   trackArtist: string;
   trackTitle: string;
-  trackKey: string;
+  trackKey: number;
   trackID: number;
   [key: string]: unknown;
 };

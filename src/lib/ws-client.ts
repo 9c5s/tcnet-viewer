@@ -1,6 +1,5 @@
 import { store } from "./stores.svelte.js";
 import type { WSMessage } from "./types.js";
-import type { MetricsInfo, MetadataInfo } from "./types.js";
 import { STATUS_MAP } from "./types.js";
 
 let ws: WebSocket | null = null;
@@ -85,12 +84,12 @@ function handleMessage(msg: WSMessage): void {
       break;
 
     case "metrics":
-      store.metrics[msg.layer] = msg.data as MetricsInfo;
+      store.metrics[msg.layer] = msg.data;
       store.addLogEntry(msg.type, msg.layer, `bpm=${((msg.data.bpm as number) / 100).toFixed(2)}`);
       break;
 
     case "metadata":
-      store.metadata[msg.layer] = msg.data as MetadataInfo;
+      store.metadata[msg.layer] = msg.data;
       store.addLogEntry(msg.type, msg.layer, `"${msg.data.trackTitle}"`);
       break;
 

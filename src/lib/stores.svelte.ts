@@ -1,10 +1,11 @@
 import type {
   LayerInfo,
   TimeInfo,
-  MetricsInfo,
-  MetadataInfo,
+  MetricsData,
+  MetadataData,
   CuePoint,
   WaveformBar,
+  MixerData,
   NodeInfo,
   PacketLogEntry,
 } from "./types.js";
@@ -25,11 +26,11 @@ class ViewerStore {
     })),
   );
   time: (TimeInfo | null)[] = $state(Array.from<TimeInfo | null>({ length: 8 }, () => null));
-  metrics: (MetricsInfo | null)[] = $state(
-    Array.from<MetricsInfo | null>({ length: 8 }, () => null),
+  metrics: (MetricsData | null)[] = $state(
+    Array.from<MetricsData | null>({ length: 8 }, () => null),
   );
-  metadata: (MetadataInfo | null)[] = $state(
-    Array.from<MetadataInfo | null>({ length: 8 }, () => null),
+  metadata: (MetadataData | null)[] = $state(
+    Array.from<MetadataData | null>({ length: 8 }, () => null),
   );
   cues: (CuePoint[] | null)[] = $state(Array.from<CuePoint[] | null>({ length: 8 }, () => null));
   waveformSmall: (WaveformBar[] | null)[] = $state(
@@ -39,7 +40,7 @@ class ViewerStore {
     Array.from<WaveformBar[] | null>({ length: 8 }, () => null),
   );
   artwork: (string | null)[] = $state(Array.from<string | null>({ length: 8 }, () => null));
-  mixer: Record<string, unknown> | null = $state(null);
+  mixer: MixerData | null = $state(null);
   generalSMPTEMode = $state(0);
 
   selectedLayer = $state(0);
