@@ -122,5 +122,10 @@ function handleMessage(msg: WSMessage): void {
     case "beatgrid":
       store.addLogEntry(msg.type, msg.layer, `${msg.data.entries?.length ?? 0} beats`);
       break;
+
+    default: {
+      const _exhaustive: never = msg;
+      console.warn("[WS] 未処理のメッセージ型:", _exhaustive);
+    }
   }
 }
