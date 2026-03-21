@@ -40,11 +40,17 @@
   // oxlint-disable-next-line no-unassigned-vars -- Svelteのbind:thisで代入される
   let logContainer: HTMLDivElement;
 
-  // 新しいログエントリ追加時に自動スクロールする
+  // 最下部付近にいる場合のみ自動スクロールする
+  let isAtBottom = true;
+
+  function onScroll(): void {
+    if (!logContainer) return;
+    isAtBottom = logContainer.scrollHeight - logContainer.scrollTop - logContainer.clientHeight < 1;
+  }
+
   $effect(() => {
     void filteredLogs.length;
-    if (logContainer) {
-      // requestAnimationFrameでDOM更新後にスクロールする
+    if (logContainer && isAtBottom) {
       requestAnimationFrame(() => {
         if (logContainer) {
           logContainer.scrollTop = logContainer.scrollHeight;
@@ -82,7 +88,7 @@
       {/each}
     </div>
   </div>
-  <div class="flex-1 overflow-y-auto text-[10px]" bind:this={logContainer}>
+  <div class="flex-1 overflow-y-auto text-[10px]" bind:this={logContainer} onscroll={onScroll}>
     {#each filteredLogs as entry (entry.id)}
       <div class="flex gap-2 px-3 py-px hover:bg-base-content/5">
         <span class="text-base-content/40 min-w-[85px]" style="font-variant-numeric: tabular-nums">{formatTimestamp(entry.timestamp)}</span>
