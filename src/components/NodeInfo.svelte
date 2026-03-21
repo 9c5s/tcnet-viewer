@@ -17,90 +17,22 @@
   }
 </script>
 
-<section class="node-info">
-  <h3 class="section-title">NODE INFO</h3>
-  <div class="status-row">
-    <span class="status-dot" class:connected={store.connected}></span>
-    <span class="status-text">{store.connected ? "Connected" : "Disconnected"}</span>
+<section class="p-3 border-b border-base-content/20">
+  <h3 class="text-[10px] text-base-content/40 uppercase tracking-wider mb-2">Node</h3>
+  <div class="flex items-center gap-2 mb-2">
+    <span class="w-2 h-2 rounded-full flex-shrink-0 {store.connected ? 'bg-success' : 'bg-error'}"></span>
+    <span class="text-[11px] text-base-content/70">{store.connected ? "Connected" : "Disconnected"}</span>
   </div>
   {#if store.node}
-    <div class="info-row">
-      <span class="label">Name</span>
-      <span class="value">{store.node.nodeName}</span>
-    </div>
-    <div class="info-row">
-      <span class="label">Type</span>
-      <span class="value">{NODE_TYPES[store.node.nodeType] ?? `Unknown(${store.node.nodeType})`}</span>
-    </div>
-    <div class="info-row">
-      <span class="label">Version</span>
-      <span class="value">V{store.node.majorVersion}.{store.node.minorVersion}</span>
-    </div>
-    <div class="info-row">
-      <span class="label">Protocol</span>
-      <span class="value">{store.node.protocolVersion}</span>
-    </div>
-    <div class="info-row">
-      <span class="label">Uptime</span>
-      <span class="value">{formatUptime(store.node.uptime)}</span>
-    </div>
-    <div class="info-row">
-      <span class="label">Nodes</span>
-      <span class="value">{store.node.nodeCount}</span>
+    <div class="space-y-1 text-[10px]">
+      <div class="flex justify-between"><span class="text-base-content/40">Name</span><span class="text-base-content">{store.node.nodeName}</span></div>
+      <div class="flex justify-between"><span class="text-base-content/40">Type</span><span class="text-base-content">{NODE_TYPES[store.node.nodeType] ?? `Unknown(${store.node.nodeType})`}</span></div>
+      <div class="flex justify-between"><span class="text-base-content/40">Version</span><span class="text-base-content">{store.node.majorVersion}.{store.node.minorVersion}</span></div>
+      <div class="flex justify-between"><span class="text-base-content/40">Protocol</span><span class="text-base-content">{store.node.protocolVersion}</span></div>
+      <div class="flex justify-between"><span class="text-base-content/40">Uptime</span><span class="text-base-content">{formatUptime(store.node.uptime)}</span></div>
+      <div class="flex justify-between"><span class="text-base-content/40">Nodes</span><span class="text-base-content">{store.node.nodeCount}</span></div>
     </div>
   {:else}
-    <p class="no-data">No node data</p>
+    <p class="text-[11px] text-base-content/40 italic">No node data</p>
   {/if}
 </section>
-
-<style>
-  .node-info {
-    padding: 12px;
-    border-bottom: 1px solid var(--border);
-  }
-  .section-title {
-    font-size: 10px;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-  }
-  .status-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 8px;
-  }
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--red);
-    flex-shrink: 0;
-  }
-  .status-dot.connected {
-    background: var(--green);
-  }
-  .status-text {
-    font-size: 11px;
-    color: var(--text-secondary);
-  }
-  .info-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 0;
-  }
-  .label {
-    color: var(--text-muted);
-    font-size: 11px;
-  }
-  .value {
-    color: var(--text-primary);
-    font-size: 11px;
-  }
-  .no-data {
-    color: var(--text-muted);
-    font-size: 11px;
-    font-style: italic;
-  }
-</style>
