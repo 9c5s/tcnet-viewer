@@ -14,8 +14,11 @@
     "@commitlint/cli": "^20.0.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "@tailwindcss/vite": "^4.2.2",
     "@types/ws": "^8.5.13",
+    "daisyui": "^5.5.19",
     "svelte": "^5.46.4",
+    "tailwindcss": "^4.2.2",
     "typescript": "^5.6.0",
     "vite": "npm:@voidzero-dev/vite-plus-core@latest",
     "vite-plus": "latest"
