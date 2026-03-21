@@ -1,6 +1,6 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
-  import { LAYER_NAMES } from "$lib/types.js";
+  import { LAYER_NAMES, statusBadgeClass } from "$lib/types.js";
   import MetadataView from "./MetadataView.svelte";
   import WaveformCanvas from "./WaveformCanvas.svelte";
   import MetricsView from "./MetricsView.svelte";
@@ -30,128 +30,49 @@
   }
 </script>
 
-<div class="layer-detail">
-  <div class="detail-header">
-    <h2 class="layer-title">{LAYER_NAMES[layer]}</h2>
-    <span class="layer-status">{store.layers[layer].status}</span>
+<div class="flex-1 flex flex-col overflow-hidden">
+  <div class="flex items-center gap-3 px-4 py-2 border-b border-base-content/20 bg-base-300 flex-shrink-0">
+    <h2 class="font-bold text-base-content">{LAYER_NAMES[layer]}</h2>
+    <span class="badge badge-sm {statusBadgeClass(store.layers[layer].status)}">{store.layers[layer].status}</span>
     {#if store.layers[layer].name}
-      <span class="device-name">{store.layers[layer].name}</span>
+      <span class="text-base-content/40 text-[10px]">{store.layers[layer].name}</span>
     {/if}
   </div>
-
-  <div class="detail-scroll">
+  <div class="flex-1 overflow-y-auto p-2 space-y-2">
     <MetadataView {layer} />
-
     <WaveformCanvas
       bars={waveform}
       currentPosition={timeInfo?.currentTimeMillis ?? 0}
       trackLength={metrics?.trackLength ?? 0}
     />
-
-    <div class="metrics-cue-row">
-      <MetricsView {layer} />
-      <CuePoints {layer} />
+    <div class="flex gap-2">
+      <div class="flex-1"><MetricsView {layer} /></div>
+      <div class="flex-1"><CuePoints {layer} /></div>
     </div>
-
-    <div class="timecode-section">
-      <h3 class="section-title">TIMECODE</h3>
+    <div class="p-2">
+      <h3 class="text-[10px] text-base-content/40 uppercase tracking-wider mb-1">Timecode</h3>
       {#if timeInfo}
-        <div class="tc-row">
-          <span class="tc-label">Current</span>
-          <span class="tc-value">{formatTimecode(timeInfo.currentTimeMillis)}</span>
+        <div class="flex justify-between py-0.5 text-[11px]">
+          <span class="text-base-content/40">Current</span>
+          <span class="tabular-nums">{formatTimecode(timeInfo.currentTimeMillis)}</span>
         </div>
-        <div class="tc-row">
-          <span class="tc-label">Total</span>
-          <span class="tc-value">{formatTimecode(timeInfo.totalTimeMillis)}</span>
+        <div class="flex justify-between py-0.5 text-[11px]">
+          <span class="text-base-content/40">Total</span>
+          <span class="tabular-nums">{formatTimecode(timeInfo.totalTimeMillis)}</span>
         </div>
-        <div class="tc-row">
-          <span class="tc-label">State</span>
-          <span class="tc-value">{timeInfo.state}</span>
+        <div class="flex justify-between py-0.5 text-[11px]">
+          <span class="text-base-content/40">State</span>
+          <span class="tabular-nums">{timeInfo.state}</span>
         </div>
-        <div class="tc-row">
-          <span class="tc-label">OnAir</span>
-          <span class="tc-value" class:on-air={timeInfo.onAir === 1}>
+        <div class="flex justify-between py-0.5 text-[11px]">
+          <span class="text-base-content/40">OnAir</span>
+          <span class="tabular-nums {timeInfo.onAir === 1 ? 'text-success font-bold' : ''}">
             {timeInfo.onAir === 1 ? "ON" : "OFF"}
           </span>
         </div>
       {:else}
-        <p class="no-data">No timecode data</p>
+        <p class="text-base-content/40 text-[11px] italic">No timecode data</p>
       {/if}
     </div>
   </div>
 </div>
-
-<style>
-  .layer-detail {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .detail-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .layer-title {
-    font-size: 16px;
-    color: var(--accent);
-  }
-  .layer-status {
-    font-size: 11px;
-    color: var(--text-secondary);
-    background: var(--bg-tertiary);
-    padding: 2px 8px;
-    border-radius: 4px;
-  }
-  .device-name {
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-  .detail-scroll {
-    flex: 1;
-    overflow-y: auto;
-  }
-  .metrics-cue-row {
-    display: flex;
-    gap: 16px;
-    padding: 12px;
-    border-bottom: 1px solid var(--border);
-  }
-  .timecode-section {
-    padding: 12px;
-  }
-  .section-title {
-    font-size: 10px;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-  }
-  .tc-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 0;
-    font-size: 11px;
-  }
-  .tc-label {
-    color: var(--text-muted);
-  }
-  .tc-value {
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-  }
-  .on-air {
-    color: var(--green);
-    font-weight: bold;
-  }
-  .no-data {
-    color: var(--text-muted);
-    font-size: 11px;
-    font-style: italic;
-  }
-</style>
