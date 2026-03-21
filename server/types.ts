@@ -1,19 +1,73 @@
-// レイヤー情報を持たないメッセージ型
-type WSMessageWithoutLayer = {
-  type: "optin" | "optout" | "status" | "time" | "mixer";
-  timestamp: number;
-  data: Record<string, unknown>;
+import type { CueData, WaveformData, MixerData, BeatGridEntry } from "./parsers/types.js";
+
+// --- メッセージ別data型 ---
+
+type OptInData = {
+  nodeCount: number;
+  nodeListenerPort: number;
+  uptime: number;
+  vendorName: string;
+  appName: string;
+  majorVersion: number;
+  minorVersion: number;
+  bugVersion: number;
+  nodeName: string;
+  nodeType: number;
+  nodeId: number;
+  protocolMinorVersion: number;
 };
 
-// レイヤー情報を持つメッセージ型
-type WSMessageWithLayer = {
-  type: "metrics" | "metadata" | "cue" | "waveform-small" | "waveform-big" | "artwork" | "beatgrid";
-  timestamp: number;
-  layer: number;
-  data: Record<string, unknown>;
+type OptOutData = {
+  nodeCount: number;
 };
 
-// typeフィールドでレイヤーの有無を判別するDiscriminated Union
-export type WSMessage = WSMessageWithoutLayer | WSMessageWithLayer;
+type StatusData = {
+  nodeCount: number;
+  layers: Array<{
+    source: number;
+    status: number;
+    trackID: number;
+    name: string;
+  }>;
+  [key: string]: unknown;
+};
+
+type TimeData = {
+  layers: Array<Record<string, unknown>>;
+  generalSMPTEMode: number;
+};
+
+// node-tcnetのTCNetDataPacketMetrics.dataがunknown型のため具体化困難
+type MetricsData = Record<string, unknown>;
+
+type MetadataData = {
+  trackArtist: string;
+  trackTitle: string;
+  trackKey: string;
+  trackID: number;
+  [key: string]: unknown;
+};
+
+type ArtworkData = {
+  base64: string;
+};
+
+type BeatGridData = {
+  entries: BeatGridEntry[];
+};
+
+export type WSMessage =
+  | { type: "optin"; timestamp: number; data: OptInData }
+  | { type: "optout"; timestamp: number; data: OptOutData }
+  | { type: "status"; timestamp: number; data: StatusData }
+  | { type: "time"; timestamp: number; data: TimeData }
+  | { type: "mixer"; timestamp: number; data: MixerData }
+  | { type: "metrics"; timestamp: number; layer: number; data: MetricsData }
+  | { type: "metadata"; timestamp: number; layer: number; data: MetadataData }
+  | { type: "cue"; timestamp: number; layer: number; data: CueData }
+  | { type: "waveform-small"; timestamp: number; layer: number; data: WaveformData }
+  | { type: "waveform-big"; timestamp: number; layer: number; data: WaveformData }
+  | { type: "artwork"; timestamp: number; layer: number; data: ArtworkData }
+  | { type: "beatgrid"; timestamp: number; layer: number; data: BeatGridData };
 
 export type BroadcastFn = (msg: WSMessage) => void;

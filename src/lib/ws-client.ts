@@ -1,5 +1,6 @@
 import { store } from "./stores.svelte.js";
 import type { WSMessage } from "./types.js";
+import type { MetricsInfo, MetadataInfo } from "./types.js";
 import { STATUS_MAP } from "./types.js";
 
 let ws: WebSocket | null = null;
@@ -41,123 +42,85 @@ export function disconnect(): void {
 
 // サーバーから受信したメッセージをストアに反映する
 function handleMessage(msg: WSMessage): void {
-  const { type, data } = msg;
-  const layer = "layer" in msg ? msg.layer : undefined;
-
-  switch (type) {
+  switch (msg.type) {
     case "optin":
       store.node = {
-        nodeName: data.nodeName as string,
-        nodeType: data.nodeType as number,
-        nodeId: data.nodeId as number,
-        nodeCount: data.nodeCount as number,
-        uptime: data.uptime as number,
-        vendorName: data.vendorName as string,
-        appName: data.appName as string,
-        majorVersion: data.majorVersion as number,
-        minorVersion: data.minorVersion as number,
-        protocolVersion: `3.${data.protocolMinorVersion}`,
+        nodeName: msg.data.nodeName,
+        nodeType: msg.data.nodeType,
+        nodeId: msg.data.nodeId,
+        nodeCount: msg.data.nodeCount,
+        uptime: msg.data.uptime,
+        vendorName: msg.data.vendorName,
+        appName: msg.data.appName,
+        majorVersion: msg.data.majorVersion,
+        minorVersion: msg.data.minorVersion,
+        protocolVersion: `3.${msg.data.protocolMinorVersion}`,
       };
-      store.addLogEntry(type, undefined, `${data.nodeName} nodes=${data.nodeCount}`);
-      break;
-
-    case "status":
-      if (data.layers) {
-        const layers = data.layers as Array<{
-          source: number;
-          status: number;
-          trackID: number;
-          name: string;
-        }>;
-        for (let i = 0; i < layers.length; i++) {
-          const l = layers[i];
-          store.layers[i] = {
-            source: l.source,
-            status: STATUS_MAP[l.status] ?? "IDLE",
-            trackID: l.trackID,
-            name: l.name,
-          };
-        }
-      }
-      store.addLogEntry(type, undefined, `nodes=${data.nodeCount}`);
-      break;
-
-    case "time":
-      if (data.layers) {
-        const layers = data.layers as Array<Record<string, unknown>>;
-        for (let i = 0; i < layers.length; i++) {
-          store.time[i] = layers[i] as unknown as (typeof store.time)[number];
-        }
-      }
-      store.generalSMPTEMode = data.generalSMPTEMode as number;
-      store.addLogEntry(type, undefined, `smpte=${data.generalSMPTEMode}`);
-      break;
-
-    case "metrics":
-      if (typeof layer === "number") {
-        store.metrics[layer] = data as unknown as (typeof store.metrics)[number];
-        store.addLogEntry(type, layer, `bpm=${((data.bpm as number) / 100).toFixed(2)}`);
-      }
-      break;
-
-    case "metadata":
-      if (typeof layer === "number") {
-        store.metadata[layer] = data as unknown as (typeof store.metadata)[number];
-        store.addLogEntry(type, layer, `"${data.trackTitle}"`);
-      }
-      break;
-
-    case "cue":
-      if (typeof layer === "number") {
-        store.cues[layer] = data.cues as Array<
-          Record<string, unknown>
-        > as unknown as (typeof store.cues)[number];
-        const cues = data.cues as Array<unknown> | undefined;
-        store.addLogEntry(type, layer, `${cues?.length ?? 0} cues`);
-      }
-      break;
-
-    case "waveform-small":
-      if (typeof layer === "number") {
-        store.waveformSmall[layer] = data.bars as Array<
-          Record<string, unknown>
-        > as unknown as (typeof store.waveformSmall)[number];
-        const bars = data.bars as Array<unknown> | undefined;
-        store.addLogEntry(type, layer, `${bars?.length ?? 0} bars`);
-      }
-      break;
-
-    case "waveform-big":
-      if (typeof layer === "number") {
-        store.waveformBig[layer] = data.bars as Array<
-          Record<string, unknown>
-        > as unknown as (typeof store.waveformBig)[number];
-        const bars = data.bars as Array<unknown> | undefined;
-        store.addLogEntry(type, layer, `${bars?.length ?? 0} bars`);
-      }
-      break;
-
-    case "mixer":
-      store.mixer = data;
-      store.addLogEntry(type, undefined, `master=${data.masterAudioLevel}`);
-      break;
-
-    case "artwork":
-      if (typeof layer === "number") {
-        store.artwork[layer] = data.base64 as string;
-        store.addLogEntry(type, layer, `received`);
-      }
-      break;
-
-    case "beatgrid":
-      if (typeof layer === "number") {
-        const entries = data.entries as Array<unknown> | undefined;
-        store.addLogEntry(type, layer, `${entries?.length ?? 0} beats`);
-      }
+      store.addLogEntry(msg.type, undefined, `${msg.data.nodeName} nodes=${msg.data.nodeCount}`);
       break;
 
     case "optout":
-      store.addLogEntry(type, undefined, `node left`);
+      store.addLogEntry(msg.type, undefined, `node left`);
+      break;
+
+    case "status":
+      for (let i = 0; i < msg.data.layers.length; i++) {
+        const l = msg.data.layers[i];
+        store.layers[i] = {
+          source: l.source,
+          status: STATUS_MAP[l.status] ?? "IDLE",
+          trackID: l.trackID,
+          name: l.name,
+        };
+      }
+      store.addLogEntry(msg.type, undefined, `nodes=${msg.data.nodeCount}`);
+      break;
+
+    case "time":
+      for (let i = 0; i < msg.data.layers.length; i++) {
+        store.time[i] = msg.data.layers[i] as (typeof store.time)[number];
+      }
+      store.generalSMPTEMode = msg.data.generalSMPTEMode;
+      store.addLogEntry(msg.type, undefined, `smpte=${msg.data.generalSMPTEMode}`);
+      break;
+
+    case "metrics":
+      store.metrics[msg.layer] = msg.data as MetricsInfo;
+      store.addLogEntry(msg.type, msg.layer, `bpm=${((msg.data.bpm as number) / 100).toFixed(2)}`);
+      break;
+
+    case "metadata":
+      store.metadata[msg.layer] = msg.data as MetadataInfo;
+      store.addLogEntry(msg.type, msg.layer, `"${msg.data.trackTitle}"`);
+      break;
+
+    case "cue":
+      store.cues[msg.layer] = msg.data.cues;
+      store.addLogEntry(msg.type, msg.layer, `${msg.data.cues?.length ?? 0} cues`);
+      break;
+
+    case "waveform-small":
+      store.waveformSmall[msg.layer] = msg.data.bars;
+      store.addLogEntry(msg.type, msg.layer, `${msg.data.bars?.length ?? 0} bars`);
+      break;
+
+    case "waveform-big":
+      store.waveformBig[msg.layer] = msg.data.bars;
+      store.addLogEntry(msg.type, msg.layer, `${msg.data.bars?.length ?? 0} bars`);
+      break;
+
+    case "mixer":
+      store.mixer = msg.data;
+      store.addLogEntry(msg.type, undefined, `master=${msg.data.masterAudioLevel}`);
+      break;
+
+    case "artwork":
+      store.artwork[msg.layer] = msg.data.base64;
+      store.addLogEntry(msg.type, msg.layer, `received`);
+      break;
+
+    case "beatgrid":
+      store.addLogEntry(msg.type, msg.layer, `${msg.data.entries?.length ?? 0} beats`);
       break;
   }
 }
