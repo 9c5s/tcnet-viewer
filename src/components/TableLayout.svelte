@@ -27,13 +27,13 @@
       case "Artist":
         return metadata?.trackArtist || "-";
       case "BPM":
-        return metrics ? (metrics.bpm / 100).toFixed(2) : "-";
+        return metrics ? ((metrics.bpm ?? 0) / 100).toFixed(2) : "-";
       case "Speed":
-        return metrics ? (metrics.speed / 32768 * 100).toFixed(1) + "%" : "-";
+        return metrics ? ((metrics.speed ?? 0) / 32768 * 100).toFixed(1) + "%" : "-";
       case "Position":
-        return metrics ? formatMs(metrics.currentPosition) : "-";
+        return metrics ? formatMs(metrics.currentPosition ?? 0) : "-";
       case "Length":
-        return metrics ? formatMs(metrics.trackLength) : "-";
+        return metrics ? formatMs(metrics.trackLength ?? 0) : "-";
       case "Beat":
         return metrics ? `${metrics.beatNumber} [${metrics.beatMarker}/4]` : "-";
       case "Sync":

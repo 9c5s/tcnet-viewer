@@ -18,7 +18,8 @@ export function tcnetPlugin(): Plugin {
   const broadcast = (msg: WSMessage) => {
     const json = JSON.stringify(msg);
     // メッセージをtype+layerでキャッシュする
-    const cacheKey = msg.layer !== undefined ? `${msg.type}-${msg.layer}` : msg.type;
+    const cacheKey =
+      "layer" in msg && msg.layer !== undefined ? `${msg.type}-${msg.layer}` : msg.type;
     stateCache.set(cacheKey, json);
     for (const client of clients) {
       if (client.readyState === WebSocket.OPEN) {

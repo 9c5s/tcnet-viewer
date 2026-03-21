@@ -31,24 +31,24 @@
       <div class="flex justify-between">
         <span class="text-base-content/40">BPM</span>
         <span class="text-accent font-bold text-[11px]" style="font-variant-numeric: tabular-nums">
-          {(metrics.bpm / 100).toFixed(2)}
+          {((metrics.bpm ?? 0) / 100).toFixed(2)}
         </span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Speed</span>
-        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{(metrics.speed / 32768 * 100).toFixed(1)}%</span>
+        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{((metrics.speed ?? 0) / 32768 * 100).toFixed(1)}%</span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Pitch</span>
-        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{(metrics.pitchBend / 32768 * 100).toFixed(1)}%</span>
+        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{((metrics.pitchBend ?? 0) / 32768 * 100).toFixed(1)}%</span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Position</span>
-        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{formatMmSs(metrics.currentPosition)}</span>
+        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{formatMmSs(metrics.currentPosition ?? 0)}</span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Length</span>
-        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{formatMmSs(metrics.trackLength)}</span>
+        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{formatMmSs(metrics.trackLength ?? 0)}</span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Beat</span>

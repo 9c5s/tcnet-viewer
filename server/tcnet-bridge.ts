@@ -17,6 +17,19 @@ const {
   TCNetDataPacketType,
 } = tcnet;
 
+// createRequireでロードしたクラスは値のみ存在し型情報がないため、
+// 型注釈用にimport typeで型を別途取得する
+import type {
+  TCNetClient as TCNetClientType,
+  TCNetStatusPacket as TCNetStatusPacketType,
+  TCNetOptInPacket as TCNetOptInPacketType,
+  TCNetOptOutPacket as TCNetOptOutPacketType,
+  TCNetTimePacket as TCNetTimePacketType,
+  TCNetDataPacket as TCNetDataPacketType_,
+  TCNetDataPacketMetrics as TCNetDataPacketMetricsType,
+  TCNetDataPacketMetadata as TCNetDataPacketMetadataType,
+} from "@9c5s/node-tcnet";
+
 import { parseBeatGrid } from "./parsers/beat-grid.js";
 import { parseCueData } from "./parsers/cue-data.js";
 import { parseSmallWaveform, parseBigWaveform } from "./parsers/waveform.js";
@@ -25,7 +38,7 @@ import { MultiPacketAssembler } from "./parsers/multi-packet.js";
 import type { BroadcastFn } from "./types.js";
 
 export class TCNetBridge {
-  private client: TCNetClient;
+  private client: TCNetClientType;
   private broadcast: BroadcastFn;
   private trackIds: (number | null)[] = Array.from({ length: 8 }, () => null);
   private beatGridAssembler = new MultiPacketAssembler();
@@ -52,48 +65,51 @@ export class TCNetBridge {
   private setupListeners(): void {
     this.client.on("broadcast", (packet: unknown) => {
       if (packet instanceof TCNetOptInPacket) {
+        const p = packet as TCNetOptInPacketType;
         this.broadcast({
           type: "optin",
           timestamp: Date.now(),
           data: {
-            nodeCount: packet.nodeCount,
-            nodeListenerPort: packet.nodeListenerPort,
-            uptime: packet.uptime,
-            vendorName: packet.vendorName,
-            appName: packet.appName,
-            majorVersion: packet.majorVersion,
-            minorVersion: packet.minorVersion,
-            bugVersion: packet.bugVersion,
-            nodeName: packet.header.nodeName,
-            nodeType: packet.header.nodeType,
-            nodeId: packet.header.nodeId,
-            protocolMinorVersion: packet.header.minorVersion,
+            nodeCount: p.nodeCount,
+            nodeListenerPort: p.nodeListenerPort,
+            uptime: p.uptime,
+            vendorName: p.vendorName,
+            appName: p.appName,
+            majorVersion: p.majorVersion,
+            minorVersion: p.minorVersion,
+            bugVersion: p.bugVersion,
+            nodeName: p.header.nodeName,
+            nodeType: p.header.nodeType,
+            nodeId: p.header.nodeId,
+            protocolMinorVersion: p.header.minorVersion,
           },
         });
         return;
       }
       if (packet instanceof TCNetOptOutPacket) {
+        const p = packet as TCNetOptOutPacketType;
         this.broadcast({
           type: "optout",
           timestamp: Date.now(),
-          data: { nodeCount: packet.nodeCount },
+          data: { nodeCount: p.nodeCount },
         });
         return;
       }
       if (packet instanceof TCNetStatusPacket) {
-        this.handleStatus(packet);
+        this.handleStatus(packet as TCNetStatusPacketType);
         return;
       }
     });
 
     this.client.on("time", (packet: unknown) => {
       if (packet instanceof TCNetTimePacket) {
+        const p = packet as TCNetTimePacketType;
         this.broadcast({
           type: "time",
           timestamp: Date.now(),
           data: {
-            layers: packet.layers,
-            generalSMPTEMode: packet.generalSMPTEMode,
+            layers: p.layers,
+            generalSMPTEMode: p.generalSMPTEMode,
           },
         });
       }
@@ -101,20 +117,22 @@ export class TCNetBridge {
 
     this.client.on("data", (packet: unknown) => {
       if (packet instanceof TCNetDataPacketMetrics) {
+        const p = packet as TCNetDataPacketMetricsType;
         this.broadcast({
           type: "metrics",
           timestamp: Date.now(),
-          layer: packet.layer,
-          data: packet.data ?? {},
+          layer: p.layer,
+          data: p.data ?? {},
         });
         return;
       }
 
       // TCNetDataPacket基底クラスで受信されるパケットをdataTypeで分岐処理する
       if (packet instanceof TCNetDataPacket) {
-        const buf: Buffer = packet.buffer;
-        const dataType: number = packet.dataType;
-        const layer: number = packet.layer;
+        const p = packet as TCNetDataPacketType_;
+        const buf: Buffer = p.buffer;
+        const dataType: number = p.dataType;
+        const layer: number = p.layer;
 
         try {
           switch (dataType) {
@@ -183,13 +201,21 @@ export class TCNetBridge {
     });
   }
 
-  private handleStatus(packet: TCNetStatusPacket): void {
+  private handleStatus(packet: TCNetStatusPacketType): void {
+    const statusData = packet.data ?? {
+      nodeCount: 0,
+      nodeListenerPort: 0,
+      smpteMode: 0,
+      autoMasterMode: 0,
+    };
     this.broadcast({
       type: "status",
       timestamp: Date.now(),
       data: {
-        ...packet.data,
-        layers: packet.layers.filter((l): l is NonNullable<typeof l> => l != null),
+        ...statusData,
+        layers: packet.layers.filter(
+          (l: (typeof packet.layers)[number]): l is NonNullable<typeof l> => l != null,
+        ),
       },
     });
 
@@ -211,19 +237,22 @@ export class TCNetBridge {
     for (let attempt = 1; attempt <= 6; attempt++) {
       try {
         const packet = await this.client.requestData(TCNetDataPacketType.MetaData, layer);
-        if (packet instanceof TCNetDataPacketMetadata && packet.info) {
-          const info = packet.info;
-          if (info.trackTitle || info.trackArtist) {
-            console.log(
-              `[TCNet] メタデータ取得 レイヤー${layer} (試行${attempt}): "${info.trackTitle}"`,
-            );
-            this.broadcast({
-              type: "metadata",
-              timestamp: Date.now(),
-              layer,
-              data: info,
-            });
-            break;
+        if (packet instanceof TCNetDataPacketMetadata) {
+          const p = packet as TCNetDataPacketMetadataType;
+          if (p.info) {
+            const info = p.info;
+            if (info.trackTitle || info.trackArtist) {
+              console.log(
+                `[TCNet] メタデータ取得 レイヤー${layer} (試行${attempt}): "${info.trackTitle}"`,
+              );
+              this.broadcast({
+                type: "metadata",
+                timestamp: Date.now(),
+                layer,
+                data: info,
+              });
+              break;
+            }
           }
         }
       } catch (err) {
