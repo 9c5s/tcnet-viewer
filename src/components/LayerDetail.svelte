@@ -2,7 +2,7 @@
   import { store } from "$lib/stores.svelte.js";
   import { LAYER_NAMES, statusBadgeClass } from "$lib/types.js";
   import MetadataView from "./MetadataView.svelte";
-  import WaveformCanvas from "./WaveformCanvas.svelte";
+  import WaveformSvg from "./WaveformSvg.svelte";
   import MetricsView from "./MetricsView.svelte";
   import CuePoints from "./CuePoints.svelte";
 
@@ -40,7 +40,7 @@
   </div>
   <div class="flex-1 overflow-y-auto p-2 space-y-2">
     <MetadataView {layer} />
-    <WaveformCanvas
+    <WaveformSvg
       bars={waveform}
       currentPosition={timeInfo?.currentTimeMillis ?? 0}
       trackLength={metrics?.trackLength ?? 0}
