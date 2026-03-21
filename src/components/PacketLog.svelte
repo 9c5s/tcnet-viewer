@@ -2,20 +2,20 @@
   import { store } from "$lib/stores.svelte.js";
   import { LAYER_NAMES } from "$lib/types.js";
 
-  // パケットタイプに応じた色を返す
-  const TYPE_COLORS: Record<string, string> = {
-    time: "var(--accent)",
-    status: "var(--green)",
-    metrics: "var(--yellow)",
-    metadata: "#bc8cff",
-    optin: "var(--text-muted)",
-    optout: "var(--red)",
-    cue: "#f0883e",
-    mixer: "#39d353",
-    "waveform-small": "var(--text-secondary)",
-    "waveform-big": "var(--text-secondary)",
-    artwork: "#bc8cff",
-    beatgrid: "var(--text-muted)",
+  // パケットタイプに応じたTailwindセマンティックカラークラスのマッピング
+  const TYPE_CLASSES: Record<string, string> = {
+    time: "text-accent",
+    status: "text-success",
+    metrics: "text-warning",
+    metadata: "text-secondary",
+    optin: "text-base-content/40",
+    optout: "text-error",
+    cue: "text-warning",
+    mixer: "text-success",
+    "waveform-small": "text-base-content/70",
+    "waveform-big": "text-base-content/70",
+    artwork: "text-secondary",
+    beatgrid: "text-base-content/40",
   };
 
   // タイムスタンプをHH:MM:SS.mmm形式に変換する
@@ -70,112 +70,26 @@
   };
 </script>
 
-<div class="packet-log">
-  <div class="log-header">
-    <h3 class="section-title">PACKET LOG</h3>
-    <div class="filters">
+<div class="flex flex-col h-full bg-base-200 border-t border-base-content/10 overflow-hidden">
+  <div class="flex items-center gap-2 px-3 py-1 border-b border-base-content/10 flex-shrink-0">
+    <h3 class="text-[10px] text-base-content/40 font-bold uppercase tracking-wider">Packet Log</h3>
+    <div class="flex gap-2 ml-auto flex-wrap">
       {#each Object.keys(store.logFilters) as key}
-        <label class="filter-label">
-          <input
-            type="checkbox"
-            checked={store.logFilters[key]}
-            onchange={() => (store.logFilters[key] = !store.logFilters[key])}
-          />
-          <span style="color: {TYPE_COLORS[key] ?? 'var(--text-secondary)'}">{filterLabels[key] ?? key}</span>
+        <label class="flex items-center gap-1 cursor-pointer text-[9px]">
+          <input type="checkbox" class="checkbox checkbox-xs" checked={store.logFilters[key]} onchange={() => (store.logFilters[key] = !store.logFilters[key])} />
+          <span class="{TYPE_CLASSES[key] ?? 'text-base-content/70'}">{filterLabels[key] ?? key}</span>
         </label>
       {/each}
     </div>
   </div>
-  <div class="log-entries" bind:this={logContainer}>
+  <div class="flex-1 overflow-y-auto text-[10px]" bind:this={logContainer}>
     {#each filteredLogs as entry (entry.id)}
-      <div class="log-entry">
-        <span class="log-time">{formatTimestamp(entry.timestamp)}</span>
-        <span class="log-type" style="color: {TYPE_COLORS[entry.type] ?? 'var(--text-secondary)'}">
-          {entry.type}
-        </span>
-        {#if entry.layer !== undefined}
-          <span class="log-layer">{LAYER_NAMES[entry.layer]}</span>
-        {:else}
-          <span class="log-layer">--</span>
-        {/if}
-        <span class="log-summary">{entry.summary}</span>
+      <div class="flex gap-2 px-3 py-px hover:bg-base-content/5">
+        <span class="text-base-content/40 min-w-[85px]" style="font-variant-numeric: tabular-nums">{formatTimestamp(entry.timestamp)}</span>
+        <span class="{TYPE_CLASSES[entry.type] ?? 'text-base-content/70'} min-w-[65px] font-semibold">{entry.type}</span>
+        <span class="text-base-content/50 min-w-[55px]">{entry.layer !== undefined ? LAYER_NAMES[entry.layer] : "--"}</span>
+        <span class="text-base-content/60 flex-1 truncate">{entry.summary}</span>
       </div>
     {/each}
   </div>
 </div>
-
-<style>
-  .packet-log {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    border-top: 1px solid var(--border);
-    background: var(--bg-secondary);
-  }
-  .log-header {
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .section-title {
-    font-size: 10px;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-  }
-  .filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .filter-label {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 10px;
-    cursor: pointer;
-    user-select: none;
-  }
-  .filter-label input {
-    width: 12px;
-    height: 12px;
-    accent-color: var(--accent);
-  }
-  .log-entries {
-    flex: 1;
-    overflow-y: auto;
-    padding: 4px 0;
-  }
-  .log-entry {
-    display: flex;
-    gap: 8px;
-    padding: 2px 12px;
-    font-size: 10px;
-    line-height: 1.6;
-  }
-  .log-entry:hover {
-    background: var(--bg-tertiary);
-  }
-  .log-time {
-    color: var(--text-muted);
-    flex-shrink: 0;
-    font-variant-numeric: tabular-nums;
-  }
-  .log-type {
-    min-width: 70px;
-    flex-shrink: 0;
-    text-transform: uppercase;
-  }
-  .log-layer {
-    color: var(--text-secondary);
-    min-width: 20px;
-    flex-shrink: 0;
-  }
-  .log-summary {
-    color: var(--text-secondary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-</style>
