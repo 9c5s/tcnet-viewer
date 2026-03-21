@@ -8,7 +8,7 @@
 
 @plugin "daisyui/theme" {
   name: "tokyo-night";
-  default: true;
+  color-scheme: dark;
   --color-base-100: #1a1b26;
   --color-base-200: #16161e;
   --color-base-300: #101014;
@@ -29,6 +29,7 @@
 
 @plugin "daisyui/theme" {
   name: "tokyo-night-storm";
+  color-scheme: dark;
   --color-base-100: #24283b;
   --color-base-200: #1f2335;
   --color-base-300: #1a1e30;
@@ -49,6 +50,7 @@
 
 @plugin "daisyui/theme" {
   name: "tokyo-night-light";
+  color-scheme: light;
   --color-base-100: #d5d6db;
   --color-base-200: #cbccd1;
   --color-base-300: #c1c2c7;
