@@ -45,7 +45,8 @@
 
   function onScroll(): void {
     if (!logContainer) return;
-    isAtBottom = logContainer.scrollHeight - logContainer.scrollTop - logContainer.clientHeight < 1;
+    // 1行分 (約16px) の余裕を持たせて最下部判定する
+    isAtBottom = logContainer.scrollHeight - logContainer.scrollTop - logContainer.clientHeight < 16;
   }
 
   $effect(() => {
