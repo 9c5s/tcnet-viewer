@@ -115,7 +115,7 @@
     onpointercancel={onDragEnd}
   ></div>
   <div class="flex items-center gap-2 px-3 py-1 border-b border-base-content/10 flex-shrink-0">
-    <h3 class="text-[10px] text-base-content/40 font-bold uppercase tracking-wider">Packet Log</h3>
+    <h3 class="section-title font-bold">Packet Log</h3>
     <div class="flex gap-2 ml-auto flex-wrap">
       {#each Object.keys(store.logFilters) as key}
         <label class="flex items-center gap-1 cursor-pointer text-[9px]">
@@ -128,7 +128,7 @@
   <div class="flex-1 overflow-y-auto text-[10px]" bind:this={logContainer} onscroll={onScroll}>
     {#each filteredLogs as entry (entry.id)}
       <div class="flex gap-2 px-3 py-px hover:bg-base-content/5">
-        <span class="text-base-content/40 min-w-[85px]" style="font-variant-numeric: tabular-nums">{formatTimestamp(entry.timestamp)}</span>
+        <span class="text-base-content/40 min-w-[85px] tabular-nums">{formatTimestamp(entry.timestamp)}</span>
         <span class="{TYPE_CLASSES[entry.type] ?? 'text-base-content/70'} min-w-[65px] font-semibold">{entry.type}</span>
         <span class="text-base-content/50 min-w-[55px]">{entry.layer !== undefined ? LAYER_NAMES[entry.layer] : "--"}</span>
         <span class="text-base-content/60 flex-1 truncate">{entry.summary}</span>

@@ -25,30 +25,30 @@
 </script>
 
 <div class="p-3 border-b border-base-content/20">
-  <h3 class="text-[10px] text-base-content/40 uppercase tracking-wider mb-2">Metrics</h3>
+  <h3 class="section-title">Metrics</h3>
   {#if metrics}
     <div class="space-y-0.5 text-[10px]">
       <div class="flex justify-between">
         <span class="text-base-content/40">BPM</span>
-        <span class="text-accent font-bold text-[11px]" style="font-variant-numeric: tabular-nums">
+        <span class="text-accent font-bold text-[11px] tabular-nums">
           {((metrics.bpm ?? 0) / 100).toFixed(2)}
         </span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Speed</span>
-        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{((metrics.speed ?? 0) / 32768 * 100).toFixed(1)}%</span>
+        <span class="text-base-content tabular-nums">{((metrics.speed ?? 0) / 32768 * 100).toFixed(1)}%</span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Pitch</span>
-        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{((metrics.pitchBend ?? 0) / 32768 * 100).toFixed(1)}%</span>
+        <span class="text-base-content tabular-nums">{((metrics.pitchBend ?? 0) / 32768 * 100).toFixed(1)}%</span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Position</span>
-        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{formatMmSs(metrics.currentPosition ?? 0)}</span>
+        <span class="text-base-content tabular-nums">{formatMmSs(metrics.currentPosition ?? 0)}</span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Length</span>
-        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{formatMmSs(metrics.trackLength ?? 0)}</span>
+        <span class="text-base-content tabular-nums">{formatMmSs(metrics.trackLength ?? 0)}</span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Beat</span>

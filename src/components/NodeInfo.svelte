@@ -18,7 +18,7 @@
 </script>
 
 <section class="p-3 border-b border-base-content/20">
-  <h3 class="text-[10px] text-base-content/40 uppercase tracking-wider mb-2">Node</h3>
+  <h3 class="section-title">Node</h3>
   <div class="flex items-center gap-2 mb-2">
     <span class="w-2 h-2 rounded-full flex-shrink-0 {store.connected ? 'bg-success' : 'bg-error'}"></span>
     <span class="text-[11px] text-base-content/70">{store.connected ? "Connected" : "Disconnected"}</span>
