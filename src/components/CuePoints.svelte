@@ -37,7 +37,7 @@
 </script>
 
 <div class="p-3">
-  <h3 class="text-[10px] text-base-content/40 uppercase tracking-wider mb-2">Cue Points</h3>
+  <h3 class="section-title">Cue Points</h3>
   {#if cues && cues.length > 0}
     <table class="table table-xs">
       <tbody>
@@ -48,8 +48,8 @@
             </td>
             <td class="text-base-content/70 px-1">#{cue.index}</td>
             <td class="text-base-content/70 px-1">{cueTypeName(cue.type)}</td>
-            <td class="text-base-content" style="font-variant-numeric: tabular-nums">{formatMmSs(cue.inTime)}</td>
-            <td class="text-base-content/40" style="font-variant-numeric: tabular-nums">
+            <td class="text-base-content tabular-nums">{formatMmSs(cue.inTime)}</td>
+            <td class="text-base-content/40 tabular-nums">
               {cue.outTime > 0 ? `- ${formatMmSs(cue.outTime)}` : ""}
             </td>
           </tr>

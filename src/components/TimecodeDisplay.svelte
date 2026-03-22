@@ -38,15 +38,15 @@
 </script>
 
 <section class="p-3 border-b border-base-content/20">
-  <h3 class="text-[10px] text-base-content/40 uppercase tracking-wider mb-2">Timecode</h3>
+  <h3 class="section-title">Timecode</h3>
   {#if timeInfo}
-    <div class="text-lg text-base-content font-bold tracking-wider mb-2" style="font-variant-numeric: tabular-nums">
+    <div class="text-lg text-base-content font-bold tracking-wider mb-2 tabular-nums">
       {formatTimecode(timeInfo.currentTimeMillis)}
     </div>
     <div class="space-y-1 text-[10px]">
       <div class="flex justify-between">
         <span class="text-base-content/40">Total</span>
-        <span class="text-base-content" style="font-variant-numeric: tabular-nums">{formatMmSs(timeInfo.totalTimeMillis)}</span>
+        <span class="text-base-content tabular-nums">{formatMmSs(timeInfo.totalTimeMillis)}</span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Beat</span>

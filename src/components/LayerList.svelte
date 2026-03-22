@@ -4,7 +4,7 @@
 </script>
 
 <div class="w-48 border-r border-base-content/20 overflow-y-auto flex-shrink-0">
-  <h3 class="text-[10px] text-base-content/40 uppercase tracking-wider px-3 pt-3 pb-1">Layers</h3>
+  <h3 class="section-title !mb-0 px-3 pt-3 pb-1">Layers</h3>
   <ul class="menu menu-xs p-1">
     {#each store.layers as layer, i}
       <li>
@@ -13,7 +13,7 @@
           onclick={() => (store.selectedLayer = i)}
         >
           <span class="font-bold">{LAYER_NAMES[i]}</span>
-          <span class="badge badge-outline badge-sm px-[0.5em] w-20 justify-center {statusBadgeClass(layer.status)}">{layer.status}</span>
+          <span class="status-badge w-20 justify-center {statusBadgeClass(layer.status)}">{layer.status}</span>
         </button>
       </li>
     {/each}

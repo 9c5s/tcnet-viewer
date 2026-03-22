@@ -45,7 +45,7 @@
       <div class="card bg-base-200 border border-base-content/12 overflow-hidden {active ? 'border-accent/50' : ''} {layer.status === 'IDLE' && !metadata && !metrics ? 'opacity-50' : ''}">
         <div class="flex justify-between items-center px-2.5 py-1 bg-base-300 border-b border-base-content/10 flex-shrink-0">
           <span class="text-xs font-bold text-base-content">{LAYER_NAMES[i]}</span>
-          <span class="badge badge-outline badge-sm px-[0.5em] {statusBadgeClass(layer.status)}">{layer.status}</span>
+          <span class="status-badge {statusBadgeClass(layer.status)}">{layer.status}</span>
         </div>
 
         {#if layer.status !== "IDLE" || metadata || metrics}
@@ -64,9 +64,9 @@
 
             {#if metrics}
               <div class="grid grid-cols-2 gap-x-2 gap-y-0 flex-shrink-0 text-[10px]">
-                <div class="flex justify-between"><span class="text-base-content/40">BPM</span><span class="text-accent font-bold text-[11px]" style="font-variant-numeric: tabular-nums">{metrics.bpm != null ? formatBPM(metrics.bpm) : "N/A"}</span></div>
-                <div class="flex justify-between"><span class="text-base-content/40">Speed</span><span class="text-base-content" style="font-variant-numeric: tabular-nums">{((metrics.speed ?? 0) / 32768 * 100).toFixed(1)}%</span></div>
-                <div class="flex justify-between"><span class="text-base-content/40">Pos</span><span class="text-base-content" style="font-variant-numeric: tabular-nums">{formatPosition(metrics.currentPosition ?? 0)}</span></div>
+                <div class="flex justify-between"><span class="text-base-content/40">BPM</span><span class="text-accent font-bold text-[11px] tabular-nums">{metrics.bpm != null ? formatBPM(metrics.bpm) : "N/A"}</span></div>
+                <div class="flex justify-between"><span class="text-base-content/40">Speed</span><span class="text-base-content tabular-nums">{((metrics.speed ?? 0) / 32768 * 100).toFixed(1)}%</span></div>
+                <div class="flex justify-between"><span class="text-base-content/40">Pos</span><span class="text-base-content tabular-nums">{formatPosition(metrics.currentPosition ?? 0)}</span></div>
                 <div class="flex justify-between items-center"><span class="text-base-content/40">Beat</span><span class="flex gap-0.5">{#each [1, 2, 3, 4] as b}<span class="w-[5px] h-[5px] rounded-full {metrics.beatMarker === b ? 'bg-accent' : 'bg-base-300'}"></span>{/each}</span></div>
               </div>
             {/if}
@@ -83,10 +83,10 @@
 
             <div class="flex gap-1 mt-auto flex-shrink-0">
               {#if timeInfo}
-                <span class="badge badge-outline badge-sm px-[0.5em] {timeInfo.onAir === 1 ? 'badge-success' : ''}">{timeInfo.onAir === 1 ? "ON AIR" : "OFF AIR"}</span>
+                <span class="status-badge {timeInfo.onAir === 1 ? 'badge-success' : ''}">{timeInfo.onAir === 1 ? "ON AIR" : "OFF AIR"}</span>
               {/if}
               {#if metrics}
-                <span class="badge badge-outline badge-sm px-[0.5em] {metrics.syncMaster === 1 ? 'badge-warning' : ''}">{metrics.syncMaster === 1 ? "MASTER" : "SLAVE"}</span>
+                <span class="status-badge {metrics.syncMaster === 1 ? 'badge-warning' : ''}">{metrics.syncMaster === 1 ? "MASTER" : "SLAVE"}</span>
               {/if}
             </div>
           </div>
