@@ -122,7 +122,7 @@
     </table>
   </div>
 
-  <div class="h-[200px] flex-shrink-0 overflow-hidden">
+  <div class="flex-shrink-0 overflow-hidden" style:height="{store.packetLogHeight}px">
     <PacketLog />
   </div>
 </div>
