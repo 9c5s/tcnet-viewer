@@ -37,11 +37,11 @@
       case "Beat":
         return metrics?.beatNumber != null && metrics?.beatMarker != null ? `${metrics.beatNumber} [${metrics.beatMarker}/4]` : "-";
       case "Sync":
-        return metrics ? (metrics.syncMaster === 1 ? "Master" : "Slave") : "-";
+        return metrics?.syncMaster != null ? (metrics.syncMaster === 1 ? "Master" : "Slave") : "-";
       case "OnAir":
         return timeInfo ? (timeInfo.onAir === 1 ? "ON" : "OFF") : "-";
       case "TrackID":
-        return metrics ? String(metrics.trackID) : "-";
+        return metrics?.trackID != null ? String(metrics.trackID) : "-";
       default:
         return "-";
     }
