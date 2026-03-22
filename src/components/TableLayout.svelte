@@ -27,15 +27,15 @@
       case "Artist":
         return metadata?.trackArtist || "-";
       case "BPM":
-        return metrics ? ((metrics.bpm ?? 0) / 100).toFixed(2) : "-";
+        return metrics?.bpm != null ? (metrics.bpm / 100).toFixed(2) : "-";
       case "Speed":
-        return metrics ? ((metrics.speed ?? 0) / 32768 * 100).toFixed(1) + "%" : "-";
+        return metrics?.speed != null ? ((metrics.speed / 32768) * 100).toFixed(1) + "%" : "-";
       case "Position":
-        return metrics ? formatMs(metrics.currentPosition ?? 0) : "-";
+        return metrics?.currentPosition != null ? formatMs(metrics.currentPosition) : "-";
       case "Length":
-        return metrics ? formatMs(metrics.trackLength ?? 0) : "-";
+        return metrics?.trackLength != null ? formatMs(metrics.trackLength) : "-";
       case "Beat":
-        return metrics ? `${metrics.beatNumber} [${metrics.beatMarker}/4]` : "-";
+        return metrics?.beatNumber != null && metrics?.beatMarker != null ? `${metrics.beatNumber} [${metrics.beatMarker}/4]` : "-";
       case "Sync":
         return metrics ? (metrics.syncMaster === 1 ? "Master" : "Slave") : "-";
       case "OnAir":

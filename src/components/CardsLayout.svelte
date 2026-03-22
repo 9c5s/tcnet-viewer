@@ -65,8 +65,8 @@
             {#if metrics}
               <div class="grid grid-cols-2 gap-x-2 gap-y-0 flex-shrink-0 text-[10px]">
                 <div class="flex justify-between"><span class="text-base-content/40">BPM</span><span class="text-accent font-bold text-[11px] tabular-nums">{metrics.bpm != null ? formatBPM(metrics.bpm) : "N/A"}</span></div>
-                <div class="flex justify-between"><span class="text-base-content/40">Speed</span><span class="text-base-content tabular-nums">{((metrics.speed ?? 0) / 32768 * 100).toFixed(1)}%</span></div>
-                <div class="flex justify-between"><span class="text-base-content/40">Pos</span><span class="text-base-content tabular-nums">{formatPosition(metrics.currentPosition ?? 0)}</span></div>
+                <div class="flex justify-between"><span class="text-base-content/40">Speed</span><span class="text-base-content tabular-nums">{metrics.speed != null ? ((metrics.speed / 32768) * 100).toFixed(1) + "%" : "-"}</span></div>
+                <div class="flex justify-between"><span class="text-base-content/40">Pos</span><span class="text-base-content tabular-nums">{metrics.currentPosition != null ? formatPosition(metrics.currentPosition) : "-"}</span></div>
                 <div class="flex justify-between items-center"><span class="text-base-content/40">Beat</span><span class="flex gap-0.5">{#each [1, 2, 3, 4] as b}<span class="w-[5px] h-[5px] rounded-full {metrics.beatMarker === b ? 'bg-accent' : 'bg-base-300'}"></span>{/each}</span></div>
               </div>
             {/if}

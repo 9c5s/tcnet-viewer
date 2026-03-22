@@ -64,21 +64,24 @@
   let dragging = false;
   let startY = 0;
   let startHeight = 0;
+  let minH = 0;
+  let maxH = 0;
 
   function onDragStart(e: PointerEvent): void {
     dragging = true;
     startY = e.clientY;
     startHeight = store.packetLogHeight;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    // ドラッグ開始時に1回だけ計算する (zoom補正済みビューポート高さ)
+    const visibleHeight = window.innerHeight / (parseFloat(getComputedStyle(document.documentElement).zoom) || 1);
+    minH = visibleHeight * 0.1;
+    maxH = visibleHeight * 0.5;
   }
 
   function onDragMove(e: PointerEvent): void {
     if (!dragging) return;
-    // 上にドラッグ = 高さ増加 (ビューポートの10%~50%、zoom補正済み)
+    // 上にドラッグ = 高さ増加 (ビューポートの10%~50%)
     const delta = startY - e.clientY;
-    const visibleHeight = window.innerHeight / (parseFloat(getComputedStyle(document.documentElement).zoom) || 1);
-    const minH = visibleHeight * 0.1;
-    const maxH = visibleHeight * 0.5;
     store.packetLogHeight = Math.max(minH, Math.min(maxH, startHeight + delta));
   }
 
