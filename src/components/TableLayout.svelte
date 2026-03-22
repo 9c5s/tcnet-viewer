@@ -79,7 +79,7 @@
   }
 </script>
 
-<div class="flex flex-col h-screen w-screen overflow-hidden">
+<div class="flex flex-col h-full w-full overflow-hidden">
   <NodeInfoBar />
 
   <div class="flex-1 overflow-auto">
