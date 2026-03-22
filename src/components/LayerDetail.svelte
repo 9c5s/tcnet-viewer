@@ -33,7 +33,7 @@
 <div class="flex-1 flex flex-col overflow-hidden">
   <div class="flex items-center gap-3 px-4 py-2 border-b border-base-content/20 bg-base-300 flex-shrink-0">
     <h2 class="font-bold text-base-content">{LAYER_NAMES[layer]}</h2>
-    <span class="badge badge-sm {statusBadgeClass(store.layers[layer].status)}">{store.layers[layer].status}</span>
+    <span class="badge badge-sm px-[0.5em] {statusBadgeClass(store.layers[layer].status)}">{store.layers[layer].status}</span>
     {#if store.layers[layer].name}
       <span class="text-base-content/40 text-[10px]">{store.layers[layer].name}</span>
     {/if}
