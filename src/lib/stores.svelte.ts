@@ -77,9 +77,10 @@ class ViewerStore {
       layer,
       summary,
     });
-    // ログエントリは最大5000件に制限する
-    if (this.packetLog.length > 5000) {
-      this.packetLog = this.packetLog.slice(-5000);
+    // ログエントリは最大5000件に制限する (インプレースで古いエントリを削除)
+    const excess = this.packetLog.length - 5000;
+    if (excess > 0) {
+      this.packetLog.splice(0, excess);
     }
   }
 }
