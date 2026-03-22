@@ -12,6 +12,7 @@
     localStorage.setItem("theme", store.theme);
   });
 
+
   onMount(() => connect());
   onDestroy(() => disconnect());
 </script>

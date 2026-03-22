@@ -60,6 +60,32 @@
     }
   });
 
+  // ドラッグによるリサイズ
+  let dragging = false;
+  let startY = 0;
+  let startHeight = 0;
+
+  function onDragStart(e: PointerEvent): void {
+    dragging = true;
+    startY = e.clientY;
+    startHeight = store.packetLogHeight;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }
+
+  function onDragMove(e: PointerEvent): void {
+    if (!dragging) return;
+    // 上にドラッグ = 高さ増加 (ビューポートの10%~50%、zoom補正済み)
+    const delta = startY - e.clientY;
+    const visibleHeight = window.innerHeight / (parseFloat(getComputedStyle(document.documentElement).zoom) || 1);
+    const minH = visibleHeight * 0.1;
+    const maxH = visibleHeight * 0.5;
+    store.packetLogHeight = Math.max(minH, Math.min(maxH, startHeight + delta));
+  }
+
+  function onDragEnd(): void {
+    dragging = false;
+  }
+
   // フィルタキーの表示名
   const filterLabels: Record<string, string> = {
     time: "Time",
@@ -77,7 +103,16 @@
   };
 </script>
 
-<div class="flex flex-col h-full bg-base-200 border-t border-base-content/10 overflow-hidden">
+<div class="flex flex-col h-full bg-base-200 overflow-hidden">
+  <!-- リサイズハンドル -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div
+    class="h-1 bg-base-300 cursor-row-resize hover:bg-accent/30 flex-shrink-0 transition-colors"
+    onpointerdown={onDragStart}
+    onpointermove={onDragMove}
+    onpointerup={onDragEnd}
+    onpointercancel={onDragEnd}
+  ></div>
   <div class="flex items-center gap-2 px-3 py-1 border-b border-base-content/10 flex-shrink-0">
     <h3 class="text-[10px] text-base-content/40 font-bold uppercase tracking-wider">Packet Log</h3>
     <div class="flex gap-2 ml-auto flex-wrap">

@@ -22,6 +22,7 @@ class ViewerStore {
     (typeof localStorage !== "undefined" && (localStorage.getItem("theme") as Theme)) ||
       "tokyo-night",
   );
+  packetLogHeight = $state(200);
 
   layers: LayerInfo[] = $state(
     Array.from({ length: 8 }, () => ({

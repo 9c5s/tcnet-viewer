@@ -111,7 +111,7 @@
     </div>
   {/if}
 
-  <div class="h-[180px] flex-shrink-0 overflow-hidden">
+  <div class="flex-shrink-0 overflow-hidden" style:height="{store.packetLogHeight}px">
     <PacketLog />
   </div>
 </div>
