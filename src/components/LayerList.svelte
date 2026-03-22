@@ -13,7 +13,7 @@
           onclick={() => (store.selectedLayer = i)}
         >
           <span class="font-bold">{LAYER_NAMES[i]}</span>
-          <span class="badge badge-sm px-[0.5em] {statusBadgeClass(layer.status)}">{layer.status}</span>
+          <span class="badge badge-outline badge-sm px-[0.5em] {statusBadgeClass(layer.status)}">{layer.status}</span>
         </button>
       </li>
     {/each}

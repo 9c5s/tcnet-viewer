@@ -44,7 +44,7 @@
       <div class="card bg-base-200 border border-base-content/12 overflow-hidden {active ? 'border-accent/50' : ''} {layer.status === 'IDLE' && !metadata && !metrics ? 'opacity-50' : ''}">
         <div class="flex justify-between items-center px-2.5 py-1 bg-base-300 border-b border-base-content/10 flex-shrink-0">
           <span class="text-xs font-bold text-base-content">{LAYER_NAMES[i]}</span>
-          <span class="badge badge-sm px-[0.5em] {statusBadgeClass(layer.status)}">{layer.status}</span>
+          <span class="badge badge-outline badge-sm px-[0.5em] {statusBadgeClass(layer.status)}">{layer.status}</span>
         </div>
 
         {#if layer.status !== "IDLE" || metadata || metrics}
@@ -82,10 +82,10 @@
 
             <div class="flex gap-1 mt-auto flex-shrink-0">
               {#if timeInfo}
-                <span class="badge badge-sm px-[0.5em] {timeInfo.onAir === 1 ? 'badge-success' : ''}">{timeInfo.onAir === 1 ? "ON AIR" : "OFF AIR"}</span>
+                <span class="badge badge-outline badge-sm px-[0.5em] {timeInfo.onAir === 1 ? 'badge-success' : ''}">{timeInfo.onAir === 1 ? "ON AIR" : "OFF AIR"}</span>
               {/if}
               {#if metrics}
-                <span class="badge badge-sm px-[0.5em] {metrics.syncMaster === 1 ? 'badge-warning' : ''}">{metrics.syncMaster === 1 ? "MASTER" : "SLAVE"}</span>
+                <span class="badge badge-outline badge-sm px-[0.5em] {metrics.syncMaster === 1 ? 'badge-warning' : ''}">{metrics.syncMaster === 1 ? "MASTER" : "SLAVE"}</span>
               {/if}
             </div>
           </div>
