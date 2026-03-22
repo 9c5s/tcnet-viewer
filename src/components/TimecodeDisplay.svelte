@@ -52,7 +52,7 @@
         <span class="text-base-content/40">Beat</span>
         <span class="flex items-center gap-1">
           {#each [1, 2, 3, 4] as beat}
-            <span class="w-[5px] h-[5px] rounded-full {timeInfo.beatMarker === beat ? 'bg-accent' : 'bg-base-300'}">{beat}</span>
+            <span class="w-[5px] h-[5px] rounded-full {timeInfo.beatMarker === beat ? 'bg-accent' : 'bg-base-300'}"></span>
           {/each}
         </span>
       </div>

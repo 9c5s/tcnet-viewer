@@ -19,8 +19,12 @@ class ViewerStore {
   connected = $state(false);
   layoutMode: LayoutMode = $state("detail");
   theme: Theme = $state(
-    (typeof localStorage !== "undefined" && (localStorage.getItem("theme") as Theme)) ||
-      "tokyo-night",
+    (() => {
+      if (typeof localStorage === "undefined") return "tokyo-night" as const;
+      const stored = localStorage.getItem("theme");
+      const valid: Theme[] = ["tokyo-night", "tokyo-night-storm", "tokyo-night-light"];
+      return valid.includes(stored as Theme) ? (stored as Theme) : ("tokyo-night" as const);
+    })(),
   );
   packetLogHeight = $state(200);
 

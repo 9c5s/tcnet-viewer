@@ -82,8 +82,9 @@
     store.packetLogHeight = Math.max(minH, Math.min(maxH, startHeight + delta));
   }
 
-  function onDragEnd(): void {
+  function onDragEnd(e: PointerEvent): void {
     dragging = false;
+    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
   }
 
   // フィルタキーの表示名
