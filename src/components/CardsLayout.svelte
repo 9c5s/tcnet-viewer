@@ -85,7 +85,7 @@
               {#if timeInfo}
                 <span class="status-badge {timeInfo.onAir === 1 ? 'badge-success' : ''}">{timeInfo.onAir === 1 ? "ON AIR" : "OFF AIR"}</span>
               {/if}
-              {#if metrics}
+              {#if metrics?.syncMaster != null}
                 <span class="status-badge {metrics.syncMaster === 1 ? 'badge-warning' : ''}">{metrics.syncMaster === 1 ? "MASTER" : "SLAVE"}</span>
               {/if}
             </div>
