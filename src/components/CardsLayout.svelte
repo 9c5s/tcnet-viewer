@@ -1,12 +1,13 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
   import { LAYER_NAMES, statusBadgeClass } from "$lib/types.js";
+  import type { LayerStatus } from "$lib/types.js";
   import NodeInfoBar from "./NodeInfoBar.svelte";
   import WaveformSvg from "./WaveformSvg.svelte";
   import PacketLog from "./PacketLog.svelte";
 
   // アクティブ状態(PLAYING/LOOPING)かどうかを判定する
-  function isActive(status: string): boolean {
+  function isActive(status: LayerStatus): boolean {
     return status === "PLAYING" || status === "LOOPING";
   }
 

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
-  import { LAYER_NAMES, STATUS_MAP, statusClass } from "$lib/types.js";
+  import { LAYER_NAMES, statusClass } from "$lib/types.js";
   import NodeInfoBar from "./NodeInfoBar.svelte";
   import PacketLog from "./PacketLog.svelte";
 

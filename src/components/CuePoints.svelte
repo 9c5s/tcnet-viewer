@@ -49,9 +49,9 @@
             <td class="text-base-content/70 px-1">#{cue.index}</td>
             <td class="text-base-content/70 px-1">{cueTypeName(cue.type)}</td>
             <td class="text-base-content" style="font-variant-numeric: tabular-nums">{formatMmSs(cue.inTime)}</td>
-            {#if cue.outTime > 0}
-              <td class="text-base-content/40" style="font-variant-numeric: tabular-nums">- {formatMmSs(cue.outTime)}</td>
-            {/if}
+            <td class="text-base-content/40" style="font-variant-numeric: tabular-nums">
+              {cue.outTime > 0 ? `- ${formatMmSs(cue.outTime)}` : ""}
+            </td>
           </tr>
         {/each}
       </tbody>
