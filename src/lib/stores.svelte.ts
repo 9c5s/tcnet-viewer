@@ -17,6 +17,7 @@ export type Theme = "tokyo-night" | "tokyo-night-storm" | "tokyo-night-light";
 class ViewerStore {
   node: NodeInfo | null = $state(null);
   connected = $state(false);
+  tcnetConnected = $state(false);
   layoutMode: LayoutMode = $state("detail");
   theme: Theme = $state(
     (() => {
