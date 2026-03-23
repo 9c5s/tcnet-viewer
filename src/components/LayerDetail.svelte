@@ -49,7 +49,7 @@
         </div>
         <div class="flex justify-between py-0.5 text-[11px]">
           <span class="text-base-content/40">OnAir</span>
-          <span class="tabular-nums {timeInfo.onAir === 1 ? 'font-bold text-success' : ''}">
+          <span class="tabular-nums" class:font-bold={timeInfo.onAir === 1} class:text-success={timeInfo.onAir === 1}>
             {timeInfo.onAir === 1 ? "ON" : "OFF"}
           </span>
         </div>

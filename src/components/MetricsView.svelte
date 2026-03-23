@@ -42,14 +42,14 @@
           {metrics.beatNumber}
           <span class="ml-1 inline-flex items-center gap-0.5">
             {#each [1, 2, 3, 4] as b}
-              <span class="size-[5px] rounded-full {metrics.beatMarker === b ? 'bg-accent' : 'bg-base-300'}"></span>
+              <span class="size-[5px] rounded-full" class:bg-accent={metrics.beatMarker === b} class:bg-base-300={metrics.beatMarker !== b}></span>
             {/each}
           </span>
         </span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Sync</span>
-        <span class="{metrics.syncMaster === 1 ? 'font-bold text-warning' : 'text-base-content'}">
+        <span class:font-bold={metrics.syncMaster === 1} class:text-warning={metrics.syncMaster === 1} class:text-base-content={metrics.syncMaster !== 1}>
           {metrics.syncMaster === 1 ? "Master" : "Slave"}
         </span>
       </div>

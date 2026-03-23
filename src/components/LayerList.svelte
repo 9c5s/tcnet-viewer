@@ -9,7 +9,8 @@
     {#each store.layers as layer, i}
       <li>
         <button
-          class="flex items-center justify-between {store.selectedLayer === i ? 'active' : ''}"
+          class="flex items-center justify-between"
+          class:active={store.selectedLayer === i}
           onclick={() => (store.selectedLayer = i)}
         >
           <span class="font-bold">{LAYER_NAMES[i]}</span>

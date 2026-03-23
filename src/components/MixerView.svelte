@@ -34,7 +34,7 @@
       </div>
       <div class="flex items-center justify-between text-[10px]">
         <span class="text-base-content/40">BeatFX</span>
-        <span class="status-badge {store.mixer.beatFxOn ? 'badge-success' : ''}">{store.mixer.beatFxOn ? "ON" : "OFF"}</span>
+        <span class="status-badge" class:badge-success={store.mixer.beatFxOn}>{store.mixer.beatFxOn ? "ON" : "OFF"}</span>
       </div>
       <div class="flex justify-between text-[10px]">
         <span class="text-base-content/40">FX Select</span>
