@@ -37,16 +37,23 @@ import { parseMixerData } from "./parsers/mixer.js";
 import { MultiPacketAssembler } from "./parsers/multi-packet.js";
 import type { BroadcastFn } from "./types.js";
 
+type TCNetBridgeOptions = {
+  broadcast: BroadcastFn;
+  onStatusChange: (connected: boolean) => void;
+};
+
 export class TCNetBridge {
   private client: TCNetClientType;
   private broadcast: BroadcastFn;
+  private onStatusChange: (connected: boolean) => void;
   private nodeName: string;
   private trackIds: (number | null)[] = Array.from({ length: 8 }, () => null);
   private beatGridAssembler = new MultiPacketAssembler();
   private bigWaveformAssembler = new MultiPacketAssembler();
 
-  constructor(iface: string, broadcast: BroadcastFn) {
-    this.broadcast = broadcast;
+  constructor(iface: string, options: TCNetBridgeOptions) {
+    this.broadcast = options.broadcast;
+    this.onStatusChange = options.onStatusChange;
     const config = new TCNetConfiguration();
     config.broadcastInterface = iface;
     this.nodeName = config.nodeName;
