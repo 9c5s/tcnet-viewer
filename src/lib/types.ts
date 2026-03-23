@@ -96,8 +96,14 @@ export const STATUS_MAP: Record<number, LayerStatus> = {
 export type { WSMessage } from "../../server/types.js";
 import type { WSMessage } from "../../server/types.js";
 
-// WSMessageからメッセージ型別のdata型を抽出するユーティリティ型
-type ExtractWSData<T extends WSMessage["type"]> = Extract<WSMessage, { type: T }>["data"];
+// dataプロパティを持つWSMessageのユニオン型
+type WSMessageWithData = Extract<WSMessage, { data: unknown }>;
+
+// WSMessageからメッセージ型別のdata型を抽出するユーティリティ型 (dataプロパティを持つ型のみ対象)
+type ExtractWSData<T extends WSMessageWithData["type"]> = Extract<
+  WSMessageWithData,
+  { type: T }
+>["data"];
 
 export type MetricsData = ExtractWSData<"metrics">;
 export type MetadataData = ExtractWSData<"metadata">;

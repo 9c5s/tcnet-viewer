@@ -72,7 +72,7 @@ export function tcnetPlugin(): Plugin {
       const TCNetBridge = bridgeModule.TCNetBridge;
       bridge = new TCNetBridge(iface, {
         broadcast,
-        onStatusChange: (connected) => {
+        onStatusChange: (connected: boolean) => {
           broadcast({ type: "tcnet-status", connected, timestamp: Date.now() });
         },
       });
