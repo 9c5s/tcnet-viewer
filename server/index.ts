@@ -31,6 +31,11 @@ export function tcnetPlugin(): Plugin {
   return {
     name: "tcnet-websocket",
     async configureServer(server: ViteDevServer) {
+      // テスト環境ではhttpServerがnullのため、WSサーバーセットアップをスキップする
+      if (!server.httpServer) {
+        return;
+      }
+
       const iface = process.env.TCNET_INTERFACE;
 
       if (!iface) {
@@ -42,7 +47,7 @@ export function tcnetPlugin(): Plugin {
       // upgradeリクエストのパスが /ws の場合のみハンドルする
       wss = new WebSocketServer({ noServer: true });
 
-      server.httpServer!.on("upgrade", (req, socket, head) => {
+      server.httpServer.on("upgrade", (req, socket, head) => {
         if (req.url && req.url.startsWith("/ws")) {
           wss.handleUpgrade(req, socket, head, (ws) => {
             wss.emit("connection", ws, req);
@@ -80,7 +85,7 @@ export function tcnetPlugin(): Plugin {
         console.error("[TCNet] 接続失敗:", err);
       });
 
-      server.httpServer!.on("close", () => {
+      server.httpServer.on("close", () => {
         bridge.disconnect();
         wss.close();
       });
