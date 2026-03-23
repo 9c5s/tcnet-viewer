@@ -20,8 +20,10 @@
 <section class="border-b border-base-content/20 p-3">
   <h3 class="section-title">Node</h3>
   <div class="mb-2 flex items-center gap-2">
-    <span class="size-2 shrink-0 rounded-full {store.connected ? 'bg-success' : 'bg-error'}"></span>
-    <span class="text-[11px] text-base-content/70">{store.connected ? "Connected" : "Disconnected"}</span>
+    <span class="size-2 shrink-0 rounded-full {store.connected ? (store.tcnetConnected ? 'bg-success' : 'bg-warning') : `
+      bg-error
+    `}"></span>
+    <span class="text-[11px] text-base-content/70">{store.connected ? (store.tcnetConnected ? "Connected" : "Waiting for Bridge...") : "Disconnected"}</span>
   </div>
   {#if store.node}
     <div class="space-y-1 text-[10px]">
