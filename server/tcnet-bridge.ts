@@ -92,7 +92,7 @@ export class TCNetBridge {
         this.onStatusChange(false);
         await this.sleep(delay);
         delay = Math.min(delay * 2, TCNetBridge.MAX_RETRY_DELAY);
-        // disconnect()がremoveAllListenersを呼ぶため、新インスタンスで再試行
+        // 接続失敗したクライアントを破棄し、新インスタンスで再試行
         this.createClient();
       }
     }
