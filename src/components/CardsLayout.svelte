@@ -30,9 +30,10 @@
       {@const waveform = store.waveformSmall[i]}
       {@const artworkBase64 = store.artwork[i]}
 
-      <div class="card overflow-hidden border border-base-content/12 bg-base-200 {active ? 'border-accent/50' : ''} {layer.status === 'IDLE' && !metadata && !metrics ? `
-        opacity-50
-      ` : ''}">
+      <div
+        class="card overflow-hidden border border-base-content/12 bg-base-200 {active ? 'border-accent/50' : ''}"
+        class:opacity-50={layer.status === 'IDLE' && !metadata && !metrics}
+      >
         <div class="flex shrink-0 items-center justify-between border-b border-base-content/10 bg-base-300 px-2.5 py-1">
           <span class="text-xs font-bold text-base-content">{LAYER_NAMES[i]}</span>
           <span class="status-badge {statusBadgeClass(layer.status)}">{layer.status}</span>
@@ -67,9 +68,7 @@
                 ">{metrics.currentPosition != null ? formatPosition(metrics.currentPosition) : "-"}</span></div>
                 <div class="flex items-center justify-between"><span class="text-base-content/40">Beat</span><span class="
                   flex gap-0.5
-                ">{#each [1, 2, 3, 4] as b}<span class="size-[5px] rounded-full {metrics.beatMarker === b ? `bg-accent` : `
-                  bg-base-300
-                `}"></span>{/each}</span></div>
+                ">{#each [1, 2, 3, 4] as b}<span class="size-[5px] rounded-full" class:bg-accent={metrics.beatMarker === b} class:bg-base-300={metrics.beatMarker !== b}></span>{/each}</span></div>
               </div>
             {/if}
 
@@ -85,10 +84,10 @@
 
             <div class="mt-auto flex shrink-0 gap-1">
               {#if timeInfo}
-                <span class="status-badge {timeInfo.onAir === 1 ? 'badge-success' : ''}">{timeInfo.onAir === 1 ? "ON AIR" : "OFF AIR"}</span>
+                <span class="status-badge" class:badge-success={timeInfo.onAir === 1}>{timeInfo.onAir === 1 ? "ON AIR" : "OFF AIR"}</span>
               {/if}
               {#if metrics?.syncMaster != null}
-                <span class="status-badge {metrics.syncMaster === 1 ? 'badge-warning' : ''}">{metrics.syncMaster === 1 ? "MASTER" : "SLAVE"}</span>
+                <span class="status-badge" class:badge-warning={metrics.syncMaster === 1}>{metrics.syncMaster === 1 ? "MASTER" : "SLAVE"}</span>
               {/if}
             </div>
           </div>

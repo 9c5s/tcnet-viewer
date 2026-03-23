@@ -20,13 +20,13 @@
         <span class="text-base-content/40">Beat</span>
         <span class="flex items-center gap-1">
           {#each [1, 2, 3, 4] as beat}
-            <span class="size-[5px] rounded-full {timeInfo.beatMarker === beat ? 'bg-accent' : 'bg-base-300'}"></span>
+            <span class="size-[5px] rounded-full" class:bg-accent={timeInfo.beatMarker === beat} class:bg-base-300={timeInfo.beatMarker !== beat}></span>
           {/each}
         </span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">OnAir</span>
-        <span class="{timeInfo.onAir === 1 ? 'font-bold text-success' : 'text-base-content'}">
+        <span class:font-bold={timeInfo.onAir === 1} class:text-success={timeInfo.onAir === 1} class:text-base-content={timeInfo.onAir !== 1}>
           {timeInfo.onAir === 1 ? "ON" : "OFF"}
         </span>
       </div>

@@ -19,7 +19,9 @@
   <div class="join">
     {#each modes as mode}
       <button
-        class="btn join-item btn-xs {store.layoutMode === mode.key ? 'btn-accent' : 'btn-ghost'}"
+        class="btn join-item btn-xs"
+        class:btn-accent={store.layoutMode === mode.key}
+        class:btn-ghost={store.layoutMode !== mode.key}
         onclick={() => (store.layoutMode = mode.key)}
         title="{mode.label} layout"
       >
@@ -40,7 +42,8 @@
       {#each themes as t}
         <li>
           <button
-            class="text-[11px] {store.theme === t.key ? 'active' : ''}"
+            class="text-[11px]"
+            class:active={store.theme === t.key}
             onclick={() => (store.theme = t.key)}
           >
             {t.icon} {t.label}
