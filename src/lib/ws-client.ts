@@ -15,6 +15,7 @@ export function connect(): void {
 
   ws.onclose = () => {
     store.connected = false;
+    store.tcnetConnected = false;
     reconnectTimer = setTimeout(connect, 2000);
   };
 
@@ -125,6 +126,10 @@ function handleMessage(msg: WSMessage): void {
 
     case "beatgrid":
       store.addLogEntry(msg.type, msg.layer, `${msg.data.entries?.length ?? 0} beats`);
+      break;
+
+    case "tcnet-status":
+      store.tcnetConnected = msg.connected;
       break;
 
     default: {
