@@ -49,6 +49,7 @@ export class TCNetBridge {
   private nodeName!: string;
   private iface: string;
   private running = false;
+  private isReconnecting = false;
   private heartbeatTimer: ReturnType<typeof setTimeout> | null = null;
   private trackIds: (number | null)[] = Array.from({ length: 8 }, () => null);
   private beatGridAssembler = new MultiPacketAssembler();
@@ -82,7 +83,7 @@ export class TCNetBridge {
         console.log("[TCNet] 接続完了");
         this.onStatusChange(true);
         this.setupListeners();
-        this.startHeartbeat();
+        this.resetHeartbeat();
         return;
       } catch (err) {
         if (!this.running) return;
@@ -108,10 +109,6 @@ export class TCNetBridge {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  private startHeartbeat(): void {
-    this.resetHeartbeat();
-  }
-
   private stopHeartbeat(): void {
     if (this.heartbeatTimer) {
       clearTimeout(this.heartbeatTimer);
@@ -123,20 +120,28 @@ export class TCNetBridge {
     this.stopHeartbeat();
     this.heartbeatTimer = setTimeout(() => {
       console.warn("[TCNet] ハートビートタイムアウト: パケット未受信");
-      this.reconnect();
+      this.reconnect().catch((err) => {
+        console.error("[TCNet] 再接続処理でエラー:", err);
+      });
     }, TCNetBridge.HEARTBEAT_TIMEOUT);
   }
 
   private async reconnect(): Promise<void> {
-    this.stopHeartbeat();
-    this.onStatusChange(false);
+    if (this.isReconnecting) return;
+    this.isReconnecting = true;
     try {
-      await this.client.disconnect();
-    } catch {
-      // 切断時のエラーは無視する
+      this.stopHeartbeat();
+      this.onStatusChange(false);
+      try {
+        await this.client.disconnect();
+      } catch {
+        // 切断時のエラーは無視する
+      }
+      this.createClient();
+      await this.connect();
+    } finally {
+      this.isReconnecting = false;
     }
-    this.createClient();
-    await this.connect();
   }
 
   private setupListeners(): void {
