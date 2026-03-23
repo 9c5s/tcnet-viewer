@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     staged: {
-      "*": ["bash -c '! git check-ignore'", "vp check --fix"],
+      "*": ["bash -c '! git check-ignore'", "vp check --fix", "vp lint --deny-warnings"],
       "*.svelte": ["vp dlx eslint --fix", "vp dlx svelte-check --fail-on-warnings"],
       ".github/workflows/*.{yml,yaml}": ["vp dlx actionlint", "vp dlx zizmor --fix --pedantic"],
     },
