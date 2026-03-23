@@ -1,6 +1,6 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
-  import { formatMmSs } from "$lib/formatting.js";
+  import { formatMmSs, formatBPM } from "$lib/formatting.js";
 
   interface Props {
     layer: number;
@@ -17,7 +17,7 @@
       <div class="flex justify-between">
         <span class="text-base-content/40">BPM</span>
         <span class="text-[11px] font-bold text-accent tabular-nums">
-          {((metrics.bpm ?? 0) / 100).toFixed(2)}
+          {formatBPM(metrics.bpm ?? 0)}
         </span>
       </div>
       <div class="flex justify-between">

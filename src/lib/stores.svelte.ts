@@ -8,6 +8,7 @@ import type {
   MixerData,
   NodeInfo,
   PacketLogEntry,
+  BeatGridEntry,
 } from "./types.js";
 
 export type LayoutMode = "cards" | "detail" | "table";
@@ -63,6 +64,9 @@ class ViewerStore {
     Array.from({ length: 8 }, (): WaveformBar[] | null => null),
   );
   artwork: (string | null)[] = $state(Array.from({ length: 8 }, (): string | null => null));
+  beatgrid: (BeatGridEntry[] | null)[] = $state(
+    Array.from({ length: 8 }, (): BeatGridEntry[] | null => null),
+  );
   mixer: MixerData | null = $state(null);
   generalSMPTEMode = $state(0);
 
