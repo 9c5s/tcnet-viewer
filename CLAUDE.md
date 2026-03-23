@@ -67,3 +67,6 @@ TCNet UDP → server/tcnet-bridge.ts → WebSocket (/ws) → src/lib/ws-client.t
 - @9c5s/node-tcnetはGitHub依存。ローカル開発時にnode-tcnetを修正する場合は`pnpm add link:../node-tcnet`で一時的にローカルリンクに切り替え可能
 - .envファイルはprocess.envに自動ロードされない。vite.config.tsでloadEnvを明示的に呼び出してマージしている
 - vite-plusはimport元に`vite-plus`を使用する (`vite`ではなく`vite-plus`からimport)
+- ESLintはTailwind CSS専用リンターとして使用する。JS/TSの一般リントはOxlint (`vp check`) が担当する
+- `eslint.config.js` は `betterTailwindcss.rules` から全ルールを動的展開する。パッケージ更新で新ルールが自動有効化される
+- `no-unknown-classes` の `ignore` リストはDaisyUI/カスタムクラス追加時に更新が必要
