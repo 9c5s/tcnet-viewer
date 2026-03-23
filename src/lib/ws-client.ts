@@ -130,6 +130,11 @@ function handleMessage(msg: WSMessage): void {
 
     case "tcnet-status":
       store.tcnetConnected = msg.connected;
+      store.addLogEntry(
+        msg.type,
+        undefined,
+        msg.connected ? "Bridge connected" : "Bridge disconnected",
+      );
       break;
 
     default: {
