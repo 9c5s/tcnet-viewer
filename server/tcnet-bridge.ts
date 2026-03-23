@@ -127,7 +127,7 @@ export class TCNetBridge {
   }
 
   private async reconnect(): Promise<void> {
-    if (this.isReconnecting) return;
+    if (this.isReconnecting || !this.running) return;
     this.isReconnecting = true;
     try {
       this.stopHeartbeat();
