@@ -125,6 +125,7 @@ function handleMessage(msg: WSMessage): void {
       break;
 
     case "beatgrid":
+      store.beatgrid[msg.layer] = msg.data.entries;
       store.addLogEntry(msg.type, msg.layer, `${msg.data.entries?.length ?? 0} beats`);
       break;
 

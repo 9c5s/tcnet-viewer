@@ -1,7 +1,7 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
   import { LAYER_NAMES, statusClass } from "$lib/types.js";
-  import { formatMmSs } from "$lib/formatting.js";
+  import { formatMmSs, formatBPM } from "$lib/formatting.js";
   import NodeInfoBar from "./NodeInfoBar.svelte";
   import PacketLog from "./PacketLog.svelte";
 
@@ -28,7 +28,7 @@
       case "Artist":
         return metadata?.trackArtist || "-";
       case "BPM":
-        return metrics?.bpm != null ? (metrics.bpm / 100).toFixed(2) : "-";
+        return metrics?.bpm != null ? formatBPM(metrics.bpm) : "-";
       case "Speed":
         return metrics?.speed != null ? ((metrics.speed / 32768) * 100).toFixed(1) + "%" : "-";
       case "Position":
