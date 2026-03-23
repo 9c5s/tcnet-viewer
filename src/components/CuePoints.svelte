@@ -34,6 +34,9 @@
       default: return `T${type}`;
     }
   }
+
+  // RGB値を0-255の範囲に制限する
+  const clamp = (v: number) => Math.max(0, Math.min(255, v));
 </script>
 
 <div class="p-3">
@@ -44,7 +47,7 @@
         {#each cues as cue}
           <tr>
             <td class="w-4 px-0">
-              <span class="inline-block size-2.5 rounded-full" style="background: rgb({cue.color.r}, {cue.color.g}, {cue.color.b})"></span>
+              <span class="inline-block size-2.5 rounded-full" style="background: rgb({clamp(cue.color.r)}, {clamp(cue.color.g)}, {clamp(cue.color.b)})"></span>
             </td>
             <td class="px-1 text-base-content/70">#{cue.index}</td>
             <td class="px-1 text-base-content/70">{cueTypeName(cue.type)}</td>
