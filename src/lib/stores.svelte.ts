@@ -41,13 +41,21 @@ class ViewerStore {
       name: "",
     })),
   );
-  time: (TimeInfo | null)[] = $state(new Array<TimeInfo | null>(8).fill(null));
-  metrics: (MetricsData | null)[] = $state(new Array<MetricsData | null>(8).fill(null));
-  metadata: (MetadataData | null)[] = $state(new Array<MetadataData | null>(8).fill(null));
-  cues: (CuePoint[] | null)[] = $state(new Array<CuePoint[] | null>(8).fill(null));
-  waveformSmall: (WaveformBar[] | null)[] = $state(new Array<WaveformBar[] | null>(8).fill(null));
-  waveformBig: (WaveformBar[] | null)[] = $state(new Array<WaveformBar[] | null>(8).fill(null));
-  artwork: (string | null)[] = $state(new Array<string | null>(8).fill(null));
+  time: (TimeInfo | null)[] = $state(Array.from<TimeInfo | null>({ length: 8 }, () => null));
+  metrics: (MetricsData | null)[] = $state(
+    Array.from<MetricsData | null>({ length: 8 }, () => null),
+  );
+  metadata: (MetadataData | null)[] = $state(
+    Array.from<MetadataData | null>({ length: 8 }, () => null),
+  );
+  cues: (CuePoint[] | null)[] = $state(Array.from<CuePoint[] | null>({ length: 8 }, () => null));
+  waveformSmall: (WaveformBar[] | null)[] = $state(
+    Array.from<WaveformBar[] | null>({ length: 8 }, () => null),
+  );
+  waveformBig: (WaveformBar[] | null)[] = $state(
+    Array.from<WaveformBar[] | null>({ length: 8 }, () => null),
+  );
+  artwork: (string | null)[] = $state(Array.from<string | null>({ length: 8 }, () => null));
   mixer: MixerData | null = $state(null);
   generalSMPTEMode = $state(0);
 
