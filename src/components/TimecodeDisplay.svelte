@@ -1,38 +1,6 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
-
-  // ミリ秒をHH:MM:SS.mmm形式に変換する
-  function formatTimecode(ms: number): string {
-    const totalSec = Math.floor(ms / 1000);
-    const millis = ms % 1000;
-    const h = Math.floor(totalSec / 3600);
-    const m = Math.floor((totalSec % 3600) / 60);
-    const s = totalSec % 60;
-    return (
-      String(h).padStart(2, "0") +
-      ":" +
-      String(m).padStart(2, "0") +
-      ":" +
-      String(s).padStart(2, "0") +
-      "." +
-      String(millis).padStart(3, "0")
-    );
-  }
-
-  // ミリ秒をMM:SS.mmm形式に変換する
-  function formatMmSs(ms: number): string {
-    const totalSec = Math.floor(ms / 1000);
-    const millis = ms % 1000;
-    const m = Math.floor(totalSec / 60);
-    const s = totalSec % 60;
-    return (
-      String(m).padStart(2, "0") +
-      ":" +
-      String(s).padStart(2, "0") +
-      "." +
-      String(millis).padStart(3, "0")
-    );
-  }
+  import { formatTimecode, formatMmSs } from "$lib/formatting.js";
 
   let timeInfo = $derived(store.time[store.selectedLayer]);
 </script>

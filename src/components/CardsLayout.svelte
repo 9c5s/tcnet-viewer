@@ -2,6 +2,7 @@
   import { store } from "$lib/stores.svelte.js";
   import { LAYER_NAMES, statusBadgeClass } from "$lib/types.js";
   import type { LayerStatus } from "$lib/types.js";
+  import { formatBPM, formatPosition } from "$lib/formatting.js";
   import NodeInfoBar from "./NodeInfoBar.svelte";
   import WaveformSvg from "./WaveformSvg.svelte";
   import PacketLog from "./PacketLog.svelte";
@@ -9,19 +10,6 @@
   // アクティブ状態(PLAYING/LOOPING)かどうかを判定する
   function isActive(status: LayerStatus): boolean {
     return status === "PLAYING" || status === "LOOPING";
-  }
-
-  // BPM値をフォーマットする(100分の1単位の値を変換)
-  function formatBPM(bpm: number): string {
-    return (bpm / 100).toFixed(2);
-  }
-
-  // ミリ秒をMM:SS形式に変換する
-  function formatPosition(ms: number): string {
-    const totalSec = Math.floor(ms / 1000);
-    const m = Math.floor(totalSec / 60);
-    const s = totalSec % 60;
-    return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
   }
 
   // ミキサーの0-255値をパーセンテージに変換する

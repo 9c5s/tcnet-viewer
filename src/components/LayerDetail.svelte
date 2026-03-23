@@ -1,6 +1,7 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
   import { LAYER_NAMES, statusBadgeClass } from "$lib/types.js";
+  import { formatTimecode } from "$lib/formatting.js";
   import MetadataView from "./MetadataView.svelte";
   import WaveformSvg from "./WaveformSvg.svelte";
   import MetricsView from "./MetricsView.svelte";
@@ -10,24 +11,6 @@
   let timeInfo = $derived(store.time[layer]);
   let metrics = $derived(store.metrics[layer]);
   let waveform = $derived(store.waveformSmall[layer]);
-
-  // ミリ秒をHH:MM:SS.mmm形式に変換する
-  function formatTimecode(ms: number): string {
-    const totalSec = Math.floor(ms / 1000);
-    const millis = ms % 1000;
-    const h = Math.floor(totalSec / 3600);
-    const m = Math.floor((totalSec % 3600) / 60);
-    const s = totalSec % 60;
-    return (
-      String(h).padStart(2, "0") +
-      ":" +
-      String(m).padStart(2, "0") +
-      ":" +
-      String(s).padStart(2, "0") +
-      "." +
-      String(millis).padStart(3, "0")
-    );
-  }
 </script>
 
 <div class="flex flex-1 flex-col overflow-hidden">

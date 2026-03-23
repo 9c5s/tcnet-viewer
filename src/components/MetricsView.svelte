@@ -1,5 +1,6 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
+  import { formatMmSs } from "$lib/formatting.js";
 
   interface Props {
     layer: number;
@@ -7,21 +8,6 @@
   let { layer }: Props = $props();
 
   let metrics = $derived(store.metrics[layer]);
-
-  // ミリ秒をMM:SS.mmm形式に変換する
-  function formatMmSs(ms: number): string {
-    const totalSec = Math.floor(ms / 1000);
-    const millis = ms % 1000;
-    const m = Math.floor(totalSec / 60);
-    const s = totalSec % 60;
-    return (
-      String(m).padStart(2, "0") +
-      ":" +
-      String(s).padStart(2, "0") +
-      "." +
-      String(millis).padStart(3, "0")
-    );
-  }
 </script>
 
 <div class="border-b border-base-content/20 p-3">

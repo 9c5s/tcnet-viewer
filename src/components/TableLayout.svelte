@@ -1,6 +1,7 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
   import { LAYER_NAMES, statusClass } from "$lib/types.js";
+  import { formatMmSs } from "$lib/formatting.js";
   import NodeInfoBar from "./NodeInfoBar.svelte";
   import PacketLog from "./PacketLog.svelte";
 
@@ -31,9 +32,9 @@
       case "Speed":
         return metrics?.speed != null ? ((metrics.speed / 32768) * 100).toFixed(1) + "%" : "-";
       case "Position":
-        return metrics?.currentPosition != null ? formatMs(metrics.currentPosition) : "-";
+        return metrics?.currentPosition != null ? formatMmSs(metrics.currentPosition) : "-";
       case "Length":
-        return metrics?.trackLength != null ? formatMs(metrics.trackLength) : "-";
+        return metrics?.trackLength != null ? formatMmSs(metrics.trackLength) : "-";
       case "Beat":
         return metrics?.beatNumber != null && metrics?.beatMarker != null ? `${metrics.beatNumber} [${metrics.beatMarker}/4]` : "-";
       case "Sync":
@@ -45,19 +46,6 @@
       default:
         return "-";
     }
-  }
-
-  // ミリ秒をMM:SS.mmm形式に変換する
-  function formatMs(ms: number): string {
-    const totalSec = Math.floor(ms / 1000);
-    const millis = ms % 1000;
-    const m = Math.floor(totalSec / 60);
-    const s = totalSec % 60;
-    return (
-      String(m).padStart(2, "0") + ":" +
-      String(s).padStart(2, "0") + "." +
-      String(millis).padStart(3, "0")
-    );
   }
 
   // 変更検知用の前回値マップ: key = "row-layerIndex"

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
+  import { formatMmSs } from "$lib/formatting.js";
 
   interface Props {
     layer: number;
@@ -7,22 +8,6 @@
   let { layer }: Props = $props();
 
   let cues = $derived(store.cues[layer]);
-
-  // ミリ秒をMM:SS.mmm形式に変換する
-  function formatMmSs(ms: number): string {
-    if (ms <= 0) return "--:--.---";
-    const totalSec = Math.floor(ms / 1000);
-    const millis = ms % 1000;
-    const m = Math.floor(totalSec / 60);
-    const s = totalSec % 60;
-    return (
-      String(m).padStart(2, "0") +
-      ":" +
-      String(s).padStart(2, "0") +
-      "." +
-      String(millis).padStart(3, "0")
-    );
-  }
 
   // CUEタイプ名を返す
   function cueTypeName(type: number): string {
@@ -51,7 +36,7 @@
             </td>
             <td class="px-1 text-base-content/70">#{cue.index}</td>
             <td class="px-1 text-base-content/70">{cueTypeName(cue.type)}</td>
-            <td class="text-base-content tabular-nums">{formatMmSs(cue.inTime)}</td>
+            <td class="text-base-content tabular-nums">{cue.inTime > 0 ? formatMmSs(cue.inTime) : "--:--.---"}</td>
             <td class="text-base-content/40 tabular-nums">
               {cue.outTime > 0 ? `- ${formatMmSs(cue.outTime)}` : ""}
             </td>
