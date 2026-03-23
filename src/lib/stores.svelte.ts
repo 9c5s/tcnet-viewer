@@ -18,6 +18,13 @@ class ViewerStore {
   node: NodeInfo | null = $state(null);
   connected = $state(false);
   tcnetConnected = $state(false);
+
+  get statusIndicator(): { color: string; text: string } {
+    if (!this.connected) return { color: "bg-error", text: "Disconnected" };
+    return this.tcnetConnected
+      ? { color: "bg-success", text: "Connected" }
+      : { color: "bg-warning", text: "Waiting for Bridge..." };
+  }
   layoutMode: LayoutMode = $state("detail");
   theme: Theme = $state(
     (() => {
@@ -41,21 +48,21 @@ class ViewerStore {
       name: "",
     })),
   );
-  time: (TimeInfo | null)[] = $state(Array.from<TimeInfo | null>({ length: 8 }, () => null));
+  time: (TimeInfo | null)[] = $state(Array.from({ length: 8 }, (): TimeInfo | null => null));
   metrics: (MetricsData | null)[] = $state(
-    Array.from<MetricsData | null>({ length: 8 }, () => null),
+    Array.from({ length: 8 }, (): MetricsData | null => null),
   );
   metadata: (MetadataData | null)[] = $state(
-    Array.from<MetadataData | null>({ length: 8 }, () => null),
+    Array.from({ length: 8 }, (): MetadataData | null => null),
   );
-  cues: (CuePoint[] | null)[] = $state(Array.from<CuePoint[] | null>({ length: 8 }, () => null));
+  cues: (CuePoint[] | null)[] = $state(Array.from({ length: 8 }, (): CuePoint[] | null => null));
   waveformSmall: (WaveformBar[] | null)[] = $state(
-    Array.from<WaveformBar[] | null>({ length: 8 }, () => null),
+    Array.from({ length: 8 }, (): WaveformBar[] | null => null),
   );
   waveformBig: (WaveformBar[] | null)[] = $state(
-    Array.from<WaveformBar[] | null>({ length: 8 }, () => null),
+    Array.from({ length: 8 }, (): WaveformBar[] | null => null),
   );
-  artwork: (string | null)[] = $state(Array.from<string | null>({ length: 8 }, () => null));
+  artwork: (string | null)[] = $state(Array.from({ length: 8 }, (): string | null => null));
   mixer: MixerData | null = $state(null);
   generalSMPTEMode = $state(0);
 
