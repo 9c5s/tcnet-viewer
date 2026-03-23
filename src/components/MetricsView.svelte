@@ -24,13 +24,13 @@
   }
 </script>
 
-<div class="p-3 border-b border-base-content/20">
+<div class="border-b border-base-content/20 p-3">
   <h3 class="section-title">Metrics</h3>
   {#if metrics}
     <div class="space-y-0.5 text-[10px]">
       <div class="flex justify-between">
         <span class="text-base-content/40">BPM</span>
-        <span class="text-accent font-bold text-[11px] tabular-nums">
+        <span class="text-[11px] font-bold text-accent tabular-nums">
           {((metrics.bpm ?? 0) / 100).toFixed(2)}
         </span>
       </div>
@@ -54,21 +54,21 @@
         <span class="text-base-content/40">Beat</span>
         <span class="text-base-content">
           {metrics.beatNumber}
-          <span class="inline-flex items-center gap-0.5 ml-1">
+          <span class="ml-1 inline-flex items-center gap-0.5">
             {#each [1, 2, 3, 4] as b}
-              <span class="w-[5px] h-[5px] rounded-full {metrics.beatMarker === b ? 'bg-accent' : 'bg-base-300'}"></span>
+              <span class="size-[5px] rounded-full {metrics.beatMarker === b ? 'bg-accent' : 'bg-base-300'}"></span>
             {/each}
           </span>
         </span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Sync</span>
-        <span class="{metrics.syncMaster === 1 ? 'text-warning font-bold' : 'text-base-content'}">
+        <span class="{metrics.syncMaster === 1 ? 'font-bold text-warning' : 'text-base-content'}">
           {metrics.syncMaster === 1 ? "Master" : "Slave"}
         </span>
       </div>
     </div>
   {:else}
-    <div class="text-base-content/40 text-[11px]">No metrics data</div>
+    <div class="text-[11px] text-base-content/40">No metrics data</div>
   {/if}
 </div>

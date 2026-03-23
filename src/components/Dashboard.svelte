@@ -6,7 +6,7 @@
   import PacketLog from "./PacketLog.svelte";
 </script>
 
-<div class="grid grid-cols-[200px_1fr] h-full w-full overflow-hidden" style:grid-template-rows="1fr {store.packetLogHeight}px">
+<div class="grid size-full grid-cols-[200px_1fr] overflow-hidden" style:grid-template-rows="1fr {store.packetLogHeight}px">
   <Sidebar />
   <div class="flex overflow-hidden">
     <LayerList />

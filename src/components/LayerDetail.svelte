@@ -30,15 +30,15 @@
   }
 </script>
 
-<div class="flex-1 flex flex-col overflow-hidden">
-  <div class="flex items-center gap-3 px-4 py-2 border-b border-base-content/20 bg-base-300 flex-shrink-0">
+<div class="flex flex-1 flex-col overflow-hidden">
+  <div class="flex shrink-0 items-center gap-3 border-b border-base-content/20 bg-base-300 px-4 py-2">
     <h2 class="font-bold text-base-content">{LAYER_NAMES[layer]}</h2>
     <span class="status-badge {statusBadgeClass(store.layers[layer].status)}">{store.layers[layer].status}</span>
     {#if store.layers[layer].name}
-      <span class="text-base-content/40 text-[10px]">{store.layers[layer].name}</span>
+      <span class="text-[10px] text-base-content/40">{store.layers[layer].name}</span>
     {/if}
   </div>
-  <div class="flex-1 overflow-y-auto p-2 space-y-2">
+  <div class="flex-1 space-y-2 overflow-y-auto p-2">
     <MetadataView {layer} />
     <WaveformSvg
       bars={waveform}
@@ -50,7 +50,7 @@
       <div class="flex-1"><CuePoints {layer} /></div>
     </div>
     <div class="p-2">
-      <h3 class="text-[10px] text-base-content/40 uppercase tracking-wider mb-1">Timecode</h3>
+      <h3 class="mb-1 text-[10px] tracking-wider text-base-content/40 uppercase">Timecode</h3>
       {#if timeInfo}
         <div class="flex justify-between py-0.5 text-[11px]">
           <span class="text-base-content/40">Current</span>
@@ -66,12 +66,12 @@
         </div>
         <div class="flex justify-between py-0.5 text-[11px]">
           <span class="text-base-content/40">OnAir</span>
-          <span class="tabular-nums {timeInfo.onAir === 1 ? 'text-success font-bold' : ''}">
+          <span class="tabular-nums {timeInfo.onAir === 1 ? 'font-bold text-success' : ''}">
             {timeInfo.onAir === 1 ? "ON" : "OFF"}
           </span>
         </div>
       {:else}
-        <p class="text-base-content/40 text-[11px] italic">No timecode data</p>
+        <p class="text-[11px] text-base-content/40 italic">No timecode data</p>
       {/if}
     </div>
   </div>

@@ -79,14 +79,14 @@
   }
 </script>
 
-<div class="flex flex-col h-full w-full overflow-hidden">
+<div class="flex size-full flex-col overflow-hidden">
   <NodeInfoBar />
 
   <div class="flex-1 overflow-auto">
-    <table class="table table-xs table-fixed w-full">
+    <table class="table w-full table-fixed table-xs">
       <thead>
-        <tr class="sticky top-0 bg-base-300 z-10">
-          <th class="text-left w-[100px]">Property</th>
+        <tr class="sticky top-0 z-10 bg-base-300">
+          <th class="w-[100px] text-left">Property</th>
           {#each LAYER_NAMES as name, i}
             <th class="text-center">
               <span class={`font-bold ${statusClass(store.layers[i].status)}`}>
@@ -99,7 +99,7 @@
       <tbody>
         {#each ROW_DEFS as row}
           <tr>
-            <td class="font-bold text-left text-xs uppercase text-base-content/60 bg-base-200">{row}</td>
+            <td class="bg-base-200 text-left text-xs font-bold text-base-content/60 uppercase">{row}</td>
             {#each LAYER_NAMES as _, i}
               {@const value = getCellValue(row, i)}
               {@const isHighlighted = checkHighlight(row, i, value)}
@@ -122,7 +122,7 @@
     </table>
   </div>
 
-  <div class="flex-shrink-0 overflow-hidden" style:height="{store.packetLogHeight}px">
+  <div class="shrink-0 overflow-hidden" style:height="{store.packetLogHeight}px">
     <PacketLog />
   </div>
 </div>

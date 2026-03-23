@@ -44,10 +44,10 @@
         {#each cues as cue}
           <tr>
             <td class="w-4 px-0">
-              <span class="inline-block w-2.5 h-2.5 rounded-full" style="background: rgb({cue.color.r}, {cue.color.g}, {cue.color.b})"></span>
+              <span class="inline-block size-2.5 rounded-full" style="background: rgb({cue.color.r}, {cue.color.g}, {cue.color.b})"></span>
             </td>
-            <td class="text-base-content/70 px-1">#{cue.index}</td>
-            <td class="text-base-content/70 px-1">{cueTypeName(cue.type)}</td>
+            <td class="px-1 text-base-content/70">#{cue.index}</td>
+            <td class="px-1 text-base-content/70">{cueTypeName(cue.type)}</td>
             <td class="text-base-content tabular-nums">{formatMmSs(cue.inTime)}</td>
             <td class="text-base-content/40 tabular-nums">
               {cue.outTime > 0 ? `- ${formatMmSs(cue.outTime)}` : ""}
@@ -57,6 +57,6 @@
       </tbody>
     </table>
   {:else}
-    <div class="text-base-content/40 text-[11px]">No cue points</div>
+    <div class="text-[11px] text-base-content/40">No cue points</div>
   {/if}
 </div>

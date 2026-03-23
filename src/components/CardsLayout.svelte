@@ -30,10 +30,10 @@
   }
 </script>
 
-<div class="flex flex-col h-full w-full overflow-hidden">
+<div class="flex size-full flex-col overflow-hidden">
   <NodeInfoBar />
 
-  <div class="flex-1 grid grid-cols-4 grid-rows-2 gap-1.5 p-1.5 overflow-hidden min-h-0">
+  <div class="grid min-h-0 flex-1 grid-cols-4 grid-rows-2 gap-1.5 overflow-hidden p-1.5">
     {#each store.layers as layer, i}
       {@const active = isActive(layer.status)}
       {@const metrics = store.metrics[i]}
@@ -42,32 +42,46 @@
       {@const waveform = store.waveformSmall[i]}
       {@const artworkBase64 = store.artwork[i]}
 
-      <div class="card bg-base-200 border border-base-content/12 overflow-hidden {active ? 'border-accent/50' : ''} {layer.status === 'IDLE' && !metadata && !metrics ? 'opacity-50' : ''}">
-        <div class="flex justify-between items-center px-2.5 py-1 bg-base-300 border-b border-base-content/10 flex-shrink-0">
+      <div class="card overflow-hidden border border-base-content/12 bg-base-200 {active ? 'border-accent/50' : ''} {layer.status === 'IDLE' && !metadata && !metrics ? `
+        opacity-50
+      ` : ''}">
+        <div class="flex shrink-0 items-center justify-between border-b border-base-content/10 bg-base-300 px-2.5 py-1">
           <span class="text-xs font-bold text-base-content">{LAYER_NAMES[i]}</span>
           <span class="status-badge {statusBadgeClass(layer.status)}">{layer.status}</span>
         </div>
 
         {#if layer.status !== "IDLE" || metadata || metrics}
-          <div class="flex-1 flex flex-col gap-1 px-2 py-1.5 overflow-hidden min-h-0">
+          <div class="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden px-2 py-1.5">
             {#if metadata}
-              <div class="flex gap-2 items-center flex-shrink-0">
+              <div class="flex shrink-0 items-center gap-2">
                 {#if artworkBase64}
-                  <img src="data:image/jpeg;base64,{artworkBase64}" alt="Art" class="w-8 h-8 rounded flex-shrink-0 object-cover" />
+                  <img src="data:image/jpeg;base64,{artworkBase64}" alt="Art" class="
+                    size-8 shrink-0 rounded-sm object-cover
+                  " />
                 {/if}
-                <div class="flex-1 min-w-0">
-                  <div class="text-[11px] font-bold text-base-content truncate">{metadata.trackTitle || "Unknown"}</div>
-                  <div class="text-[10px] text-base-content/60 truncate">{metadata.trackArtist || "Unknown"}</div>
+                <div class="min-w-0 flex-1">
+                  <div class="truncate text-[11px] font-bold text-base-content">{metadata.trackTitle || "Unknown"}</div>
+                  <div class="truncate text-[10px] text-base-content/60">{metadata.trackArtist || "Unknown"}</div>
                 </div>
               </div>
             {/if}
 
             {#if metrics}
-              <div class="grid grid-cols-2 gap-x-2 gap-y-0 flex-shrink-0 text-[10px]">
-                <div class="flex justify-between"><span class="text-base-content/40">BPM</span><span class="text-accent font-bold text-[11px] tabular-nums">{metrics.bpm != null ? formatBPM(metrics.bpm) : "N/A"}</span></div>
-                <div class="flex justify-between"><span class="text-base-content/40">Speed</span><span class="text-base-content tabular-nums">{metrics.speed != null ? ((metrics.speed / 32768) * 100).toFixed(1) + "%" : "-"}</span></div>
-                <div class="flex justify-between"><span class="text-base-content/40">Pos</span><span class="text-base-content tabular-nums">{metrics.currentPosition != null ? formatPosition(metrics.currentPosition) : "-"}</span></div>
-                <div class="flex justify-between items-center"><span class="text-base-content/40">Beat</span><span class="flex gap-0.5">{#each [1, 2, 3, 4] as b}<span class="w-[5px] h-[5px] rounded-full {metrics.beatMarker === b ? 'bg-accent' : 'bg-base-300'}"></span>{/each}</span></div>
+              <div class="grid shrink-0 grid-cols-2 gap-x-2 gap-y-0 text-[10px]">
+                <div class="flex justify-between"><span class="text-base-content/40">BPM</span><span class="
+                  text-[11px] font-bold text-accent tabular-nums
+                ">{metrics.bpm != null ? formatBPM(metrics.bpm) : "N/A"}</span></div>
+                <div class="flex justify-between"><span class="text-base-content/40">Speed</span><span class="
+                  text-base-content tabular-nums
+                ">{metrics.speed != null ? ((metrics.speed / 32768) * 100).toFixed(1) + "%" : "-"}</span></div>
+                <div class="flex justify-between"><span class="text-base-content/40">Pos</span><span class="
+                  text-base-content tabular-nums
+                ">{metrics.currentPosition != null ? formatPosition(metrics.currentPosition) : "-"}</span></div>
+                <div class="flex items-center justify-between"><span class="text-base-content/40">Beat</span><span class="
+                  flex gap-0.5
+                ">{#each [1, 2, 3, 4] as b}<span class="size-[5px] rounded-full {metrics.beatMarker === b ? `bg-accent` : `
+                  bg-base-300
+                `}"></span>{/each}</span></div>
               </div>
             {/if}
 
@@ -81,7 +95,7 @@
               />
             {/if}
 
-            <div class="flex gap-1 mt-auto flex-shrink-0">
+            <div class="mt-auto flex shrink-0 gap-1">
               {#if timeInfo}
                 <span class="status-badge {timeInfo.onAir === 1 ? 'badge-success' : ''}">{timeInfo.onAir === 1 ? "ON AIR" : "OFF AIR"}</span>
               {/if}
@@ -91,8 +105,8 @@
             </div>
           </div>
         {:else}
-          <div class="flex-1 flex items-center justify-center">
-            <span class="text-base-content/30 text-[10px] italic">No data</span>
+          <div class="flex flex-1 items-center justify-center">
+            <span class="text-[10px] text-base-content/30 italic">No data</span>
           </div>
         {/if}
       </div>
@@ -100,19 +114,19 @@
   </div>
 
   {#if store.mixer}
-    <div class="flex items-center gap-2.5 px-3 py-1 bg-base-300 border-y border-base-content/10 text-[10px] flex-shrink-0">
-      <span class="text-base-content/40 font-bold uppercase tracking-wider">Mixer</span>
+    <div class="flex shrink-0 items-center gap-2.5 border-y border-base-content/10 bg-base-300 px-3 py-1 text-[10px]">
+      <span class="font-bold tracking-wider text-base-content/40 uppercase">Mixer</span>
       <span class="text-base-content/60">Master: {toPercent(store.mixer.masterAudioLevel)}%</span>
       <span class="text-base-content/30">|</span>
       <span class="text-base-content/60">Fader: {toPercent(store.mixer.masterFaderLevel)}%</span>
       <span class="text-base-content/30">|</span>
       <span class="text-base-content/60">XFader: {toPercent(store.mixer.crossFader)}%</span>
       <span class="text-base-content/30">|</span>
-      <span class="{store.mixer.beatFxOn ? 'text-success font-bold' : 'text-base-content/60'}">BeatFX: {store.mixer.beatFxOn ? "ON" : "OFF"}</span>
+      <span class="{store.mixer.beatFxOn ? 'font-bold text-success' : 'text-base-content/60'}">BeatFX: {store.mixer.beatFxOn ? "ON" : "OFF"}</span>
     </div>
   {/if}
 
-  <div class="flex-shrink-0 overflow-hidden" style:height="{store.packetLogHeight}px">
+  <div class="shrink-0 overflow-hidden" style:height="{store.packetLogHeight}px">
     <PacketLog />
   </div>
 </div>

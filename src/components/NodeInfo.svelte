@@ -17,18 +17,22 @@
   }
 </script>
 
-<section class="p-3 border-b border-base-content/20">
+<section class="border-b border-base-content/20 p-3">
   <h3 class="section-title">Node</h3>
-  <div class="flex items-center gap-2 mb-2">
-    <span class="w-2 h-2 rounded-full flex-shrink-0 {store.connected ? 'bg-success' : 'bg-error'}"></span>
+  <div class="mb-2 flex items-center gap-2">
+    <span class="size-2 shrink-0 rounded-full {store.connected ? 'bg-success' : 'bg-error'}"></span>
     <span class="text-[11px] text-base-content/70">{store.connected ? "Connected" : "Disconnected"}</span>
   </div>
   {#if store.node}
     <div class="space-y-1 text-[10px]">
       <div class="flex justify-between"><span class="text-base-content/40">Name</span><span class="text-base-content">{store.node.nodeName}</span></div>
       <div class="flex justify-between"><span class="text-base-content/40">Type</span><span class="text-base-content">{NODE_TYPES[store.node.nodeType] ?? `Unknown(${store.node.nodeType})`}</span></div>
-      <div class="flex justify-between"><span class="text-base-content/40">Version</span><span class="text-base-content">{store.node.majorVersion}.{store.node.minorVersion}</span></div>
-      <div class="flex justify-between"><span class="text-base-content/40">Protocol</span><span class="text-base-content">{store.node.protocolVersion}</span></div>
+      <div class="flex justify-between"><span class="text-base-content/40">Version</span><span class="
+        text-base-content
+      ">{store.node.majorVersion}.{store.node.minorVersion}</span></div>
+      <div class="flex justify-between"><span class="text-base-content/40">Protocol</span><span class="
+        text-base-content
+      ">{store.node.protocolVersion}</span></div>
       <div class="flex justify-between"><span class="text-base-content/40">Uptime</span><span class="text-base-content">{formatUptime(store.node.uptime)}</span></div>
       <div class="flex justify-between"><span class="text-base-content/40">Nodes</span><span class="text-base-content">{store.node.nodeCount}</span></div>
     </div>

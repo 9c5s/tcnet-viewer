@@ -14,11 +14,20 @@ export default [
     plugins: {
       "better-tailwindcss": betterTailwindcss,
     },
-    rules: Object.fromEntries(
-      Object.entries(betterTailwindcss.rules).map(([name]) => [
-        `better-tailwindcss/${name}`,
-        ["error", { entryPoint: "src/app.css" }],
-      ]),
-    ),
+    rules: {
+      ...Object.fromEntries(
+        Object.entries(betterTailwindcss.rules).map(([name]) => [
+          `better-tailwindcss/${name}`,
+          ["error", { entryPoint: "src/app.css" }],
+        ]),
+      ),
+      // @plugin "daisyui" および @layer components のカスタムクラスを認識できないため無効化
+      "better-tailwindcss/no-unknown-classes": "off",
+      // 行折り返し: 120文字超で折り返し、収まるなら1行にまとめる
+      "better-tailwindcss/enforce-consistent-line-wrapping": [
+        "error",
+        { entryPoint: "src/app.css", printWidth: 120, preferSingleLine: true },
+      ],
+    },
   },
 ];

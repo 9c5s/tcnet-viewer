@@ -15,12 +15,12 @@
   let posX = $derived(trackLength > 0 ? (currentPosition / trackLength) * VIEW_WIDTH : 0);
 </script>
 
-<div class="px-2 py-1 border-b border-base-content/20 {className}">
+<div class="border-b border-base-content/20 px-2 py-1 {className}">
   {#if bars && bars.length > 0}
     <svg
       viewBox="0 0 {VIEW_WIDTH} {height}"
       preserveAspectRatio="none"
-      class="w-full rounded block"
+      class="block w-full rounded-sm"
       style:height="{height}px"
     >
       <rect width={VIEW_WIDTH} height={height} class="fill-base-100" />
@@ -42,7 +42,7 @@
       {/if}
     </svg>
   {:else}
-    <div class="flex items-center justify-center rounded bg-base-100 text-base-content/40 text-[11px]" style:height="{height}px">
+    <div class="flex items-center justify-center rounded-sm bg-base-100 text-[11px] text-base-content/40" style:height="{height}px">
       No waveform data
     </div>
   {/if}
