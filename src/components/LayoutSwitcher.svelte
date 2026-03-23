@@ -15,26 +15,28 @@
   ];
 </script>
 
-<div class="fixed top-1 right-2 z-[1000] flex items-center gap-2">
+<div class="fixed top-1 right-2 z-1000 flex items-center gap-2">
   <div class="join">
     {#each modes as mode}
       <button
-        class="join-item btn btn-xs {store.layoutMode === mode.key ? 'btn-accent' : 'btn-ghost'}"
+        class="btn join-item btn-xs {store.layoutMode === mode.key ? 'btn-accent' : 'btn-ghost'}"
         onclick={() => (store.layoutMode = mode.key)}
         title="{mode.label} layout"
       >
         <span class="text-sm leading-none">{mode.icon}</span>
-        <span class="text-[10px] uppercase tracking-wider">{mode.label}</span>
+        <span class="text-[10px] tracking-wider uppercase">{mode.label}</span>
       </button>
     {/each}
   </div>
 
   <div class="dropdown dropdown-end">
-    <div tabindex="0" role="button" class="btn btn-xs btn-ghost">
+    <div tabindex="0" role="button" class="btn btn-ghost btn-xs">
       <span class="text-sm leading-none">{themes.find((t) => t.key === store.theme)?.icon ?? "\u263D"}</span>
     </div>
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-    <ul tabindex="0" class="dropdown-content menu bg-base-200 rounded-box z-1 w-28 p-1 shadow-lg border border-base-content/20">
+    <ul tabindex="0" class="
+      dropdown-content menu z-1 w-28 rounded-box border border-base-content/20 bg-base-200 p-1 shadow-lg
+    ">
       {#each themes as t}
         <li>
           <button

@@ -4,7 +4,7 @@
   import MixerView from "./MixerView.svelte";
 </script>
 
-<aside class="bg-base-200 border-r border-base-content/20 overflow-y-auto row-span-2">
+<aside class="row-span-2 overflow-y-auto border-r border-base-content/20 bg-base-200">
   <NodeInfo />
   <TimecodeDisplay />
   <MixerView />

@@ -107,21 +107,21 @@
   };
 </script>
 
-<div class="flex flex-col h-full bg-base-200 overflow-hidden">
+<div class="flex h-full flex-col overflow-hidden bg-base-200">
   <!-- リサイズハンドル -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
-    class="h-1 bg-base-300 cursor-row-resize hover:bg-accent/30 flex-shrink-0 transition-colors"
+    class="h-1 shrink-0 cursor-row-resize bg-base-300 transition-colors hover:bg-accent/30"
     onpointerdown={onDragStart}
     onpointermove={onDragMove}
     onpointerup={onDragEnd}
     onpointercancel={onDragEnd}
   ></div>
-  <div class="flex items-center gap-2 px-3 py-1 border-b border-base-content/10 flex-shrink-0">
+  <div class="flex shrink-0 items-center gap-2 border-b border-base-content/10 px-3 py-1">
     <h3 class="section-title font-bold">Packet Log</h3>
-    <div class="flex gap-2 ml-auto flex-wrap">
+    <div class="ml-auto flex flex-wrap gap-2">
       {#each Object.keys(store.logFilters) as key}
-        <label class="flex items-center gap-1 cursor-pointer text-[9px]">
+        <label class="flex cursor-pointer items-center gap-1 text-[9px]">
           <input type="checkbox" class="checkbox checkbox-xs" checked={store.logFilters[key]} onchange={() => (store.logFilters[key] = !store.logFilters[key])} />
           <span class="{TYPE_CLASSES[key] ?? 'text-base-content/70'}">{filterLabels[key] ?? key}</span>
         </label>
@@ -131,10 +131,10 @@
   <div class="flex-1 overflow-y-auto text-[10px]" bind:this={logContainer} onscroll={onScroll}>
     {#each filteredLogs as entry (entry.id)}
       <div class="flex gap-2 px-3 py-px hover:bg-base-content/5">
-        <span class="text-base-content/40 min-w-[85px] tabular-nums">{formatTimestamp(entry.timestamp)}</span>
+        <span class="min-w-[85px] text-base-content/40 tabular-nums">{formatTimestamp(entry.timestamp)}</span>
         <span class="{TYPE_CLASSES[entry.type] ?? 'text-base-content/70'} min-w-[65px] font-semibold">{entry.type}</span>
-        <span class="text-base-content/50 min-w-[55px]">{entry.layer !== undefined ? LAYER_NAMES[entry.layer] : "--"}</span>
-        <span class="text-base-content/60 flex-1 truncate">{entry.summary}</span>
+        <span class="min-w-[55px] text-base-content/50">{entry.layer !== undefined ? LAYER_NAMES[entry.layer] : "--"}</span>
+        <span class="flex-1 truncate text-base-content/60">{entry.summary}</span>
       </div>
     {/each}
   </div>

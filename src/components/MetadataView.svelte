@@ -10,28 +10,34 @@
   let artworkBase64 = $derived(store.artwork[layer]);
 </script>
 
-<div class="p-3 border-b border-base-content/20">
+<div class="border-b border-base-content/20 p-3">
   {#if metadata}
-    <div class="flex gap-3 items-start">
+    <div class="flex items-start gap-3">
       {#if artworkBase64}
         <div class="avatar">
-          <div class="w-16 rounded">
+          <div class="w-16 rounded-sm">
             <img src="data:image/jpeg;base64,{artworkBase64}" alt="Artwork" />
           </div>
         </div>
       {:else}
-        <div class="w-16 h-16 rounded bg-base-300 flex items-center justify-center text-base-content/30 text-2xl flex-shrink-0">&#9835;</div>
+        <div class="
+          flex size-16 shrink-0 items-center justify-center rounded-sm bg-base-300 text-2xl text-base-content/30
+        ">&#9835;</div>
       {/if}
-      <div class="flex-1 min-w-0">
-        <div class="font-bold text-base-content text-[12px] truncate">{metadata.trackTitle || "Unknown"}</div>
-        <div class="text-base-content/70 text-[11px] truncate">{metadata.trackArtist || "Unknown"}</div>
+      <div class="min-w-0 flex-1">
+        <div class="truncate text-[12px] font-bold text-base-content">{metadata.trackTitle || "Unknown"}</div>
+        <div class="truncate text-[11px] text-base-content/70">{metadata.trackArtist || "Unknown"}</div>
         <div class="mt-2 space-y-0.5 text-[10px]">
-          <div class="flex justify-between"><span class="text-base-content/40">ID</span><span class="text-base-content truncate ml-2">{metadata.trackID}</span></div>
-          <div class="flex justify-between"><span class="text-base-content/40">Key</span><span class="text-base-content">{metadata.trackKey || "-"}</span></div>
+          <div class="flex justify-between"><span class="text-base-content/40">ID</span><span class="
+            ml-2 truncate text-base-content
+          ">{metadata.trackID}</span></div>
+          <div class="flex justify-between"><span class="text-base-content/40">Key</span><span class="
+            text-base-content
+          ">{metadata.trackKey || "-"}</span></div>
         </div>
       </div>
     </div>
   {:else}
-    <div class="text-base-content/40 text-[11px]">No metadata</div>
+    <div class="text-[11px] text-base-content/40">No metadata</div>
   {/if}
 </div>
