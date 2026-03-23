@@ -137,6 +137,7 @@ export class TCNetBridge {
       } catch {
         // 切断時のエラーは無視する
       }
+      if (!this.running) return;
       this.createClient();
       await this.connect();
     } finally {
