@@ -21,8 +21,14 @@ export default [
           ["error", { entryPoint: "src/app.css" }],
         ]),
       ),
-      // @plugin "daisyui" および @layer components のカスタムクラスを認識できないため無効化
-      "better-tailwindcss/no-unknown-classes": "off",
+      // @plugin "daisyui" と @layer components のカスタムクラスを許可リストで除外
+      "better-tailwindcss/no-unknown-classes": [
+        "error",
+        {
+          entryPoint: "src/app.css",
+          ignore: ["section-title", "status-badge", "dropdown-content", "active"],
+        },
+      ],
       // 行折り返し: 120文字超で折り返し、収まるなら1行にまとめる
       "better-tailwindcss/enforce-consistent-line-wrapping": [
         "error",
