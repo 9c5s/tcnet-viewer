@@ -47,7 +47,6 @@ export class TCNetBridge {
   private broadcast: BroadcastFn;
   private onStatusChange: (connected: boolean) => void;
   private nodeName!: string;
-  private iface: string;
   private running = false;
   private isReconnecting = false;
   private heartbeatTimer: ReturnType<typeof setTimeout> | null = null;
@@ -59,16 +58,14 @@ export class TCNetBridge {
   private static readonly INITIAL_RETRY_DELAY = 2_000;
   private static readonly MAX_RETRY_DELAY = 30_000;
 
-  constructor(iface: string, options: TCNetBridgeOptions) {
+  constructor(options: TCNetBridgeOptions) {
     this.broadcast = options.broadcast;
     this.onStatusChange = options.onStatusChange;
-    this.iface = iface;
     this.createClient();
   }
 
   private createClient(): void {
     const config = new TCNetConfiguration();
-    config.broadcastInterface = this.iface;
     this.nodeName = config.nodeName;
     this.client = new TCNetClient(config);
   }
@@ -80,10 +77,8 @@ export class TCNetBridge {
     while (this.running) {
       try {
         await this.client.connect();
-        console.log("[TCNet] 接続完了");
-        this.onStatusChange(true);
+        console.log("[TCNet] ソケット作成完了、アダプタ検出中...");
         this.setupListeners();
-        this.resetHeartbeat();
         return;
       } catch (err) {
         if (!this.running) return;
@@ -146,6 +141,17 @@ export class TCNetBridge {
   }
 
   private setupListeners(): void {
+    this.client.on("adapterSelected", () => {
+      const name = this.client.selectedAdapter?.name ?? "unknown";
+      console.log(`[TCNet] アダプタ確定: ${name}`);
+      this.onStatusChange(true);
+      this.resetHeartbeat();
+    });
+
+    this.client.on("detectionTimeout", () => {
+      console.warn("[TCNet] アダプタ検出タイムアウト (listenは継続)");
+    });
+
     this.client.on("broadcast", (packet: unknown) => {
       this.resetHeartbeat();
       if (packet instanceof TCNetOptInPacket) {

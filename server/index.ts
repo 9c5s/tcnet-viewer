@@ -36,13 +36,6 @@ export function tcnetPlugin(): Plugin {
         return;
       }
 
-      const iface = process.env.TCNET_INTERFACE;
-
-      if (!iface) {
-        console.error("[TCNet] TCNET_INTERFACE未設定 -- .envファイルに設定してください");
-        process.exit(1);
-      }
-
       // ViteのHMR WebSocketと衝突しないよう、noServerモードで作成し
       // upgradeリクエストのパスが /ws の場合のみハンドルする
       wss = new WebSocketServer({ noServer: true });
@@ -75,7 +68,7 @@ export function tcnetPlugin(): Plugin {
       const bridgePath = resolve(__dirname, "tcnet-bridge.ts");
       const bridgeModule = await server.ssrLoadModule(bridgePath);
       const TCNetBridge = bridgeModule.TCNetBridge;
-      bridge = new TCNetBridge(iface, {
+      bridge = new TCNetBridge({
         broadcast,
         onStatusChange: (connected: boolean) => {
           broadcast({ type: "tcnet-status", connected, timestamp: Date.now() });
