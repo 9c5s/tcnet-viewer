@@ -2,6 +2,7 @@
  * ミリ秒をMM:SS.mmm形式に変換する
  */
 export function formatMmSs(ms: number): string {
+  ms = Math.max(0, ms);
   const totalSec = Math.floor(ms / 1000);
   const millis = ms % 1000;
   const m = Math.floor(totalSec / 60);
@@ -19,6 +20,7 @@ export function formatMmSs(ms: number): string {
  * ミリ秒をMM:SS形式に変換する
  */
 export function formatPosition(ms: number): string {
+  ms = Math.max(0, ms);
   const totalSec = Math.floor(ms / 1000);
   const m = Math.floor(totalSec / 60);
   const s = totalSec % 60;
@@ -29,6 +31,7 @@ export function formatPosition(ms: number): string {
  * ミリ秒をHH:MM:SS.mmm形式に変換する
  */
 export function formatTimecode(ms: number): string {
+  ms = Math.max(0, ms);
   const totalSec = Math.floor(ms / 1000);
   const millis = ms % 1000;
   const h = Math.floor(totalSec / 3600);
@@ -49,5 +52,6 @@ export function formatTimecode(ms: number): string {
  * BPM生値(100倍整数)を小数2桁の文字列に変換する
  */
 export function formatBPM(bpm: number): string {
+  bpm = Math.max(0, bpm);
   return (bpm / 100).toFixed(2);
 }

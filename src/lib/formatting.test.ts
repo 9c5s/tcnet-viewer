@@ -48,3 +48,19 @@ test("formatTimecode: 時の繰り上がり直前を正しく変換する", () =
 test("formatBPM: 端数が生じるBPM値を正しく変換する", () => {
   expect(formatBPM(12345)).toBe("123.45");
 });
+
+test("formatMmSs: 負の値は0にクランプされる", () => {
+  expect(formatMmSs(-1000)).toBe("00:00.000");
+});
+
+test("formatPosition: 負の値は0にクランプされる", () => {
+  expect(formatPosition(-1000)).toBe("00:00");
+});
+
+test("formatTimecode: 負の値は0にクランプされる", () => {
+  expect(formatTimecode(-1000)).toBe("00:00:00.000");
+});
+
+test("formatBPM: 負の値は0にクランプされる", () => {
+  expect(formatBPM(-100)).toBe("0.00");
+});
