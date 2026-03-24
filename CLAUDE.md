@@ -5,18 +5,12 @@ TCNetプロトコルのリアルタイムデバッグビューワー。
 
 ## 起動
 
-`.env` に `TCNET_INTERFACE` を設定:
-
-```dotenv
-TCNET_INTERFACE=10GbE
-```
-
 ```bash
 vp install     # 初回のみ (依存解決 + prepare hookでvp configが自動実行)
 vp dev
 ```
 
-http://localhost:5180 で開く。`TCNET_INTERFACE` は必須 (ネットワークインターフェース名)。
+http://localhost:5180 で開く。ネットワークアダプタはTCNetトラフィックから自動検出される。
 `pnpm dev` でも起動可能。
 
 ## 技術スタック
@@ -65,7 +59,6 @@ TCNet UDP → server/tcnet-bridge.ts → WebSocket (/ws) → src/lib/ws-client.t
 - Bridgeは曲変更直後のメタデータリクエストに空を返すことがある。500ms間隔で最大6回リトライする
 - stateCache (server/index.ts) で最新メッセージをキャッシュし、新規WSクライアントに即送信する
 - @9c5s/node-tcnetはGitHub依存。ローカル開発時にnode-tcnetを修正する場合は`pnpm add link:../node-tcnet`で一時的にローカルリンクに切り替え可能
-- .envファイルはprocess.envに自動ロードされない。vite.config.tsでloadEnvを明示的に呼び出してマージしている
 - vite-plusはimport元に`vite-plus`を使用する (`vite`ではなく`vite-plus`からimport)
 - ESLintはTailwind CSS専用リンターとして使用する。JS/TSの一般リントはOxlint (`vp check`) が担当する
 - `eslint.config.js` は `betterTailwindcss.rules` から全ルールを動的展開する。パッケージ更新で新ルールが自動有効化される
