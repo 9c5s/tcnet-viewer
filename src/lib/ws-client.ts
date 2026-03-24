@@ -1,6 +1,7 @@
 import { store } from "./stores.svelte.js";
 import type { WSMessage } from "./types.js";
 import { STATUS_MAP } from "./types.js";
+import { formatBPM } from "./formatting.js";
 
 let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout>;
@@ -89,7 +90,7 @@ function handleMessage(msg: WSMessage): void {
       store.addLogEntry(
         msg.type,
         msg.layer,
-        `bpm=${msg.data.bpm != null ? (msg.data.bpm / 100).toFixed(2) : "N/A"}`,
+        `bpm=${msg.data.bpm != null ? formatBPM(msg.data.bpm) : "N/A"}`,
       );
       break;
 
