@@ -68,6 +68,7 @@ export class TCNetBridge {
     const config = new TCNetConfiguration();
     this.nodeName = config.nodeName;
     this.client = new TCNetClient(config);
+    this.setupListeners();
   }
 
   async connect(): Promise<void> {
@@ -78,7 +79,6 @@ export class TCNetBridge {
       try {
         await this.client.connect();
         console.log("[TCNet] ソケット作成完了、アダプタ検出中...");
-        this.setupListeners();
         return;
       } catch (err) {
         if (!this.running) return;
