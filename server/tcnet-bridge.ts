@@ -153,11 +153,12 @@ export class TCNetBridge {
     });
 
     this.client.on("broadcast", (packet: unknown) => {
-      this.resetHeartbeat();
       if (packet instanceof TCNetOptInPacket) {
         const p = packet as TCNetOptInPacketType;
-        // 自ノードのoptinはクライアントに転送しない
+        // 自ノードのOptInはスキップする (node-tcnetが定期送信する自身のOptInを
+        // 受信するため、ハートビートリセットも行わない)
         if (p.header.nodeName === this.nodeName) return;
+        this.resetHeartbeat();
         this.broadcast({
           type: "optin",
           timestamp: Date.now(),
@@ -178,6 +179,7 @@ export class TCNetBridge {
         });
         return;
       }
+      this.resetHeartbeat();
       if (packet instanceof TCNetOptOutPacket) {
         const p = packet as TCNetOptOutPacketType;
         this.broadcast({
