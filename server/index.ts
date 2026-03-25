@@ -1,6 +1,7 @@
 import type { Plugin, ViteDevServer } from "vite-plus";
 import type { WSMessage } from "./types.js";
 import { WebSocketServer, WebSocket } from "ws";
+import { format } from "node:util";
 import { fileURLToPath } from "url";
 import { resolve, dirname } from "path";
 
@@ -21,6 +22,27 @@ export function tcnetPlugin(): Plugin {
     const cacheKey =
       "layer" in msg && msg.layer !== undefined ? `${msg.type}-${msg.layer}` : msg.type;
     stateCache.set(cacheKey, json);
+    for (const client of clients) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(json);
+      }
+    }
+  };
+
+  const broadcastServerLog = (level: "log" | "warn" | "error", args: unknown[]) => {
+    if (clients.size === 0) return;
+    let message: string;
+    try {
+      message = format(...args);
+    } catch {
+      message = String(args);
+    }
+    const json = JSON.stringify({
+      type: "server-log",
+      timestamp: Date.now(),
+      level,
+      message,
+    });
     for (const client of clients) {
       if (client.readyState === WebSocket.OPEN) {
         client.send(json);
@@ -62,6 +84,23 @@ export function tcnetPlugin(): Plugin {
           console.log(`[WS] クライアント切断 (合計: ${clients.size})`);
         });
       });
+
+      const originalLog = console.log;
+      const originalWarn = console.warn;
+      const originalError = console.error;
+
+      console.log = (...args: unknown[]) => {
+        originalLog(...args);
+        broadcastServerLog("log", args);
+      };
+      console.warn = (...args: unknown[]) => {
+        originalWarn(...args);
+        broadcastServerLog("warn", args);
+      };
+      console.error = (...args: unknown[]) => {
+        originalError(...args);
+        broadcastServerLog("error", args);
+      };
 
       // ViteのSSRモジュールローダーを使ってtcnet-bridgeをロードする
       // これによりViteのconfig bundling時にnode-tcnetのCJS依存が含まれるのを回避する

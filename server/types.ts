@@ -81,6 +81,7 @@ export type WSMessage =
   | { type: "waveform-big"; timestamp: number; layer: number; data: WaveformData }
   | { type: "artwork"; timestamp: number; layer: number; data: ArtworkData }
   | { type: "beatgrid"; timestamp: number; layer: number; data: BeatGridData }
+  | { type: "server-log"; timestamp: number; level: "log" | "warn" | "error"; message: string }
   | { type: "tcnet-status"; connected: boolean; timestamp: number };
 
 export type BroadcastFn = (msg: WSMessage) => void;
