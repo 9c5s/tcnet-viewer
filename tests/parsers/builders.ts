@@ -90,8 +90,12 @@ export class MixerDataBuilder {
   }
 
   setMixerName(name: string): this {
+    const maxLen = 16;
+    if (Buffer.byteLength(name, "ascii") > maxLen) {
+      throw new RangeError(`Mixer name too long: ${name} (max ${maxLen} bytes)`);
+    }
     this.data.fill(0, 29, 45);
-    this.data.write(name, 29, "ascii");
+    this.data.write(name, 29, maxLen, "ascii");
     return this;
   }
 
