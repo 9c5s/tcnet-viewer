@@ -1,6 +1,6 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
-  import { LAYER_NAMES } from "$lib/types.js";
+  import { LAYER_NAMES, type PacketLogEntry } from "$lib/types.js";
 
   // パケットタイプに応じたTailwindセマンティックカラークラスのマッピング
   const TYPE_CLASSES: Record<string, string> = {
@@ -16,7 +16,18 @@
     "waveform-big": "text-base-content/70",
     artwork: "text-secondary",
     beatgrid: "text-base-content/40",
+    server: "text-info",
   };
+
+  // serverタイプはログレベルに応じた色を返す
+  function getTypeClass(entry: PacketLogEntry): string {
+    if (entry.type === "server") {
+      if (entry.summary.startsWith("[ERROR]")) return "text-error";
+      if (entry.summary.startsWith("[WARN]")) return "text-warning";
+      return "text-info";
+    }
+    return TYPE_CLASSES[entry.type] ?? "text-base-content/70";
+  }
 
   // タイムスタンプをHH:MM:SS.mmm形式に変換する
   function formatTimestamp(ts: number): string {
@@ -104,6 +115,7 @@
     "waveform-big": "WfB",
     mixer: "Mixer",
     artwork: "Art",
+    server: "Srv",
   };
 </script>
 
@@ -132,7 +144,7 @@
     {#each filteredLogs as entry (entry.id)}
       <div class="flex gap-2 px-3 py-px hover:bg-base-content/5">
         <span class="min-w-[85px] text-base-content/40 tabular-nums">{formatTimestamp(entry.timestamp)}</span>
-        <span class="{TYPE_CLASSES[entry.type] ?? 'text-base-content/70'} min-w-[65px] font-semibold">{entry.type}</span>
+        <span class="{getTypeClass(entry)} min-w-[65px] font-semibold">{entry.type}</span>
         <span class="min-w-[55px] text-base-content/50">{entry.layer !== undefined ? LAYER_NAMES[entry.layer] : "--"}</span>
         <span class="flex-1 truncate text-base-content/60">{entry.summary}</span>
       </div>
