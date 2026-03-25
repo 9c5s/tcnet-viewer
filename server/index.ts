@@ -118,6 +118,9 @@ export function tcnetPlugin(): Plugin {
       });
 
       server.httpServer.on("close", () => {
+        console.log = originalLog;
+        console.warn = originalWarn;
+        console.error = originalError;
         bridge.disconnect();
         wss.close();
       });
