@@ -28,5 +28,13 @@ export default defineConfig(({ mode }) => {
       // node-tcnetはNode.jsの標準importで解決し、ViteのSSR変換を通さない
       external: ["@9c5s/node-tcnet"],
     },
+    test: {
+      include: ["tests/**/*.test.ts"],
+      environmentMatchGlobs: [
+        ["tests/parsers/**", "node"],
+        ["tests/utils/**", "node"],
+        ["tests/lib/**", "jsdom"],
+      ],
+    },
   };
 });
