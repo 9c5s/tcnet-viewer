@@ -1,55 +1,20 @@
 import type { Plugin, ViteDevServer } from "vite-plus";
-import type { WSMessage } from "./types.js";
-import { WebSocketServer, WebSocket } from "ws";
-import { stripAnsi } from "./utils/ansi.ts";
+import type { WSMessage } from "./types.ts";
+import { WebSocketServer } from "ws";
 import { format } from "node:util";
 import { fileURLToPath } from "url";
 import { resolve, dirname } from "path";
+import { WebSocketBroadcaster } from "./utils/broadcaster.ts";
+import { stripAnsi } from "./utils/ansi.ts";
 
-export type { WSMessage } from "./types.js";
+export type { WSMessage } from "./types.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export function tcnetPlugin(): Plugin {
   let wss: WebSocketServer;
   let bridge: { connect(): Promise<void>; disconnect(): Promise<void> };
-  const clients = new Set<WebSocket>();
-  // 最新メッセージをtype+layerでキャッシュし、新規クライアントに送信する
-  const stateCache = new Map<string, string>();
-
-  const broadcast = (msg: WSMessage) => {
-    const json = JSON.stringify(msg);
-    // メッセージをtype+layerでキャッシュする
-    const cacheKey =
-      "layer" in msg && msg.layer !== undefined ? `${msg.type}-${msg.layer}` : msg.type;
-    stateCache.set(cacheKey, json);
-    for (const client of clients) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(json);
-      }
-    }
-  };
-
-  const broadcastServerLog = (level: "log" | "warn" | "error", args: unknown[]) => {
-    if (clients.size === 0) return;
-    let message: string;
-    try {
-      message = stripAnsi(format(...args));
-    } catch {
-      message = stripAnsi(args.map((a) => String(a)).join(" "));
-    }
-    const json = JSON.stringify({
-      type: "server-log",
-      timestamp: Date.now(),
-      level,
-      message,
-    });
-    for (const client of clients) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(json);
-      }
-    }
-  };
+  const broadcaster = new WebSocketBroadcaster();
 
   return {
     name: "tcnet-websocket",
@@ -72,17 +37,14 @@ export function tcnetPlugin(): Plugin {
       });
 
       wss.on("connection", (ws) => {
-        clients.add(ws);
+        broadcaster.addClient(ws);
         console.log(
-          `[WS] クライアント接続 (合計: ${clients.size}), キャッシュ ${stateCache.size}件を送信`,
+          `[WS] クライアント接続 (合計: ${broadcaster.getClientCount()}), キャッシュ ${broadcaster.getCachedState().size}件を送信`,
         );
-        // キャッシュ済みの最新状態を新規クライアントに送信する
-        for (const json of stateCache.values()) {
-          ws.send(json);
-        }
+        broadcaster.sendCachedState(ws);
         ws.on("close", () => {
-          clients.delete(ws);
-          console.log(`[WS] クライアント切断 (合計: ${clients.size})`);
+          broadcaster.removeClient(ws);
+          console.log(`[WS] クライアント切断 (合計: ${broadcaster.getClientCount()})`);
         });
       });
 
@@ -92,15 +54,15 @@ export function tcnetPlugin(): Plugin {
 
       console.log = (...args: unknown[]) => {
         originalLog(...args);
-        broadcastServerLog("log", args);
+        broadcaster.broadcastServerLog("log", args, stripAnsi, format);
       };
       console.warn = (...args: unknown[]) => {
         originalWarn(...args);
-        broadcastServerLog("warn", args);
+        broadcaster.broadcastServerLog("warn", args, stripAnsi, format);
       };
       console.error = (...args: unknown[]) => {
         originalError(...args);
-        broadcastServerLog("error", args);
+        broadcaster.broadcastServerLog("error", args, stripAnsi, format);
       };
 
       const restoreConsole = () => {
@@ -110,15 +72,14 @@ export function tcnetPlugin(): Plugin {
       };
 
       // ViteのSSRモジュールローダーを使ってtcnet-bridgeをロードする
-      // これによりViteのconfig bundling時にnode-tcnetのCJS依存が含まれるのを回避する
       try {
         const bridgePath = resolve(__dirname, "tcnet-bridge.ts");
         const bridgeModule = await server.ssrLoadModule(bridgePath);
         const TCNetBridge = bridgeModule.TCNetBridge;
         bridge = new TCNetBridge({
-          broadcast,
+          broadcast: (msg: WSMessage) => broadcaster.broadcast(msg),
           onStatusChange: (connected: boolean) => {
-            broadcast({ type: "tcnet-status", connected, timestamp: Date.now() });
+            broadcaster.broadcast({ type: "tcnet-status", connected, timestamp: Date.now() });
           },
         });
       } catch (err) {
