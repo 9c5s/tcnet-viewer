@@ -86,6 +86,7 @@ class ViewerStore {
     "waveform-big": true,
     mixer: true,
     artwork: true,
+    server: true,
   });
   private logIdCounter = 0;
 
