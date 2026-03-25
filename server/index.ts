@@ -14,7 +14,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 export function tcnetPlugin(): Plugin {
   let wss: WebSocketServer;
   let bridge: { connect(): Promise<void>; disconnect(): Promise<void> };
-  const broadcaster = new WebSocketBroadcaster();
+  const broadcaster = new WebSocketBroadcaster({ stripAnsi, format });
 
   return {
     name: "tcnet-websocket",
@@ -54,15 +54,15 @@ export function tcnetPlugin(): Plugin {
 
       console.log = (...args: unknown[]) => {
         originalLog(...args);
-        broadcaster.broadcastServerLog("log", args, stripAnsi, format);
+        broadcaster.broadcastServerLog("log", args);
       };
       console.warn = (...args: unknown[]) => {
         originalWarn(...args);
-        broadcaster.broadcastServerLog("warn", args, stripAnsi, format);
+        broadcaster.broadcastServerLog("warn", args);
       };
       console.error = (...args: unknown[]) => {
         originalError(...args);
-        broadcaster.broadcastServerLog("error", args, stripAnsi, format);
+        broadcaster.broadcastServerLog("error", args);
       };
 
       const restoreConsole = () => {

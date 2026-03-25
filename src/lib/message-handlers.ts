@@ -126,10 +126,10 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
   };
 }
 
-export function dispatchMessage(msg: WSMessage, handlers: HandlerMap): void {
-  const handler = handlers[msg.type];
+export function dispatchMessage<T extends WSMessage>(msg: T, handlers: HandlerMap): void {
+  const handler = handlers[msg.type] as ((msg: T) => void) | undefined;
   if (handler) {
-    (handler as (msg: WSMessage) => void)(msg);
+    handler(msg);
   } else {
     console.warn("[WS] 未処理のメッセージ型:", msg);
   }

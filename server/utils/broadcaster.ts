@@ -1,6 +1,7 @@
 import type { WSMessage } from "../types.ts";
 
 // WebSocket互換のインターフェース (テスト時にモック可能にするため)
+// readyState: 1=OPEN (WebSocket.OPEN相当), 3=CLOSED (WebSocket.CLOSED相当)
 interface WSClient {
   readyState: number;
   send(data: string): void;
@@ -8,9 +9,21 @@ interface WSClient {
 
 const WS_OPEN = 1;
 
+export type BroadcasterOptions = {
+  stripAnsi: (s: string) => string;
+  format: (...args: unknown[]) => string;
+};
+
 export class WebSocketBroadcaster {
   private clients = new Set<WSClient>();
   private stateCache = new Map<string, string>();
+  private readonly stripAnsi: (s: string) => string;
+  private readonly format: (...args: unknown[]) => string;
+
+  constructor(options: BroadcasterOptions) {
+    this.stripAnsi = options.stripAnsi;
+    this.format = options.format;
+  }
 
   addClient(ws: WSClient): void {
     this.clients.add(ws);
@@ -34,42 +47,31 @@ export class WebSocketBroadcaster {
     const cacheKey =
       "layer" in msg && msg.layer !== undefined ? `${msg.type}-${msg.layer}` : msg.type;
     this.stateCache.set(cacheKey, json);
-    for (const client of this.clients) {
-      if (client.readyState === WS_OPEN) {
-        client.send(json);
-      }
-    }
+    this.sendToAll(json);
   }
 
-  broadcastServerLog(
-    level: "log" | "warn" | "error",
-    args: unknown[],
-    stripAnsi: (s: string) => string,
-    format: (...args: unknown[]) => string,
-  ): void {
+  broadcastServerLog(level: "log" | "warn" | "error", args: unknown[]): void {
     if (this.clients.size === 0) return;
     let message: string;
     try {
-      message = stripAnsi(format(...args));
+      message = this.stripAnsi(this.format(...args));
     } catch {
-      message = stripAnsi(args.map((a) => String(a)).join(" "));
+      message = this.stripAnsi(args.map((a) => String(a)).join(" "));
     }
-    const json = JSON.stringify({
-      type: "server-log",
-      timestamp: Date.now(),
-      level,
-      message,
-    });
-    for (const client of this.clients) {
-      if (client.readyState === WS_OPEN) {
-        client.send(json);
-      }
-    }
+    this.sendToAll(JSON.stringify({ type: "server-log", timestamp: Date.now(), level, message }));
   }
 
   sendCachedState(ws: WSClient): void {
     for (const json of this.stateCache.values()) {
       ws.send(json);
+    }
+  }
+
+  private sendToAll(json: string): void {
+    for (const client of this.clients) {
+      if (client.readyState === WS_OPEN) {
+        client.send(json);
+      }
     }
   }
 }
