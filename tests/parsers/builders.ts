@@ -172,8 +172,8 @@ export function createMultiPacketBuffer(
   clusterSize: number,
   data: number[],
 ): Buffer {
-  if (data.length > clusterSize) {
-    throw new Error(`data.length (${data.length}) exceeds clusterSize (${clusterSize})`);
+  if (data.length !== clusterSize) {
+    throw new Error(`data.length (${data.length}) must equal clusterSize (${clusterSize})`);
   }
   const buffer = Buffer.alloc(42 + clusterSize);
   buffer.writeUInt32LE(totalPackets, 30);
