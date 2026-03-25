@@ -1,6 +1,7 @@
 import type { Plugin, ViteDevServer } from "vite-plus";
 import type { WSMessage } from "./types.js";
 import { WebSocketServer, WebSocket } from "ws";
+import { stripAnsi } from "./utils/ansi.ts";
 import { format } from "node:util";
 import { fileURLToPath } from "url";
 import { resolve, dirname } from "path";
@@ -28,10 +29,6 @@ export function tcnetPlugin(): Plugin {
       }
     }
   };
-
-  // ANSI制御シーケンスを除去する (Vite等の色付きログ対策)
-  // oxlint-disable-next-line no-control-regex -- ANSI ESCを意図的にマッチさせている
-  const stripAnsi = (s: string) => s.replace(/\u001b\[[0-?]*[ -/]*[@-~]/g, "");
 
   const broadcastServerLog = (level: "log" | "warn" | "error", args: unknown[]) => {
     if (clients.size === 0) return;
