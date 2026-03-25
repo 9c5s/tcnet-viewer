@@ -11,7 +11,20 @@ export default defineConfig(({ mode }) => {
 
   return {
     staged: {
-      "*": ["bash -c '! git check-ignore'", "vp check --fix", "vp lint --deny-warnings"],
+      "*": [
+        [
+          'bash -c "',
+          "d=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null",
+          "|sed 's#^origin/##')",
+          "&&[ $(git symbolic-ref --short HEAD) = $d ]",
+          "&&echo Direct commits to $d are not allowed. Use a feature branch.",
+          "&&exit 1;true",
+          '"',
+        ].join(""),
+        "bash -c '! git check-ignore'",
+        "vp check --fix",
+        "vp lint --deny-warnings",
+      ],
       "*.svelte": ["vp dlx eslint --fix", "vp dlx svelte-check --fail-on-warnings"],
       ".github/workflows/*.{yml,yaml}": ["vp dlx actionlint", "vp dlx zizmor --fix --pedantic"],
     },
