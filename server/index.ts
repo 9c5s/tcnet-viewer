@@ -29,13 +29,17 @@ export function tcnetPlugin(): Plugin {
     }
   };
 
+  // ANSI制御シーケンスを除去する (Vite等の色付きログ対策)
+  // oxlint-disable-next-line no-control-regex -- ANSI ESCを意図的にマッチさせている
+  const stripAnsi = (s: string) => s.replace(/\u001b\[[0-?]*[ -/]*[@-~]/g, "");
+
   const broadcastServerLog = (level: "log" | "warn" | "error", args: unknown[]) => {
     if (clients.size === 0) return;
     let message: string;
     try {
-      message = format(...args);
+      message = stripAnsi(format(...args));
     } catch {
-      message = String(args);
+      message = args.map((a) => String(a)).join(" ");
     }
     const json = JSON.stringify({
       type: "server-log",
