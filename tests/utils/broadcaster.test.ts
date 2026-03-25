@@ -1,0 +1,122 @@
+import { expect, test, vi } from "vite-plus/test";
+import { WebSocketBroadcaster } from "../../server/utils/broadcaster.js";
+import { stripAnsi } from "../../server/utils/ansi.js";
+import type { WSMessage } from "../../server/types.js";
+
+const identity = (s: string) => s;
+const simpleFormat = (...a: unknown[]) => String(a[0]);
+
+function createBroadcaster() {
+  return new WebSocketBroadcaster({ stripAnsi, format: simpleFormat });
+}
+
+function createMockWs(open = true) {
+  return { readyState: open ? 1 : 3, send: vi.fn() };
+}
+
+test("broadcast: メッセージをJSON化して全クライアントに送信する", () => {
+  const broadcaster = createBroadcaster();
+  const ws1 = createMockWs();
+  const ws2 = createMockWs();
+  broadcaster.addClient(ws1 as any);
+  broadcaster.addClient(ws2 as any);
+
+  const msg: WSMessage = { type: "tcnet-status", connected: true, timestamp: 1000 };
+  broadcaster.broadcast(msg);
+
+  const expected = JSON.stringify(msg);
+  expect(ws1.send).toHaveBeenCalledWith(expected);
+  expect(ws2.send).toHaveBeenCalledWith(expected);
+});
+
+test("broadcast: OPEN状態でないクライアントには送信しない", () => {
+  const broadcaster = createBroadcaster();
+  const wsOpen = createMockWs(true);
+  const wsClosed = createMockWs(false);
+  broadcaster.addClient(wsOpen as any);
+  broadcaster.addClient(wsClosed as any);
+
+  broadcaster.broadcast({ type: "tcnet-status", connected: true, timestamp: 1000 });
+
+  expect(wsOpen.send).toHaveBeenCalled();
+  expect(wsClosed.send).not.toHaveBeenCalled();
+});
+
+test("broadcast: メッセージをtype+layerでキャッシュする", () => {
+  const broadcaster = createBroadcaster();
+  const msg: WSMessage = { type: "metrics", timestamp: 1000, layer: 0, data: { bpm: 12800 } };
+  broadcaster.broadcast(msg);
+
+  const cache = broadcaster.getCachedState();
+  expect(cache.has("metrics-0")).toBe(true);
+});
+
+test("broadcast: layerなしメッセージはtypeのみでキャッシュする", () => {
+  const broadcaster = createBroadcaster();
+  const msg: WSMessage = { type: "tcnet-status", connected: true, timestamp: 1000 };
+  broadcaster.broadcast(msg);
+
+  expect(broadcaster.getCachedState().has("tcnet-status")).toBe(true);
+});
+
+test("removeClient: 削除後は送信対象外になる", () => {
+  const broadcaster = createBroadcaster();
+  const ws = createMockWs();
+  broadcaster.addClient(ws as any);
+  broadcaster.removeClient(ws as any);
+
+  broadcaster.broadcast({ type: "tcnet-status", connected: true, timestamp: 1000 });
+  expect(ws.send).not.toHaveBeenCalled();
+});
+
+test("getClientCount: クライアント数を返す", () => {
+  const broadcaster = createBroadcaster();
+  expect(broadcaster.getClientCount()).toBe(0);
+  const ws = createMockWs();
+  broadcaster.addClient(ws as any);
+  expect(broadcaster.getClientCount()).toBe(1);
+});
+
+test("sendCachedState: キャッシュ済みメッセージを新規クライアントに送信する", () => {
+  const broadcaster = createBroadcaster();
+  broadcaster.broadcast({ type: "tcnet-status", connected: true, timestamp: 1000 });
+
+  const newWs = createMockWs();
+  broadcaster.sendCachedState(newWs as any);
+  expect(newWs.send).toHaveBeenCalledTimes(1);
+});
+
+test("broadcastServerLog: ANSI除去しフォーマットした文字列を送信する", () => {
+  const broadcaster = new WebSocketBroadcaster({
+    stripAnsi,
+    format: (...args: unknown[]) => `\u001b[32m${String(args[0])}\u001b[0m`,
+  });
+  const ws = createMockWs();
+  broadcaster.addClient(ws as any);
+
+  broadcaster.broadcastServerLog("log", ["hello"]);
+
+  expect(ws.send).toHaveBeenCalled();
+  const sent = JSON.parse((ws.send as any).mock.calls[0][0]);
+  expect(sent.type).toBe("server-log");
+  expect(sent.level).toBe("log");
+  expect(sent.message).toBe("hello");
+});
+
+test("broadcastServerLog: クライアントなしなら何もしない", () => {
+  const broadcaster = createBroadcaster();
+  broadcaster.broadcastServerLog("log", ["test"]);
+});
+
+test("broadcastServerLog: format失敗時はフォールバックする", () => {
+  const throwingFormat = (): string => {
+    throw new Error("format error");
+  };
+  const broadcaster = new WebSocketBroadcaster({ stripAnsi: identity, format: throwingFormat });
+  const ws = createMockWs();
+  broadcaster.addClient(ws as any);
+  broadcaster.broadcastServerLog("error", ["fallback"]);
+
+  const sent = JSON.parse((ws.send as any).mock.calls[0][0]);
+  expect(sent.message).toBe("fallback");
+});

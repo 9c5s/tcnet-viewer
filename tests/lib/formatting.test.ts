@@ -1,5 +1,5 @@
 import { expect, test } from "vite-plus/test";
-import { formatMmSs, formatPosition, formatTimecode, formatBPM } from "./formatting.js";
+import { formatMmSs, formatPosition, formatTimecode, formatBPM } from "$lib/formatting.js";
 
 test("formatMmSs: ミリ秒をMM:SS.mmm形式に変換する", () => {
   expect(formatMmSs(125400)).toBe("02:05.400");
