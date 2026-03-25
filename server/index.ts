@@ -39,7 +39,7 @@ export function tcnetPlugin(): Plugin {
     try {
       message = stripAnsi(format(...args));
     } catch {
-      message = args.map((a) => String(a)).join(" ");
+      message = stripAnsi(args.map((a) => String(a)).join(" "));
     }
     const json = JSON.stringify({
       type: "server-log",
@@ -106,25 +106,34 @@ export function tcnetPlugin(): Plugin {
         broadcastServerLog("error", args);
       };
 
+      const restoreConsole = () => {
+        console.log = originalLog;
+        console.warn = originalWarn;
+        console.error = originalError;
+      };
+
       // ViteのSSRモジュールローダーを使ってtcnet-bridgeをロードする
       // これによりViteのconfig bundling時にnode-tcnetのCJS依存が含まれるのを回避する
-      const bridgePath = resolve(__dirname, "tcnet-bridge.ts");
-      const bridgeModule = await server.ssrLoadModule(bridgePath);
-      const TCNetBridge = bridgeModule.TCNetBridge;
-      bridge = new TCNetBridge({
-        broadcast,
-        onStatusChange: (connected: boolean) => {
-          broadcast({ type: "tcnet-status", connected, timestamp: Date.now() });
-        },
-      });
+      try {
+        const bridgePath = resolve(__dirname, "tcnet-bridge.ts");
+        const bridgeModule = await server.ssrLoadModule(bridgePath);
+        const TCNetBridge = bridgeModule.TCNetBridge;
+        bridge = new TCNetBridge({
+          broadcast,
+          onStatusChange: (connected: boolean) => {
+            broadcast({ type: "tcnet-status", connected, timestamp: Date.now() });
+          },
+        });
+      } catch (err) {
+        restoreConsole();
+        throw err;
+      }
       bridge.connect().catch((err: unknown) => {
         console.error("[TCNet] 接続失敗:", err);
       });
 
       server.httpServer.on("close", () => {
-        console.log = originalLog;
-        console.warn = originalWarn;
-        console.error = originalError;
+        restoreConsole();
         bridge.disconnect();
         wss.close();
       });
