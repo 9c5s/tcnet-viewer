@@ -72,7 +72,7 @@ export class CueDataBuilder {
   }
 }
 
-// Mixer: 先頭25バイトヘッダー + 各フィールド。チャンネル: [125,149,173,197,221,245] x 14バイト
+// Mixer: 先頭25バイトヘッダー + 各フィールド。チャンネル: オフセット[125,149,173,197,221,245] (ストライド24バイト, 使用14バイト)
 export class MixerDataBuilder {
   private data = Buffer.alloc(270);
 

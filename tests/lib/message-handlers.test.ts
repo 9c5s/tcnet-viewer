@@ -135,7 +135,7 @@ test("server-log: レベルを大文字でログに記録する", () => {
 test("dispatchMessage: 型に応じたハンドラを呼び出す", () => {
   const store = createMockStore();
   const handlers = createHandlers(store);
-  const msg: WSMessage = { type: "tcnet-status", connected: false, timestamp: 1000 };
+  const msg: WSMessage = { type: "tcnet-status", connected: true, timestamp: 1000 };
   dispatchMessage(msg, handlers);
-  expect(store.tcnetConnected).toBe(false);
+  expect(store.tcnetConnected).toBe(true);
 });

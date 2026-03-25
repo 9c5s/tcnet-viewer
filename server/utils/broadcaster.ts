@@ -62,6 +62,7 @@ export class WebSocketBroadcaster {
   }
 
   sendCachedState(ws: WSClient): void {
+    if (ws.readyState !== WS_OPEN) return;
     for (const json of this.stateCache.values()) {
       ws.send(json);
     }
