@@ -139,6 +139,10 @@ function handleMessage(msg: WSMessage): void {
       );
       break;
 
+    case "server-log":
+      store.addLogEntry("server", undefined, `[${msg.level.toUpperCase()}] ${msg.message}`);
+      break;
+
     default: {
       const _exhaustive: never = msg;
       console.warn("[WS] 未処理のメッセージ型:", _exhaustive);
