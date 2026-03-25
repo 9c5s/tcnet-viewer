@@ -60,6 +60,9 @@ export class CueDataBuilder {
     buffer.writeUInt32LE(this.loopInTime, 42);
     buffer.writeUInt32LE(this.loopOutTime, 46);
     for (const cue of this.cues) {
+      if (cue.index < 1 || cue.index > 18) {
+        throw new Error(`Invalid cue index: ${cue.index} (must be 1-18)`);
+      }
       const offset = 50 + (cue.index - 1) * 22;
       buffer.writeUInt8(cue.type, offset);
       buffer.writeUInt32LE(cue.inTime, offset + 2);
@@ -165,6 +168,9 @@ export function createMultiPacketBuffer(
   clusterSize: number,
   data: number[],
 ): Buffer {
+  if (data.length > clusterSize) {
+    throw new Error(`data.length (${data.length}) exceeds clusterSize (${clusterSize})`);
+  }
   const buffer = Buffer.alloc(42 + clusterSize);
   buffer.writeUInt32LE(totalPackets, 30);
   buffer.writeUInt32LE(packetNo, 34);
