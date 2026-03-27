@@ -175,7 +175,7 @@ test("tcnet-error: ログにerrorDataのサイズを記録する", () => {
   expect(store.addLogEntry).toHaveBeenCalledWith("tcnet-error", undefined, "3 bytes");
 });
 
-test("appdata: ログにcmdとtokenを記録する", () => {
+test("appdata: ログにcmd, token, dest, portを記録する", () => {
   const store = createMockStore();
   const handlers = createHandlers(store);
   handlers["appdata"]({
@@ -183,5 +183,9 @@ test("appdata: ログにcmdとtokenを記録する", () => {
     timestamp: 1000,
     data: { cmd: 1, token: 0x12345678, dest: 0xffff, listenerPort: 65023 },
   });
-  expect(store.addLogEntry).toHaveBeenCalledWith("appdata", undefined, "cmd=1 token=0x12345678");
+  expect(store.addLogEntry).toHaveBeenCalledWith(
+    "appdata",
+    undefined,
+    "cmd=1 token=0x12345678 dest=0xffff port=65023",
+  );
 });
