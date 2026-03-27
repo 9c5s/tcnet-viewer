@@ -64,6 +64,17 @@ type ArtworkData = {
   base64: string;
 };
 
+type TCNetErrorData = {
+  errorData: number[];
+};
+
+type AppDataData = {
+  cmd: number;
+  token: number;
+  dest: number;
+  listenerPort: number;
+};
+
 type BeatGridData = {
   entries: BeatGridEntry[];
 };
@@ -81,7 +92,9 @@ export type WSMessage =
   | { type: "waveform-big"; timestamp: number; layer: number; data: WaveformData }
   | { type: "artwork"; timestamp: number; layer: number; data: ArtworkData }
   | { type: "beatgrid"; timestamp: number; layer: number; data: BeatGridData }
+  | { type: "tcnet-error"; timestamp: number; data: TCNetErrorData }
+  | { type: "appdata"; timestamp: number; data: AppDataData }
   | { type: "server-log"; timestamp: number; level: "log" | "warn" | "error"; message: string }
-  | { type: "tcnet-status"; connected: boolean; timestamp: number };
+  | { type: "tcnet-status"; connected: boolean; authState: string; timestamp: number };
 
 export type BroadcastFn = (msg: WSMessage) => void;
