@@ -78,8 +78,13 @@ export function tcnetPlugin(): Plugin {
         const TCNetBridge = bridgeModule.TCNetBridge;
         bridge = new TCNetBridge({
           broadcast: (msg: WSMessage) => broadcaster.broadcast(msg),
-          onStatusChange: (connected: boolean) => {
-            broadcaster.broadcast({ type: "tcnet-status", connected, timestamp: Date.now() });
+          onStatusChange: (connected: boolean, authState: string) => {
+            broadcaster.broadcast({
+              type: "tcnet-status",
+              connected,
+              authState,
+              timestamp: Date.now(),
+            });
           },
         });
       } catch (err) {
