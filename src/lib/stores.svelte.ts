@@ -19,12 +19,21 @@ class ViewerStore {
   node: NodeInfo | null = $state(null);
   connected = $state(false);
   tcnetConnected = $state(false);
+  authState = $state("none");
 
   get statusIndicator(): { color: string; text: string } {
     if (!this.connected) return { color: "bg-error", text: "Disconnected" };
-    return this.tcnetConnected
-      ? { color: "bg-success", text: "Connected" }
-      : { color: "bg-warning", text: "Waiting for Bridge..." };
+    if (!this.tcnetConnected) return { color: "bg-warning", text: "Waiting for Bridge..." };
+    switch (this.authState) {
+      case "authenticated":
+        return { color: "bg-success", text: "Authenticated" };
+      case "failed":
+        return { color: "bg-error", text: "Auth Failed" };
+      case "pending":
+        return { color: "bg-warning", text: "Authenticating..." };
+      default:
+        return { color: "bg-success", text: "Connected" };
+    }
   }
   layoutMode: LayoutMode = $state("detail");
   theme: Theme = $state(

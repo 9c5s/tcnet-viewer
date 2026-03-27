@@ -17,6 +17,7 @@ import { formatBPM } from "./formatting.js";
 export interface MessageHandlerStore {
   node: NodeInfo | null;
   tcnetConnected: boolean;
+  authState: string;
   layers: LayerInfo[];
   time: (TimeInfo | null)[];
   metrics: (MetricsData | null)[];
@@ -114,10 +115,21 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
     },
     "tcnet-status": (msg) => {
       store.tcnetConnected = msg.connected;
+      store.authState = msg.authState;
       store.addLogEntry(
         msg.type,
         undefined,
         msg.connected ? "Bridge connected" : "Bridge disconnected",
+      );
+    },
+    "tcnet-error": (msg) => {
+      store.addLogEntry("tcnet-error", undefined, `${msg.data.errorData.length} bytes`);
+    },
+    appdata: (msg) => {
+      store.addLogEntry(
+        "appdata",
+        undefined,
+        `cmd=${msg.data.cmd} token=0x${msg.data.token.toString(16).padStart(8, "0")}`,
       );
     },
     "server-log": (msg) => {

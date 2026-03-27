@@ -10,6 +10,7 @@ function createMockStore(): MessageHandlerStore {
   return {
     node: null,
     tcnetConnected: false,
+    authState: "none",
     layers: Array.from({ length: 8 }, () => ({
       source: 0,
       status: "IDLE" as const,
@@ -121,7 +122,12 @@ test("metadata: トラック情報をストアに反映する", () => {
 test("tcnet-status: 接続状態を更新する", () => {
   const store = createMockStore();
   const handlers = createHandlers(store);
-  handlers["tcnet-status"]({ type: "tcnet-status", connected: true, timestamp: 1000 });
+  handlers["tcnet-status"]({
+    type: "tcnet-status",
+    connected: true,
+    authState: "none",
+    timestamp: 1000,
+  });
   expect(store.tcnetConnected).toBe(true);
 });
 
@@ -135,7 +141,47 @@ test("server-log: レベルを大文字でログに記録する", () => {
 test("dispatchMessage: 型に応じたハンドラを呼び出す", () => {
   const store = createMockStore();
   const handlers = createHandlers(store);
-  const msg: WSMessage = { type: "tcnet-status", connected: true, timestamp: 1000 };
+  const msg: WSMessage = {
+    type: "tcnet-status",
+    connected: true,
+    authState: "none",
+    timestamp: 1000,
+  };
   dispatchMessage(msg, handlers);
   expect(store.tcnetConnected).toBe(true);
+});
+
+test("tcnet-status: authStateをストアに反映する", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  handlers["tcnet-status"]({
+    type: "tcnet-status",
+    connected: true,
+    authState: "authenticated",
+    timestamp: 1000,
+  });
+  expect(store.tcnetConnected).toBe(true);
+  expect(store.authState).toBe("authenticated");
+});
+
+test("tcnet-error: ログにerrorDataのサイズを記録する", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  handlers["tcnet-error"]({
+    type: "tcnet-error",
+    timestamp: 1000,
+    data: { errorData: [0xff, 0xff, 0xff] },
+  });
+  expect(store.addLogEntry).toHaveBeenCalledWith("tcnet-error", undefined, "3 bytes");
+});
+
+test("appdata: ログにcmdとtokenを記録する", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  handlers["appdata"]({
+    type: "appdata",
+    timestamp: 1000,
+    data: { cmd: 1, token: 0x12345678, dest: 0xffff, listenerPort: 65023 },
+  });
+  expect(store.addLogEntry).toHaveBeenCalledWith("appdata", undefined, "cmd=1 token=0x12345678");
 });
