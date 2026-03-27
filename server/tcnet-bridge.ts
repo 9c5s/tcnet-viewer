@@ -15,6 +15,8 @@ const {
   TCNetDataPacketMetrics,
   TCNetDataPacketMetadata,
   TCNetDataPacketType,
+  TCNetErrorPacket,
+  TCNetApplicationDataPacket,
 } = tcnet;
 
 // createRequireでロードしたクラスは値のみ存在し型情報がないため、
@@ -28,8 +30,11 @@ import type {
   TCNetDataPacket as TCNetDataPacketType_,
   TCNetDataPacketMetrics as TCNetDataPacketMetricsType,
   TCNetDataPacketMetadata as TCNetDataPacketMetadataType,
+  TCNetErrorPacket as TCNetErrorPacketType,
+  TCNetApplicationDataPacket as TCNetApplicationDataPacketType,
 } from "@9c5s/node-tcnet";
 
+import { artworkToBase64 } from "./parsers/artwork.js";
 import { parseBeatGrid } from "./parsers/beat-grid.js";
 import { parseCueData } from "./parsers/cue-data.js";
 import { parseSmallWaveform, parseBigWaveform } from "./parsers/waveform.js";
@@ -39,18 +44,20 @@ import type { BroadcastFn } from "./types.js";
 
 type TCNetBridgeOptions = {
   broadcast: BroadcastFn;
-  onStatusChange: (connected: boolean) => void;
+  onStatusChange: (connected: boolean, authState: string) => void;
 };
 
 export class TCNetBridge {
   private client!: TCNetClientType;
   private broadcast: BroadcastFn;
-  private onStatusChange: (connected: boolean) => void;
+  private onStatusChange: (connected: boolean, authState: string) => void;
   private nodeName!: string;
   private running = false;
   private isReconnecting = false;
   private heartbeatTimer: ReturnType<typeof setTimeout> | null = null;
   private trackIds: (number | null)[] = Array.from({ length: 8 }, () => null);
+  private artworkAssembler = new MultiPacketAssembler();
+  private authState = "none";
   private beatGridAssembler = new MultiPacketAssembler();
   private bigWaveformAssembler = new MultiPacketAssembler();
 
@@ -84,7 +91,7 @@ export class TCNetBridge {
         if (!this.running) return;
         const reason = err instanceof Error ? err.message : String(err);
         console.warn(`[TCNet] 接続失敗 (${reason}), ${delay / 1000}秒後にリトライ`);
-        this.onStatusChange(false);
+        this.onStatusChange(false, this.authState);
         await this.sleep(delay);
         delay = Math.min(delay * 2, TCNetBridge.MAX_RETRY_DELAY);
         // 接続失敗したクライアントを破棄し、新インスタンスで再試行
@@ -126,7 +133,7 @@ export class TCNetBridge {
     this.isReconnecting = true;
     try {
       this.stopHeartbeat();
-      this.onStatusChange(false);
+      this.onStatusChange(false, this.authState);
       try {
         await this.client.disconnect();
       } catch {
@@ -144,12 +151,24 @@ export class TCNetBridge {
     this.client.on("adapterSelected", () => {
       const name = this.client.selectedAdapter?.name ?? "unknown";
       console.log(`[TCNet] アダプタ確定: ${name}`);
-      this.onStatusChange(true);
+      this.onStatusChange(true, this.authState);
       this.resetHeartbeat();
     });
 
     this.client.on("detectionTimeout", () => {
       console.warn("[TCNet] アダプタ検出タイムアウト (listenは継続)");
+    });
+
+    this.client.on("authenticated", () => {
+      console.log("[TCNet] TCNASDP認証成功");
+      this.authState = "authenticated";
+      this.onStatusChange(true, this.authState);
+    });
+
+    this.client.on("authFailed", () => {
+      console.warn("[TCNet] TCNASDP認証失敗");
+      this.authState = "failed";
+      this.onStatusChange(true, this.authState);
     });
 
     this.client.on("broadcast", (packet: unknown) => {
@@ -191,6 +210,29 @@ export class TCNetBridge {
       }
       if (packet instanceof TCNetStatusPacket) {
         this.handleStatus(packet as TCNetStatusPacketType);
+        return;
+      }
+      if (packet instanceof TCNetErrorPacket) {
+        const p = packet as TCNetErrorPacketType;
+        this.broadcast({
+          type: "tcnet-error",
+          timestamp: Date.now(),
+          data: { errorData: Array.from(p.errorData) },
+        });
+        return;
+      }
+      if (packet instanceof TCNetApplicationDataPacket) {
+        const p = packet as TCNetApplicationDataPacketType;
+        this.broadcast({
+          type: "appdata",
+          timestamp: Date.now(),
+          data: {
+            cmd: p.cmd,
+            token: p.token,
+            dest: p.dest,
+            listenerPort: p.listenerPort,
+          },
+        });
         return;
       }
     });
@@ -289,6 +331,19 @@ export class TCNetBridge {
               }
               break;
             }
+            case TCNetDataPacketType.ArtworkData: {
+              if (this.artworkAssembler.add(buf)) {
+                const assembled = this.artworkAssembler.assemble();
+                this.broadcast({
+                  type: "artwork",
+                  timestamp: Date.now(),
+                  layer,
+                  data: { base64: artworkToBase64(assembled) },
+                });
+                this.artworkAssembler.reset();
+              }
+              break;
+            }
           }
         } catch (err) {
           console.error(`[TCNet] パーサーエラー (dataType=${dataType}):`, err);
@@ -372,6 +427,14 @@ export class TCNetBridge {
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err);
       console.debug(`[TCNet] 小波形データ取得失敗 (レイヤー${layer}): ${reason}`);
+    }
+
+    // ArtworkData
+    try {
+      await this.client.requestData(TCNetDataPacketType.ArtworkData, layer);
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err);
+      console.debug(`[TCNet] アートワーク取得失敗 (レイヤー${layer}): ${reason}`);
     }
   }
 }
