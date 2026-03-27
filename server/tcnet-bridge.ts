@@ -133,6 +133,7 @@ export class TCNetBridge {
     this.isReconnecting = true;
     try {
       this.stopHeartbeat();
+      this.authState = "none";
       this.onStatusChange(false, this.authState);
       try {
         await this.client.disconnect();
