@@ -130,7 +130,7 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
       store.addLogEntry(
         "appdata",
         undefined,
-        `cmd=${msg.data.cmd} token=0x${msg.data.token.toString(16).padStart(8, "0")}`,
+        `cmd=${msg.data.cmd} token=0x${msg.data.token.toString(16).padStart(8, "0")} dest=0x${msg.data.dest.toString(16).padStart(4, "0")} port=${msg.data.listenerPort}`,
       );
     },
     "server-log": (msg) => {
