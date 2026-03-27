@@ -4,6 +4,7 @@ async function loadResetStore() {
   const { store } = await import("$lib/stores.svelte.js");
   store.connected = false;
   store.tcnetConnected = false;
+  store.authState = "none";
   store.packetLog.splice(0, store.packetLog.length);
   return store;
 }
@@ -49,4 +50,41 @@ test("addLogEntry: 5000件を超えると古いエントリを削除する", asy
     store.addLogEntry("test", undefined, `entry ${i}`);
   }
   expect(store.packetLog.length).toBe(5000);
+});
+
+test("authState: 初期値はnoneである", async () => {
+  const store = await loadResetStore();
+  expect(store.authState).toBe("none");
+});
+
+test("statusIndicator: 接続済み+認証済みはAuthenticatedを返す", async () => {
+  const store = await loadResetStore();
+  store.connected = true;
+  store.tcnetConnected = true;
+  store.authState = "authenticated";
+  expect(store.statusIndicator).toEqual({ color: "bg-success", text: "Authenticated" });
+});
+
+test("statusIndicator: 接続済み+認証なしはConnectedを返す", async () => {
+  const store = await loadResetStore();
+  store.connected = true;
+  store.tcnetConnected = true;
+  store.authState = "none";
+  expect(store.statusIndicator).toEqual({ color: "bg-success", text: "Connected" });
+});
+
+test("statusIndicator: 接続済み+認証失敗はAuth Failedを返す", async () => {
+  const store = await loadResetStore();
+  store.connected = true;
+  store.tcnetConnected = true;
+  store.authState = "failed";
+  expect(store.statusIndicator).toEqual({ color: "bg-error", text: "Auth Failed" });
+});
+
+test("statusIndicator: 接続済み+認証中はAuthenticating...を返す", async () => {
+  const store = await loadResetStore();
+  store.connected = true;
+  store.tcnetConnected = true;
+  store.authState = "pending";
+  expect(store.statusIndicator).toEqual({ color: "bg-warning", text: "Authenticating..." });
 });
