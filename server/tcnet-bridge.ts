@@ -34,30 +34,30 @@ import type {
   TCNetApplicationDataPacket as TCNetApplicationDataPacketType,
 } from "@9c5s/node-tcnet";
 
-import { artworkToBase64 } from "./parsers/artwork.js";
+import { artworkToBase64, detectArtworkMimeType } from "./parsers/artwork.js";
 import { parseBeatGrid } from "./parsers/beat-grid.js";
 import { parseCueData } from "./parsers/cue-data.js";
 import { parseSmallWaveform, parseBigWaveform } from "./parsers/waveform.js";
 import { parseMixerData } from "./parsers/mixer.js";
 import { MultiPacketAssembler } from "./parsers/multi-packet.js";
-import type { BroadcastFn } from "./types.js";
+import type { BroadcastFn, AuthState } from "./types.js";
 
 type TCNetBridgeOptions = {
   broadcast: BroadcastFn;
-  onStatusChange: (connected: boolean, authState: string) => void;
+  onStatusChange: (connected: boolean, authState: AuthState) => void;
 };
 
 export class TCNetBridge {
   private client!: TCNetClientType;
   private broadcast: BroadcastFn;
-  private onStatusChange: (connected: boolean, authState: string) => void;
+  private onStatusChange: (connected: boolean, authState: AuthState) => void;
   private nodeName!: string;
   private running = false;
   private isReconnecting = false;
   private heartbeatTimer: ReturnType<typeof setTimeout> | null = null;
   private trackIds: (number | null)[] = Array.from({ length: 8 }, () => null);
   private artworkAssembler = new MultiPacketAssembler();
-  private authState = "none";
+  private authState: AuthState = "none";
   private beatGridAssembler = new MultiPacketAssembler();
   private bigWaveformAssembler = new MultiPacketAssembler();
 
@@ -91,7 +91,7 @@ export class TCNetBridge {
         if (!this.running) return;
         const reason = err instanceof Error ? err.message : String(err);
         console.warn(`[TCNet] 接続失敗 (${reason}), ${delay / 1000}秒後にリトライ`);
-        this.onStatusChange(false, this.authState);
+        this.setAuthState("none", false);
         await this.sleep(delay);
         delay = Math.min(delay * 2, TCNetBridge.MAX_RETRY_DELAY);
         // 接続失敗したクライアントを破棄し、新インスタンスで再試行
@@ -109,6 +109,11 @@ export class TCNetBridge {
 
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private setAuthState(state: AuthState, connected: boolean): void {
+    this.authState = state;
+    this.onStatusChange(connected, state);
   }
 
   private stopHeartbeat(): void {
@@ -133,14 +138,16 @@ export class TCNetBridge {
     this.isReconnecting = true;
     try {
       this.stopHeartbeat();
-      this.authState = "none";
-      this.onStatusChange(false, this.authState);
+      this.setAuthState("none", false);
       try {
         await this.client.disconnect();
       } catch {
         // 切断時のエラーは無視する
       }
       if (!this.running) return;
+      this.beatGridAssembler.reset();
+      this.bigWaveformAssembler.reset();
+      this.artworkAssembler.reset();
       this.createClient();
       await this.connect();
     } finally {
@@ -162,14 +169,12 @@ export class TCNetBridge {
 
     this.client.on("authenticated", () => {
       console.log("[TCNet] TCNASDP認証成功");
-      this.authState = "authenticated";
-      this.onStatusChange(true, this.authState);
+      this.setAuthState("authenticated", true);
     });
 
     this.client.on("authFailed", () => {
       console.warn("[TCNet] TCNASDP認証失敗");
-      this.authState = "failed";
-      this.onStatusChange(true, this.authState);
+      this.setAuthState("failed", true);
     });
 
     this.client.on("broadcast", (packet: unknown) => {
@@ -339,7 +344,10 @@ export class TCNetBridge {
                   type: "artwork",
                   timestamp: Date.now(),
                   layer,
-                  data: { base64: artworkToBase64(assembled) },
+                  data: {
+                    base64: artworkToBase64(assembled),
+                    mimeType: detectArtworkMimeType(assembled),
+                  },
                 });
                 this.artworkAssembler.reset();
               }

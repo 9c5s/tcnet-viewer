@@ -1,5 +1,5 @@
 import type { Plugin, ViteDevServer } from "vite-plus";
-import type { WSMessage } from "./types.ts";
+import type { WSMessage, AuthState } from "./types.ts";
 import { WebSocketServer } from "ws";
 import { format } from "node:util";
 import { fileURLToPath } from "url";
@@ -78,7 +78,7 @@ export function tcnetPlugin(): Plugin {
         const TCNetBridge = bridgeModule.TCNetBridge;
         bridge = new TCNetBridge({
           broadcast: (msg: WSMessage) => broadcaster.broadcast(msg),
-          onStatusChange: (connected: boolean, authState: string) => {
+          onStatusChange: (connected: boolean, authState: AuthState) => {
             broadcaster.broadcast({
               type: "tcnet-status",
               connected,

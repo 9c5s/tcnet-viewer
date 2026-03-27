@@ -62,7 +62,10 @@ type MetadataData = {
 
 type ArtworkData = {
   base64: string;
+  mimeType: string;
 };
+
+export type AuthState = "none" | "pending" | "authenticated" | "failed";
 
 type TCNetErrorData = {
   errorData: number[];
@@ -95,6 +98,6 @@ export type WSMessage =
   | { type: "tcnet-error"; timestamp: number; data: TCNetErrorData }
   | { type: "appdata"; timestamp: number; data: AppDataData }
   | { type: "server-log"; timestamp: number; level: "log" | "warn" | "error"; message: string }
-  | { type: "tcnet-status"; connected: boolean; authState: string; timestamp: number };
+  | { type: "tcnet-status"; connected: boolean; authState: AuthState; timestamp: number };
 
 export type BroadcastFn = (msg: WSMessage) => void;

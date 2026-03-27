@@ -9,6 +9,7 @@ import type {
   NodeInfo,
   PacketLogEntry,
   BeatGridEntry,
+  AuthState,
 } from "./types.js";
 
 export type LayoutMode = "cards" | "detail" | "table";
@@ -19,7 +20,7 @@ class ViewerStore {
   node: NodeInfo | null = $state(null);
   connected = $state(false);
   tcnetConnected = $state(false);
-  authState = $state("none");
+  authState: AuthState = $state("none");
 
   get statusIndicator(): { color: string; text: string } {
     if (!this.connected) return { color: "bg-error", text: "Disconnected" };
@@ -31,7 +32,7 @@ class ViewerStore {
         return { color: "bg-error", text: "Auth Failed" };
       case "pending":
         return { color: "bg-warning", text: "Authenticating..." };
-      default:
+      case "none":
         return { color: "bg-success", text: "Connected" };
     }
   }
@@ -72,7 +73,9 @@ class ViewerStore {
   waveformBig: (WaveformBar[] | null)[] = $state(
     Array.from({ length: 8 }, (): WaveformBar[] | null => null),
   );
-  artwork: (string | null)[] = $state(Array.from({ length: 8 }, (): string | null => null));
+  artwork: ({ base64: string; mimeType: string } | null)[] = $state(
+    Array.from({ length: 8 }, (): { base64: string; mimeType: string } | null => null),
+  );
   beatgrid: (BeatGridEntry[] | null)[] = $state(
     Array.from({ length: 8 }, (): BeatGridEntry[] | null => null),
   );
