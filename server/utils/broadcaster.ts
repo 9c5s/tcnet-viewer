@@ -15,6 +15,12 @@ export type BroadcasterOptions = {
 };
 
 export class WebSocketBroadcaster {
+  // キャッシュ対象外の一過性メッセージタイプ
+  private static readonly TRANSIENT_TYPES: ReadonlySet<string> = new Set([
+    "tcnet-error",
+    "appdata",
+  ]);
+
   private clients = new Set<WSClient>();
   private stateCache = new Map<string, string>();
   private readonly stripAnsi: (s: string) => string;
@@ -43,10 +49,12 @@ export class WebSocketBroadcaster {
 
   broadcast(msg: WSMessage): void {
     const json = JSON.stringify(msg);
-    // メッセージをtype+layerでキャッシュする
-    const cacheKey =
-      "layer" in msg && msg.layer !== undefined ? `${msg.type}-${msg.layer}` : msg.type;
-    this.stateCache.set(cacheKey, json);
+    if (!WebSocketBroadcaster.TRANSIENT_TYPES.has(msg.type)) {
+      // 一過性でないメッセージのみtype+layerでキャッシュする
+      const cacheKey =
+        "layer" in msg && msg.layer !== undefined ? `${msg.type}-${msg.layer}` : msg.type;
+      this.stateCache.set(cacheKey, json);
+    }
     this.sendToAll(json);
   }
 
