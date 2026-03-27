@@ -7,7 +7,7 @@
 
   // テーブルに表示するデータ行の定義
   const ROW_DEFS = [
-    "Status", "Name", "Track Title", "Artist", "BPM", "Speed",
+    "Status", "Name", "Artwork", "Track Title", "Artist", "BPM", "Speed",
     "Position", "Length", "Beat", "Sync", "OnAir", "TrackID",
   ] as const;
 
@@ -89,20 +89,34 @@
           <tr>
             <td class="bg-base-200 text-left text-xs font-bold text-base-content/60 uppercase">{row}</td>
             {#each LAYER_NAMES as _, i}
-              {@const value = getCellValue(row, i)}
-              {@const isHighlighted = checkHighlight(row, i, value)}
-              <td
-                class={[
-                  "text-center tabular-nums",
-                  row === "Status" ? `font-bold uppercase ${statusClass(store.layers[i].status)}` : "",
-                  row === "OnAir" && value === "ON" ? "text-success font-bold" : "",
-                  row === "Sync" && value === "Master" ? "text-warning font-bold" : "",
-                  row === "BPM" && value !== "-" ? "text-accent font-bold" : "",
-                  isHighlighted ? "bg-accent/20 transition-colors duration-300" : "transition-colors duration-300",
-                ].filter(Boolean).join(" ")}
-              >
-                {value}
-              </td>
+              {#if row === "Artwork"}
+                <td class="text-center">
+                  {#if store.artwork[i]}
+                    <img
+                      src="data:image/jpeg;base64,{store.artwork[i]}"
+                      alt="Art"
+                      class="mx-auto size-8 rounded-sm object-cover"
+                    />
+                  {:else}
+                    <span class="text-base-content/30">-</span>
+                  {/if}
+                </td>
+              {:else}
+                {@const value = getCellValue(row, i)}
+                {@const isHighlighted = checkHighlight(row, i, value)}
+                <td
+                  class={[
+                    "text-center tabular-nums",
+                    row === "Status" ? `font-bold uppercase ${statusClass(store.layers[i].status)}` : "",
+                    row === "OnAir" && value === "ON" ? "text-success font-bold" : "",
+                    row === "Sync" && value === "Master" ? "text-warning font-bold" : "",
+                    row === "BPM" && value !== "-" ? "text-accent font-bold" : "",
+                    isHighlighted ? "bg-accent/20 transition-colors duration-300" : "transition-colors duration-300",
+                  ].filter(Boolean).join(" ")}
+                >
+                  {value}
+                </td>
+              {/if}
             {/each}
           </tr>
         {/each}
