@@ -7,16 +7,16 @@
   let { layer }: Props = $props();
 
   let metadata = $derived(store.metadata[layer]);
-  let artworkBase64 = $derived(store.artwork[layer]);
+  let artwork = $derived(store.artwork[layer]);
 </script>
 
 <div class="border-b border-base-content/20 p-3">
   {#if metadata}
     <div class="flex items-start gap-3">
-      {#if artworkBase64}
+      {#if artwork}
         <div class="avatar">
           <div class="w-16 rounded-sm">
-            <img src="data:image/jpeg;base64,{artworkBase64}" alt="Artwork" />
+            <img src="data:{artwork.mimeType};base64,{artwork.base64}" alt="Artwork" />
           </div>
         </div>
       {:else}
