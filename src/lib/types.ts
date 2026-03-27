@@ -92,8 +92,8 @@ export const STATUS_MAP: Record<number, LayerStatus> = {
   11: "HOLD",
 };
 
-// server/types.ts からWSMessage型を再エクスポートする
-export type { WSMessage } from "../../server/types.js";
+// server/types.ts からWSMessage型とAuthState型を再エクスポートする
+export type { WSMessage, AuthState } from "../../server/types.js";
 import type { WSMessage } from "../../server/types.js";
 
 // dataプロパティを持つWSMessageのユニオン型

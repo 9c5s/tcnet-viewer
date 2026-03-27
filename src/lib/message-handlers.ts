@@ -9,6 +9,7 @@ import type {
   NodeInfo,
   BeatGridEntry,
   WSMessage,
+  AuthState,
 } from "./types.js";
 import { STATUS_MAP } from "./types.js";
 import { formatBPM } from "./formatting.js";
@@ -17,7 +18,7 @@ import { formatBPM } from "./formatting.js";
 export interface MessageHandlerStore {
   node: NodeInfo | null;
   tcnetConnected: boolean;
-  authState: string;
+  authState: AuthState;
   layers: LayerInfo[];
   time: (TimeInfo | null)[];
   metrics: (MetricsData | null)[];
@@ -25,7 +26,7 @@ export interface MessageHandlerStore {
   cues: (CuePoint[] | null)[];
   waveformSmall: (WaveformBar[] | null)[];
   waveformBig: (WaveformBar[] | null)[];
-  artwork: (string | null)[];
+  artwork: ({ base64: string; mimeType: string } | null)[];
   beatgrid: (BeatGridEntry[] | null)[];
   mixer: MixerData | null;
   generalSMPTEMode: number;
@@ -106,7 +107,7 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
       store.addLogEntry(msg.type, undefined, `master=${msg.data.masterAudioLevel}`);
     },
     artwork: (msg) => {
-      store.artwork[msg.layer] = msg.data.base64;
+      store.artwork[msg.layer] = { base64: msg.data.base64, mimeType: msg.data.mimeType };
       store.addLogEntry(msg.type, msg.layer, `received`);
     },
     beatgrid: (msg) => {
