@@ -93,7 +93,7 @@
                 <td class="text-center">
                   {#if store.artwork[i]}
                     <img
-                      src="data:image/jpeg;base64,{store.artwork[i]}"
+                      src="data:{store.artwork[i]!.mimeType};base64,{store.artwork[i]!.base64}"
                       alt="Art"
                       class="mx-auto size-8 rounded-sm object-cover"
                     />

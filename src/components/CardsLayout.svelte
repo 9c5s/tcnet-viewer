@@ -28,7 +28,7 @@
       {@const metadata = store.metadata[i]}
       {@const timeInfo = store.time[i]}
       {@const waveform = store.waveformSmall[i]}
-      {@const artworkBase64 = store.artwork[i]}
+      {@const artwork = store.artwork[i]}
 
       <div
         class="card overflow-hidden border border-base-content/12 bg-base-200 {active ? 'border-accent/50' : ''}"
@@ -43,8 +43,8 @@
           <div class="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden px-2 py-1.5">
             {#if metadata}
               <div class="flex shrink-0 items-center gap-2">
-                {#if artworkBase64}
-                  <img src="data:image/jpeg;base64,{artworkBase64}" alt="Art" class="
+                {#if artwork}
+                  <img src="data:{artwork.mimeType};base64,{artwork.base64}" alt="Art" class="
                     size-8 shrink-0 rounded-sm object-cover
                   " />
                 {/if}
