@@ -96,6 +96,8 @@ class ViewerStore {
     mixer: true,
     artwork: true,
     server: true,
+    "tcnet-error": true,
+    appdata: true,
   });
   private logIdCounter = 0;
 

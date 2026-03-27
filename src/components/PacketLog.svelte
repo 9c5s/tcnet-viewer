@@ -17,6 +17,8 @@
     artwork: "text-secondary",
     beatgrid: "text-base-content/40",
     server: "text-info",
+    "tcnet-error": "text-error",
+    appdata: "text-info",
   };
 
   // serverタイプはログレベルに応じた色を返す
@@ -116,6 +118,8 @@
     mixer: "Mixer",
     artwork: "Art",
     server: "Srv",
+    "tcnet-error": "Err",
+    appdata: "App",
   };
 </script>
 
