@@ -17,6 +17,7 @@ export function connect(): void {
   ws.onclose = () => {
     store.connected = false;
     store.tcnetConnected = false;
+    store.authState = "none";
     reconnectTimer = setTimeout(connect, 2000);
   };
 
