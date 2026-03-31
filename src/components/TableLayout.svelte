@@ -30,7 +30,7 @@
       case "BPM":
         return metrics?.bpm != null ? formatBPM(metrics.bpm) : "-";
       case "Speed":
-        return metrics?.speed != null ? ((metrics.speed / 32768) * 100).toFixed(1) + "%" : "-";
+        return metrics?.speed != null ? ((metrics.speed / 1048576) * 100).toFixed(2) + "%" : "-";
       case "Position":
         return metrics?.currentPosition != null ? formatMmSs(metrics.currentPosition) : "-";
       case "Length":
