@@ -22,9 +22,9 @@ test("parseCueData: CUEポイントをパースする", () => {
   });
 });
 
-test("parseCueData: type=0のCUEはスキップする", () => {
+test("parseCueData: inTime/outTime共に0のCUEはスキップする", () => {
   const buffer = new CueDataBuilder()
-    .addCue(1, 0, 0, 0, { r: 0, g: 0, b: 0 })
+    .addCue(1, 1, 0, 0, { r: 0, g: 0, b: 0 })
     .addCue(2, 1, 5000, 10000, { r: 0, g: 255, b: 0 })
     .build();
   const result = parseCueData(buffer);
@@ -32,10 +32,18 @@ test("parseCueData: type=0のCUEはスキップする", () => {
   expect(result.cues[0].index).toBe(2);
 });
 
+test("parseCueData: type=0でもinTimeが非0ならエントリに含まれる", () => {
+  const buffer = new CueDataBuilder().addCue(1, 0, 563, 0, { r: 0, g: 0, b: 0 }).build();
+  const result = parseCueData(buffer);
+  expect(result.cues).toHaveLength(1);
+  expect(result.cues[0].type).toBe(0);
+  expect(result.cues[0].inTime).toBe(563);
+});
+
 test("parseCueData: 複数CUEポイントのRGBを正しく読み取る", () => {
   const buffer = new CueDataBuilder()
-    .addCue(1, 1, 0, 0, { r: 255, g: 128, b: 0 })
-    .addCue(3, 2, 0, 0, { r: 0, g: 0, b: 255 })
+    .addCue(1, 1, 1000, 0, { r: 255, g: 128, b: 0 })
+    .addCue(3, 2, 2000, 0, { r: 0, g: 0, b: 255 })
     .build();
   const result = parseCueData(buffer);
   expect(result.cues[0].color).toEqual({ r: 255, g: 128, b: 0 });
@@ -50,8 +58,9 @@ test("parseCueData: CUEなしのバッファは空配列を返す", () => {
 test("parseCueData: 短いバッファでCUEが途切れた場合は読める分だけ返す", () => {
   const buffer = new CueDataBuilder()
     .addCue(1, 1, 1000, 2000, { r: 100, g: 100, b: 100 })
+    .addCue(2, 1, 3000, 0, { r: 0, g: 0, b: 0 })
     .build()
-    .slice(0, 73);
+    .slice(0, 70); // CUE 1 (byte 47-68) は収まるが CUE 2 (byte 69+) は切れる
   const result = parseCueData(buffer);
   expect(result.cues).toHaveLength(1);
 });

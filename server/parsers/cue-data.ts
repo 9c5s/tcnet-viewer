@@ -5,18 +5,20 @@ export function parseCueData(buffer: Buffer): CueData {
   const loopOutTime = buffer.readUInt32LE(46);
   const cues: CuePoint[] = [];
 
-  // CUE 1開始: byte 50 (header 24 + DataType 1 + LayerID 1 + RESERVED 16 + LoopIN 4 + LoopOUT 4 = 50)
-  const cueStart = 50;
+  // 仕様書通り CUE 1 開始は byte 47
+  const cueStart = 47;
   for (let i = 0; i < 18; i++) {
     const offset = cueStart + i * 22;
     if (offset + 22 > buffer.length) break;
     const type = buffer.readUInt8(offset);
-    if (type === 0) continue;
+    const inTime = buffer.readUInt32LE(offset + 2);
+    const outTime = buffer.readUInt32LE(offset + 6);
+    if (inTime === 0 && outTime === 0) continue;
     cues.push({
       index: i + 1,
       type,
-      inTime: buffer.readUInt32LE(offset + 2),
-      outTime: buffer.readUInt32LE(offset + 6),
+      inTime,
+      outTime,
       color: {
         r: buffer.readUInt8(offset + 11),
         g: buffer.readUInt8(offset + 12),

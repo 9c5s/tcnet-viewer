@@ -24,7 +24,8 @@ export class BeatGridBuilder {
   }
 }
 
-// CueData: 先頭42バイトヘッダー + [loopInTime:UInt32LE@42, loopOutTime:UInt32LE@46] + CUE 22バイト x 18個 @50
+// CueData: 先頭42バイトヘッダー + [loopInTime:UInt32LE@42, loopOutTime:UInt32LE@46] + CUE 22バイト x 18個 @47
+// 注意: Loop OUT Time (byte 46-49) と CUE 1 (byte 47-) は仕様上重複する
 export class CueDataBuilder {
   private loopInTime = 0;
   private loopOutTime = 0;
@@ -56,14 +57,14 @@ export class CueDataBuilder {
   }
 
   build(): Buffer {
-    const buffer = Buffer.alloc(50 + 18 * 22);
+    const buffer = Buffer.alloc(47 + 18 * 22);
     buffer.writeUInt32LE(this.loopInTime, 42);
     buffer.writeUInt32LE(this.loopOutTime, 46);
     for (const cue of this.cues) {
       if (cue.index < 1 || cue.index > 18) {
         throw new Error(`Invalid cue index: ${cue.index} (must be 1-18)`);
       }
-      const offset = 50 + (cue.index - 1) * 22;
+      const offset = 47 + (cue.index - 1) * 22;
       buffer.writeUInt8(cue.type, offset);
       buffer.writeUInt32LE(cue.inTime, offset + 2);
       buffer.writeUInt32LE(cue.outTime, offset + 6);
