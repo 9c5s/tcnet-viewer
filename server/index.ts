@@ -1,4 +1,4 @@
-import type { Plugin, ViteDevServer } from "vite-plus";
+import { type Plugin, type ViteDevServer, loadEnv } from "vite-plus";
 import type { WSMessage, AuthState } from "./types.ts";
 import { WebSocketServer } from "ws";
 import { format } from "node:util";
@@ -18,6 +18,16 @@ export function tcnetPlugin(): Plugin {
 
   return {
     name: "tcnet-websocket",
+    config(_, { mode }) {
+      // .envファイルの変数をprocess.envに反映する (VITE_プレフィックスなしも含む)
+      // node-tcnetのTCNetConfigurationがprocess.env.TCNET_XTEA_CIPHERTEXTを参照するため必要
+      const env = loadEnv(mode, process.cwd(), "");
+      for (const [key, value] of Object.entries(env)) {
+        if (process.env[key] === undefined) {
+          process.env[key] = value;
+        }
+      }
+    },
     async configureServer(server: ViteDevServer) {
       // テスト環境ではhttpServerがnullのため、WSサーバーセットアップをスキップする
       if (!server.httpServer) {
