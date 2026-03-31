@@ -36,7 +36,18 @@ class ViewerStore {
         return { color: "bg-success", text: "Connected" };
     }
   }
-  layoutMode: LayoutMode = $state("detail");
+  layoutMode: LayoutMode = $state(
+    (() => {
+      try {
+        if (typeof localStorage === "undefined") return "detail" as const;
+        const stored = localStorage.getItem("layoutMode");
+        const valid: LayoutMode[] = ["cards", "detail", "table"];
+        return valid.includes(stored as LayoutMode) ? (stored as LayoutMode) : ("detail" as const);
+      } catch {
+        return "detail" as const;
+      }
+    })(),
+  );
   theme: Theme = $state(
     (() => {
       try {

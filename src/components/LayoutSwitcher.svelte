@@ -22,7 +22,7 @@
         class="btn join-item btn-xs"
         class:btn-accent={store.layoutMode === mode.key}
         class:btn-ghost={store.layoutMode !== mode.key}
-        onclick={() => (store.layoutMode = mode.key)}
+        onclick={() => { store.layoutMode = mode.key; try { localStorage.setItem("layoutMode", mode.key); } catch {} }}
         title="{mode.label} layout"
       >
         <span class="text-sm leading-none">{mode.icon}</span>
