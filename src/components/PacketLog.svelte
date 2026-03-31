@@ -138,7 +138,7 @@
     <div class="ml-auto flex flex-wrap gap-2">
       {#each Object.keys(store.logFilters) as key}
         <label class="flex cursor-pointer items-center gap-1 text-[9px]">
-          <input type="checkbox" class="checkbox checkbox-xs" checked={store.logFilters[key]} onchange={() => (store.logFilters[key] = !store.logFilters[key])} />
+          <input type="checkbox" class="checkbox checkbox-xs" checked={store.logFilters[key]} onchange={() => store.toggleLogFilter(key)} />
           <span class="{TYPE_CLASSES[key] ?? 'text-base-content/70'}">{filterLabels[key] ?? key}</span>
         </label>
       {/each}
