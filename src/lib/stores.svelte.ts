@@ -85,7 +85,7 @@ class ViewerStore {
   selectedLayer = $state(0);
 
   packetLog: PacketLogEntry[] = $state([]);
-  logFilters: Record<string, boolean> = $state({
+  private static readonly DEFAULT_LOG_FILTERS: Record<string, boolean> = {
     time: false,
     status: false,
     metrics: true,
@@ -101,8 +101,34 @@ class ViewerStore {
     server: true,
     "tcnet-error": true,
     appdata: true,
-  });
+  };
+
+  logFilters: Record<string, boolean> = $state(
+    (() => {
+      try {
+        if (typeof localStorage === "undefined") return { ...ViewerStore.DEFAULT_LOG_FILTERS };
+        const stored = localStorage.getItem("logFilters");
+        if (stored) {
+          const parsed = JSON.parse(stored) as Record<string, boolean>;
+          // デフォルトとマージし、新しいキーが追加されても対応する
+          return { ...ViewerStore.DEFAULT_LOG_FILTERS, ...parsed };
+        }
+      } catch {
+        // パースに失敗した場合はデフォルトを返す
+      }
+      return { ...ViewerStore.DEFAULT_LOG_FILTERS };
+    })(),
+  );
   private logIdCounter = 0;
+
+  toggleLogFilter(key: string): void {
+    this.logFilters[key] = !this.logFilters[key];
+    try {
+      localStorage.setItem("logFilters", JSON.stringify(this.logFilters));
+    } catch {
+      // localStorage書き込みに失敗しても動作は継続する
+    }
+  }
 
   addLogEntry(type: string, layer: number | undefined, summary: string): void {
     this.packetLog.push({
