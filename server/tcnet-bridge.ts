@@ -340,7 +340,6 @@ export class TCNetBridge {
             case TCNetDataPacketType.ArtworkData: {
               if (this.artworkAssembler.add(buf)) {
                 const assembled = this.artworkAssembler.assemble();
-                // 空データのブロードキャストをスキップする (認証なし時に空レスポンスが返る)
                 if (assembled.length > 0) {
                   this.broadcast({
                     type: "artwork",
@@ -425,28 +424,11 @@ export class TCNetBridge {
       if (attempt < 6) await new Promise((r) => setTimeout(r, 500));
     }
 
-    // CUEData
-    try {
-      await this.client.requestData(TCNetDataPacketType.CUEData, layer);
-    } catch (err) {
-      const reason = err instanceof Error ? err.message : String(err);
-      console.debug(`[TCNet] CUEデータ取得失敗 (レイヤー${layer}): ${reason}`);
-    }
-
-    // SmallWaveFormData
-    try {
-      await this.client.requestData(TCNetDataPacketType.SmallWaveFormData, layer);
-    } catch (err) {
-      const reason = err instanceof Error ? err.message : String(err);
-      console.debug(`[TCNet] 小波形データ取得失敗 (レイヤー${layer}): ${reason}`);
-    }
-
-    // ArtworkData
-    try {
-      await this.client.requestData(TCNetDataPacketType.ArtworkData, layer);
-    } catch (err) {
-      const reason = err instanceof Error ? err.message : String(err);
-      console.debug(`[TCNet] アートワーク取得失敗 (レイヤー${layer}): ${reason}`);
-    }
+    // CUE, SmallWaveForm, Artworkのリクエストを送信する
+    // レスポンスはdataイベントハンドラで処理される (fire-and-forget)
+    // requestDataのPromiseはnever-resolvingになる場合があるためawaitしない
+    this.client.requestData(TCNetDataPacketType.CUEData, layer).catch(() => {});
+    this.client.requestData(TCNetDataPacketType.SmallWaveFormData, layer).catch(() => {});
+    this.client.requestData(TCNetDataPacketType.ArtworkData, layer).catch(() => {});
   }
 }
