@@ -340,15 +340,18 @@ export class TCNetBridge {
             case TCNetDataPacketType.ArtworkData: {
               if (this.artworkAssembler.add(buf)) {
                 const assembled = this.artworkAssembler.assemble();
-                this.broadcast({
-                  type: "artwork",
-                  timestamp: Date.now(),
-                  layer,
-                  data: {
-                    base64: artworkToBase64(assembled),
-                    mimeType: detectArtworkMimeType(assembled),
-                  },
-                });
+                // 空データのブロードキャストをスキップする (認証なし時に空レスポンスが返る)
+                if (assembled.length > 0) {
+                  this.broadcast({
+                    type: "artwork",
+                    timestamp: Date.now(),
+                    layer,
+                    data: {
+                      base64: artworkToBase64(assembled),
+                      mimeType: detectArtworkMimeType(assembled),
+                    },
+                  });
+                }
                 this.artworkAssembler.reset();
               }
               break;

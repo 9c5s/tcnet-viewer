@@ -38,7 +38,7 @@
       {/each}
 
       {#if trackLength > 0}
-        <line x1={posX} y1="0" x2={posX} y2={height} class="stroke-accent" stroke-width="2" />
+        <line x1={posX} y1="0" x2={posX} y2={height} class="stroke-error" stroke-width="2" />
       {/if}
     </svg>
   {:else}
