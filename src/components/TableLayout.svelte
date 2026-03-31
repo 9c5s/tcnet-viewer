@@ -53,14 +53,18 @@
   let highlights: Record<string, boolean> = $state({});
 
   // 値の変更を検知してハイライトする
+  // テンプレート式はderived contextのため$stateを直接変更できない
+  // queueMicrotaskで次のマイクロタスクに遅延して変更する
   function checkHighlight(row: string, layerIndex: number, value: string): boolean {
     const key = `${row}-${layerIndex}`;
     const prev = prevValues.get(key);
     if (prev !== undefined && prev !== value) {
-      highlights[key] = true;
-      setTimeout(() => {
-        highlights[key] = false;
-      }, 300);
+      queueMicrotask(() => {
+        highlights[key] = true;
+        setTimeout(() => {
+          highlights[key] = false;
+        }, 300);
+      });
     }
     prevValues.set(key, value);
     return highlights[key] ?? false;
