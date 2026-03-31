@@ -62,7 +62,7 @@
                 ">{metrics.bpm != null ? formatBPM(metrics.bpm) : "N/A"}</span></div>
                 <div class="flex justify-between"><span class="text-base-content/40">Speed</span><span class="
                   text-base-content tabular-nums
-                ">{metrics.speed != null ? ((metrics.speed / 32768) * 100).toFixed(1) + "%" : "-"}</span></div>
+                ">{metrics.speed != null ? ((metrics.speed / 1048576) * 100).toFixed(2) + "%" : "-"}</span></div>
                 <div class="flex justify-between"><span class="text-base-content/40">Pos</span><span class="
                   text-base-content tabular-nums
                 ">{metrics.currentPosition != null ? formatPosition(metrics.currentPosition) : "-"}</span></div>

@@ -22,11 +22,11 @@
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Speed</span>
-        <span class="text-base-content tabular-nums">{((metrics.speed ?? 0) / 32768 * 100).toFixed(1)}%</span>
+        <span class="text-base-content tabular-nums">{((metrics.speed ?? 0) / 1048576 * 100).toFixed(2)}%</span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Pitch</span>
-        <span class="text-base-content tabular-nums">{((metrics.pitchBend ?? 0) / 32768 * 100).toFixed(1)}%</span>
+        <span class="text-base-content tabular-nums">{((metrics.pitchBend ?? 0) / 100).toFixed(2)}%</span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Position</span>
