@@ -7,7 +7,9 @@ export class MultiPacketAssembler {
     const packetNo = buffer.readUInt32LE(34);
     const clusterSize = buffer.readUInt32LE(38);
     const dataStart = 42;
-    const dataEnd = Math.min(dataStart + clusterSize, buffer.length);
+    // Fileパケット (Artwork等) はclusterSizeが0のため、バッファ末尾までをデータとして扱う
+    const dataEnd =
+      clusterSize > 0 ? Math.min(dataStart + clusterSize, buffer.length) : buffer.length;
     this.packets.set(packetNo, buffer.slice(dataStart, dataEnd));
     return this.packets.size >= this.totalPackets;
   }
