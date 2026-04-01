@@ -30,3 +30,15 @@ export function detectArtworkMimeType(data: Buffer): string {
 export function artworkToBase64(data: Buffer): string {
   return data.toString("base64");
 }
+
+// node-tcnetがアセンブル済みのJPEGバッファからブロードキャスト用ペイロードを生成する
+// 無効なデータの場合はnullを返す
+export function processArtworkPacket(
+  jpeg: Buffer | undefined,
+): { base64: string; mimeType: string } | null {
+  if (!jpeg || jpeg.length === 0 || !isValidImageData(jpeg)) return null;
+  return {
+    base64: artworkToBase64(jpeg),
+    mimeType: detectArtworkMimeType(jpeg),
+  };
+}
