@@ -72,7 +72,7 @@
               </div>
             {/if}
 
-            {#if active}
+            {#if waveform}
               <WaveformSvg
                 bars={waveform}
                 currentPosition={timeInfo?.currentTimeMillis ?? 0}
