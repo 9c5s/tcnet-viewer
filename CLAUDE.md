@@ -1,6 +1,6 @@
 # tcnet-viewer
 
-TCNetプロトコルのリアルタイムデバッグビューワー。
+TCNetプロトコルのリアルタイムビューワー。
 @9c5s/node-tcnet ライブラリを使用し、全パケットデータをブラウザで可視化する。
 
 ## 起動
@@ -13,14 +13,24 @@ vp dev
 http://localhost:5180 で開く。ネットワークアダプタはTCNetトラフィックから自動検出される。
 `pnpm dev` でも起動可能。
 
+## テスト・チェック
+
+```bash
+vp test          # Vitestでテスト実行
+vp check         # Oxfmt + Oxlint + TypeScript型チェック
+vp check --fix   # 自動修正付き
+```
+
 ## 技術スタック
 
 - Svelte 5 + Vite 8 + TypeScript
+- Tailwind CSS v4 + DaisyUI v5
 - WebSocket (ws) によるリアルタイム通信
 - Canvas API (波形描画)
 - @9c5s/node-tcnet (GitHub依存: `github:9c5s/node-tcnet`)
 - pnpm (パッケージマネージャー)
 - vite-plus (CLIツールチェーン: dev/check/test)
+- commitlint (Conventional Commits準拠)
 
 ## アーキテクチャ
 
@@ -34,14 +44,20 @@ TCNet UDP → server/tcnet-bridge.ts → WebSocket (/ws) → src/lib/ws-client.t
 
 - `index.ts` - Viteプラグイン。WebSocketServer (noServerモード、/wsパス) + ssrLoadModuleでtcnet-bridgeをロード
 - `tcnet-bridge.ts` - TCNetClient接続管理。createRequireでCJS版node-tcnetをロード (ESM/CJS互換性のため)
-- `parsers/` - BeatGrid, CUE, Waveform, Mixer, Artworkのバイナリパーサー
+- `types.ts` - WSMessage型定義 (全メッセージ型のdiscriminated union)、BroadcastFn
+- `parsers/` - BeatGrid, CUE, Waveform, Mixer, Artwork, MultiPacketのバイナリパーサー
+- `utils/` - ansi.ts (stripAnsi)、broadcaster.ts (WebSocketBroadcasterクラス)
 
 ### src/ (フロントエンド、Svelte 5)
 
 - `lib/stores.svelte.ts` - $stateルーンによるリアクティブストア (拡張子は.svelte.tsが必須)
 - `lib/ws-client.ts` - WebSocket接続 (/wsパス)、自動再接続、メッセージ→ストア反映
+- `lib/message-handlers.ts` - WSメッセージハンドラ (createHandlers + dispatchMessage、ストアはDI可能)
 - `lib/types.ts` - 型定義、LAYER_NAMES、STATUS_MAP
+- `lib/formatting.ts` - 表示用フォーマット関数
 - `components/` - 3つのレイアウトモード (Cards/Detail/Table) + 共用コンポーネント
+
+`$lib` パスエイリアスが設定されており、`$lib/types` のようにインポート可能。
 
 ## レイアウトモード
 
