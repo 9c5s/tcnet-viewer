@@ -48,27 +48,6 @@
     }
   }
 
-  // 変更検知用の前回値マップ: key = "row-layerIndex"
-  let prevValues: Map<string, string> = new Map();
-  let highlights: Record<string, boolean> = $state({});
-
-  // 値の変更を検知してハイライトする
-  // テンプレート式はderived contextのため$stateを直接変更できない
-  // queueMicrotaskで次のマイクロタスクに遅延して変更する
-  function checkHighlight(row: string, layerIndex: number, value: string): boolean {
-    const key = `${row}-${layerIndex}`;
-    const prev = prevValues.get(key);
-    if (prev !== undefined && prev !== value) {
-      queueMicrotask(() => {
-        highlights[key] = true;
-        setTimeout(() => {
-          highlights[key] = false;
-        }, 300);
-      });
-    }
-    prevValues.set(key, value);
-    return highlights[key] ?? false;
-  }
 </script>
 
 <div class="flex size-full flex-col overflow-hidden">
@@ -107,7 +86,6 @@
                 </td>
               {:else}
                 {@const value = getCellValue(row, i)}
-                {@const isHighlighted = checkHighlight(row, i, value)}
                 <td
                   class={[
                     "text-center tabular-nums",
@@ -115,7 +93,6 @@
                     row === "OnAir" && value === "ON" ? "text-success font-bold" : "",
                     row === "Sync" && value === "Master" ? "text-warning font-bold" : "",
                     row === "BPM" && value !== "-" ? "text-accent font-bold" : "",
-                    isHighlighted ? "bg-accent/20 transition-colors duration-300" : "transition-colors duration-300",
                   ].filter(Boolean).join(" ")}
                 >
                   {value}
