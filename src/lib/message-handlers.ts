@@ -110,6 +110,15 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
       store.artwork[msg.layer] = { base64: msg.data.base64, mimeType: msg.data.mimeType };
       store.addLogEntry(msg.type, msg.layer, `received`);
     },
+    "layer-reset": (msg) => {
+      const i = msg.layer;
+      // metadataはクリアしない (新データで上書きされるまで前曲を表示し、レイアウトの崩れを防ぐ)
+      store.artwork[i] = null;
+      store.cues[i] = null;
+      store.waveformSmall[i] = null;
+      store.waveformBig[i] = null;
+      store.beatgrid[i] = null;
+    },
     beatgrid: (msg) => {
       store.beatgrid[msg.layer] = msg.data.entries;
       store.addLogEntry(msg.type, msg.layer, `${msg.data.entries?.length ?? 0} beats`);

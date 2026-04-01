@@ -34,7 +34,7 @@ import type {
   TCNetApplicationDataPacket as TCNetApplicationDataPacketType,
 } from "@9c5s/node-tcnet";
 
-import { artworkToBase64, detectArtworkMimeType } from "./parsers/artwork.js";
+import { artworkToBase64, detectArtworkMimeType, isValidImageData } from "./parsers/artwork.js";
 import { parseBeatGrid } from "./parsers/beat-grid.js";
 import { parseCueData } from "./parsers/cue-data.js";
 import { parseSmallWaveform, parseBigWaveform } from "./parsers/waveform.js";
@@ -56,10 +56,12 @@ export class TCNetBridge {
   private isReconnecting = false;
   private heartbeatTimer: ReturnType<typeof setTimeout> | null = null;
   private trackIds: (number | null)[] = Array.from({ length: 8 }, () => null);
-  private artworkAssembler = new MultiPacketAssembler();
+  // requestLayerDataの世代管理 (トラック変更時にインクリメントし、古いリクエストの結果を破棄する)
+  private layerGeneration: number[] = Array.from({ length: 8 }, () => 0);
+  private artworkAssemblers = new Map<number, MultiPacketAssembler>();
   private authState: AuthState = "none";
-  private beatGridAssembler = new MultiPacketAssembler();
-  private bigWaveformAssembler = new MultiPacketAssembler();
+  private beatGridAssemblers = new Map<number, MultiPacketAssembler>();
+  private bigWaveformAssemblers = new Map<number, MultiPacketAssembler>();
 
   private static readonly HEARTBEAT_TIMEOUT = 10_000;
   private static readonly INITIAL_RETRY_DELAY = 2_000;
@@ -111,6 +113,24 @@ export class TCNetBridge {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  private resetLayerAssemblers(layer: number): void {
+    this.artworkAssemblers.get(layer)?.reset();
+    this.beatGridAssemblers.get(layer)?.reset();
+    this.bigWaveformAssemblers.get(layer)?.reset();
+  }
+
+  private getAssembler(
+    map: Map<number, MultiPacketAssembler>,
+    layer: number,
+  ): MultiPacketAssembler {
+    let asm = map.get(layer);
+    if (!asm) {
+      asm = new MultiPacketAssembler();
+      map.set(layer, asm);
+    }
+    return asm;
+  }
+
   private setAuthState(state: AuthState, connected: boolean): void {
     this.authState = state;
     this.onStatusChange(connected, state);
@@ -145,9 +165,9 @@ export class TCNetBridge {
         // 切断時のエラーは無視する
       }
       if (!this.running) return;
-      this.beatGridAssembler.reset();
-      this.bigWaveformAssembler.reset();
-      this.artworkAssembler.reset();
+      this.beatGridAssemblers.clear();
+      this.bigWaveformAssemblers.clear();
+      this.artworkAssemblers.clear();
       this.createClient();
       await this.connect();
     } finally {
@@ -301,8 +321,9 @@ export class TCNetBridge {
               break;
             }
             case TCNetDataPacketType.BigWaveFormData: {
-              if (this.bigWaveformAssembler.add(buf)) {
-                const assembled = this.bigWaveformAssembler.assemble();
+              const asm = this.getAssembler(this.bigWaveformAssemblers, layer);
+              if (asm.add(buf)) {
+                const assembled = asm.assemble();
                 const waveform = parseBigWaveform(assembled);
                 this.broadcast({
                   type: "waveform-big",
@@ -310,7 +331,7 @@ export class TCNetBridge {
                   layer,
                   data: waveform,
                 });
-                this.bigWaveformAssembler.reset();
+                asm.reset();
               }
               break;
             }
@@ -324,8 +345,9 @@ export class TCNetBridge {
               break;
             }
             case TCNetDataPacketType.BeatGridData: {
-              if (this.beatGridAssembler.add(buf)) {
-                const assembled = this.beatGridAssembler.assemble();
+              const asm = this.getAssembler(this.beatGridAssemblers, layer);
+              if (asm.add(buf)) {
+                const assembled = asm.assemble();
                 const beatgrid = parseBeatGrid(assembled);
                 this.broadcast({
                   type: "beatgrid",
@@ -333,14 +355,15 @@ export class TCNetBridge {
                   layer,
                   data: { entries: beatgrid },
                 });
-                this.beatGridAssembler.reset();
+                asm.reset();
               }
               break;
             }
             case TCNetDataPacketType.ArtworkData: {
-              if (this.artworkAssembler.add(buf)) {
-                const assembled = this.artworkAssembler.assemble();
-                if (assembled.length > 0) {
+              const asm = this.getAssembler(this.artworkAssemblers, layer);
+              if (asm.add(buf)) {
+                const assembled = asm.assemble();
+                if (assembled.length > 0 && isValidImageData(assembled)) {
                   this.broadcast({
                     type: "artwork",
                     timestamp: Date.now(),
@@ -351,7 +374,7 @@ export class TCNetBridge {
                     },
                   });
                 }
-                this.artworkAssembler.reset();
+                asm.reset();
               }
               break;
             }
@@ -381,24 +404,31 @@ export class TCNetBridge {
       },
     });
 
-    // trackIDが変化したレイヤーのメタデータをリクエストする
+    // trackIDが変化したレイヤーのデータをリセットしてリクエストする
     for (let i = 0; i < packet.layers.length; i++) {
       const layer = packet.layers[i];
       if (layer && layer.trackID !== 0 && layer.trackID !== this.trackIds[i]) {
         console.log(`[TCNet] レイヤー${i}: トラックID ${this.trackIds[i]} -> ${layer.trackID}`);
         this.trackIds[i] = layer.trackID;
-        this.requestLayerData(i);
+        // 前曲のデータをクリアする (アートワークなし曲で前曲データが残る問題の防止)
+        this.broadcast({ type: "layer-reset", timestamp: Date.now(), layer: i });
+        this.resetLayerAssemblers(i);
+        const gen = ++this.layerGeneration[i];
+        this.requestLayerData(i, gen);
       }
     }
   }
 
-  private async requestLayerData(layer: number): Promise<void> {
+  private async requestLayerData(layer: number, generation: number): Promise<void> {
     console.log(`[TCNet] レイヤー${layer}のデータを要求中`);
 
     // MetaData (500ms間隔で最大6回リトライ、Bridgeのメタデータ準備を待つ)
     for (let attempt = 1; attempt <= 6; attempt++) {
+      // 世代が変わった場合、新しいトラックのリクエストが発行済みなので中断する
+      if (this.layerGeneration[layer] !== generation) return;
       try {
         const packet = await this.client.requestData(TCNetDataPacketType.MetaData, layer);
+        if (this.layerGeneration[layer] !== generation) return;
         if (packet instanceof TCNetDataPacketMetadata) {
           const p = packet as TCNetDataPacketMetadataType;
           if (p.info) {
@@ -423,6 +453,8 @@ export class TCNetBridge {
       }
       if (attempt < 6) await new Promise((r) => setTimeout(r, 500));
     }
+
+    if (this.layerGeneration[layer] !== generation) return;
 
     // CUE, SmallWaveForm, Artworkのリクエストを送信する
     // レスポンスはdataイベントハンドラで処理される (fire-and-forget)

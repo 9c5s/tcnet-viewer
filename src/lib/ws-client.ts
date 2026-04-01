@@ -12,6 +12,9 @@ export function connect(): void {
 
   ws.onopen = () => {
     store.connected = true;
+    // 再接続時に前セッションのレイヤーデータをクリアする
+    // サーバーからキャッシュ済みデータが再送されるため、不整合を防止する
+    store.resetLayerData();
   };
 
   ws.onclose = () => {

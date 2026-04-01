@@ -93,6 +93,17 @@ class ViewerStore {
   mixer: MixerData | null = $state(null);
   generalSMPTEMode = $state(0);
 
+  resetLayerData(): void {
+    for (let i = 0; i < 8; i++) {
+      this.metadata[i] = null;
+      this.artwork[i] = null;
+      this.cues[i] = null;
+      this.waveformSmall[i] = null;
+      this.waveformBig[i] = null;
+      this.beatgrid[i] = null;
+    }
+  }
+
   selectedLayer = $state(0);
 
   packetLog: PacketLogEntry[] = $state([]);
