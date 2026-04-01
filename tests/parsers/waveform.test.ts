@@ -8,8 +8,8 @@ test("parseSmallWaveform: offset 42から2400バイトをパースする", () =>
   buffer.writeUInt8(200, 44);
   buffer.writeUInt8(3, 45);
   const result = parseSmallWaveform(buffer);
-  expect(result.bars[0]).toEqual({ level: 100, color: 5 });
-  expect(result.bars[1]).toEqual({ level: 200, color: 3 });
+  expect(result.bars[0]).toEqual({ color: 100, level: 5 });
+  expect(result.bars[1]).toEqual({ color: 200, level: 3 });
   expect(result.bars).toHaveLength(1200);
 });
 
@@ -21,8 +21,8 @@ test("parseBigWaveform: バッファ全体をパースする", () => {
   buffer.writeUInt8(4, 3);
   const result = parseBigWaveform(buffer);
   expect(result.bars).toHaveLength(2);
-  expect(result.bars[0]).toEqual({ level: 50, color: 2 });
-  expect(result.bars[1]).toEqual({ level: 75, color: 4 });
+  expect(result.bars[0]).toEqual({ color: 50, level: 2 });
+  expect(result.bars[1]).toEqual({ color: 75, level: 4 });
 });
 
 test("parseBigWaveform: 奇数バイトの末尾は無視する", () => {
