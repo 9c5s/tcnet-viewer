@@ -30,11 +30,12 @@ import type {
   TCNetDataPacket as TCNetDataPacketType_,
   TCNetDataPacketMetrics as TCNetDataPacketMetricsType,
   TCNetDataPacketMetadata as TCNetDataPacketMetadataType,
+  TCNetDataPacketArtwork as TCNetDataPacketArtworkType,
   TCNetErrorPacket as TCNetErrorPacketType,
   TCNetApplicationDataPacket as TCNetApplicationDataPacketType,
 } from "@9c5s/node-tcnet";
 
-import { artworkToBase64, detectArtworkMimeType, isValidImageData } from "./parsers/artwork.js";
+import { processArtworkPacket } from "./parsers/artwork.js";
 import { parseBeatGrid } from "./parsers/beat-grid.js";
 import { parseCueData } from "./parsers/cue-data.js";
 import { parseSmallWaveform, parseBigWaveform } from "./parsers/waveform.js";
@@ -58,7 +59,6 @@ export class TCNetBridge {
   private trackIds: (number | null)[] = Array.from({ length: 8 }, () => null);
   // requestLayerDataの世代管理 (トラック変更時にインクリメントし、古いリクエストの結果を破棄する)
   private layerGeneration: number[] = Array.from({ length: 8 }, () => 0);
-  private artworkAssemblers = new Map<number, MultiPacketAssembler>();
   private authState: AuthState = "none";
   private beatGridAssemblers = new Map<number, MultiPacketAssembler>();
   private bigWaveformAssemblers = new Map<number, MultiPacketAssembler>();
@@ -114,7 +114,6 @@ export class TCNetBridge {
   }
 
   private resetLayerAssemblers(layer: number): void {
-    this.artworkAssemblers.get(layer)?.reset();
     this.beatGridAssemblers.get(layer)?.reset();
     this.bigWaveformAssemblers.get(layer)?.reset();
   }
@@ -167,7 +166,6 @@ export class TCNetBridge {
       if (!this.running) return;
       this.beatGridAssemblers.clear();
       this.bigWaveformAssemblers.clear();
-      this.artworkAssemblers.clear();
       this.createClient();
       await this.connect();
     } finally {
@@ -359,25 +357,8 @@ export class TCNetBridge {
               }
               break;
             }
-            case TCNetDataPacketType.ArtworkData: {
-              const asm = this.getAssembler(this.artworkAssemblers, layer);
-              if (asm.add(buf)) {
-                const assembled = asm.assemble();
-                if (assembled.length > 0 && isValidImageData(assembled)) {
-                  this.broadcast({
-                    type: "artwork",
-                    timestamp: Date.now(),
-                    layer,
-                    data: {
-                      base64: artworkToBase64(assembled),
-                      mimeType: detectArtworkMimeType(assembled),
-                    },
-                  });
-                }
-                asm.reset();
-              }
-              break;
-            }
+            // ArtworkDataはrequestLayerDataで直接処理する
+            // (dataイベントで処理するとtimeout後の未アセンブル断片パケットを誤処理するため)
           }
         } catch (err) {
           console.error(`[TCNet] パーサーエラー (dataType=${dataType}):`, err);
@@ -449,18 +430,39 @@ export class TCNetBridge {
         }
       } catch (err) {
         const reason = err instanceof Error ? err.message : String(err);
-        console.debug(`[TCNet] メタデータ取得失敗 (レイヤー${layer}, 試行${attempt}/6): ${reason}`);
+        console.log(`[TCNet] メタデータ取得失敗 (レイヤー${layer}, 試行${attempt}/6): ${reason}`);
       }
       if (attempt < 6) await new Promise((r) => setTimeout(r, 500));
     }
 
     if (this.layerGeneration[layer] !== generation) return;
 
-    // CUE, SmallWaveForm, Artworkのリクエストを送信する
-    // レスポンスはdataイベントハンドラで処理される (fire-and-forget)
-    // requestDataのPromiseはnever-resolvingになる場合があるためawaitしない
+    // CUE, SmallWaveFormはfire-and-forget (単一パケットのため失敗しにくい)
     this.client.requestData(TCNetDataPacketType.CUEData, layer).catch(() => {});
     this.client.requestData(TCNetDataPacketType.SmallWaveFormData, layer).catch(() => {});
-    this.client.requestData(TCNetDataPacketType.ArtworkData, layer).catch(() => {});
+
+    // Artwork (マルチパケットのためパケットロス/タイムアウトが起きやすい、リトライする)
+    // dataイベントではなくrequestDataの戻り値から直接処理する
+    // (timeout後に届く未アセンブルの断片パケットを誤処理しないため)
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      if (this.layerGeneration[layer] !== generation) return;
+      try {
+        const packet = await this.client.requestData(TCNetDataPacketType.ArtworkData, layer);
+        const artPacket = packet as unknown as TCNetDataPacketArtworkType;
+        const artworkData = processArtworkPacket(artPacket.data?.jpeg);
+        if (artworkData) {
+          this.broadcast({
+            type: "artwork",
+            timestamp: Date.now(),
+            layer,
+            data: artworkData,
+          });
+        }
+        break;
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : String(err);
+        console.log(`[TCNet] アートワーク取得失敗 (レイヤー${layer}, 試行${attempt}/3): ${reason}`);
+      }
+    }
   }
 }

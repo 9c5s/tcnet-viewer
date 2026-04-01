@@ -175,6 +175,58 @@ test("tcnet-error: ログにerrorDataのサイズを記録する", () => {
   expect(store.addLogEntry).toHaveBeenCalledWith("tcnet-error", undefined, "3 bytes");
 });
 
+test("artwork: base64とmimeTypeをストアに反映する", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  handlers.artwork({
+    type: "artwork",
+    timestamp: 1000,
+    layer: 2,
+    data: { base64: "AQID", mimeType: "image/jpeg" },
+  });
+  expect(store.artwork[2]).toEqual({ base64: "AQID", mimeType: "image/jpeg" });
+  expect(store.addLogEntry).toHaveBeenCalledWith("artwork", 2, "0KB image/jpeg");
+});
+
+test("artwork: 他レイヤーのデータは影響しない", () => {
+  const store = createMockStore();
+  store.artwork[0] = { base64: "existing", mimeType: "image/png" };
+  const handlers = createHandlers(store);
+  handlers.artwork({
+    type: "artwork",
+    timestamp: 1000,
+    layer: 3,
+    data: { base64: "new", mimeType: "image/jpeg" },
+  });
+  expect(store.artwork[0]).toEqual({ base64: "existing", mimeType: "image/png" });
+  expect(store.artwork[3]).toEqual({ base64: "new", mimeType: "image/jpeg" });
+});
+
+test("layer-reset: アートワークとCUE/波形/ビートグリッドをクリアする", () => {
+  const store = createMockStore();
+  store.artwork[1] = { base64: "data", mimeType: "image/jpeg" };
+  store.cues[1] = [{ index: 1, type: 1, inTime: 0, outTime: 0, color: { r: 0, g: 0, b: 0 } }];
+  store.waveformSmall[1] = [{ level: 100, color: 0 }];
+  store.waveformBig[1] = [{ level: 100, color: 0 }];
+  store.beatgrid[1] = [{ beatNumber: 1, beatType: "downbeat", timestampMs: 0 }];
+  const handlers = createHandlers(store);
+  handlers["layer-reset"]({ type: "layer-reset", timestamp: 1000, layer: 1 });
+  expect(store.artwork[1]).toBeNull();
+  expect(store.cues[1]).toBeNull();
+  expect(store.waveformSmall[1]).toBeNull();
+  expect(store.waveformBig[1]).toBeNull();
+  expect(store.beatgrid[1]).toBeNull();
+});
+
+test("layer-reset: metadataはクリアしない", () => {
+  const store = createMockStore();
+  store.metadata[0] = { trackTitle: "Test", trackArtist: "Artist", trackKey: 1, trackID: 50 };
+  const handlers = createHandlers(store);
+  handlers["layer-reset"]({ type: "layer-reset", timestamp: 1000, layer: 0 });
+  expect(store.metadata[0]).not.toBeNull();
+  expect(store.metadata[0]?.trackTitle).toBe("Test");
+});
+
 test("appdata: ログにcmd, token, dest, portを記録する", () => {
   const store = createMockStore();
   const handlers = createHandlers(store);

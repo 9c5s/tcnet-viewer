@@ -108,7 +108,8 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
     },
     artwork: (msg) => {
       store.artwork[msg.layer] = { base64: msg.data.base64, mimeType: msg.data.mimeType };
-      store.addLogEntry(msg.type, msg.layer, `received`);
+      const sizeKB = Math.round((msg.data.base64.length * 3) / 4 / 1024);
+      store.addLogEntry(msg.type, msg.layer, `${sizeKB}KB ${msg.data.mimeType}`);
     },
     "layer-reset": (msg) => {
       const i = msg.layer;
