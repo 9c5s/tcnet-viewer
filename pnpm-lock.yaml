@@ -13,7 +13,7 @@ importers:
   .:
     dependencies:
       '@9c5s/node-tcnet':
-        specifier: link:..\node-tcnet
+        specifier: link:../node-tcnet
         version: link:../node-tcnet
       ws:
         specifier: ^8.18.0
