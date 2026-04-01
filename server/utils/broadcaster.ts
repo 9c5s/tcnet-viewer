@@ -19,6 +19,7 @@ export class WebSocketBroadcaster {
   private static readonly TRANSIENT_TYPES: ReadonlySet<string> = new Set([
     "tcnet-error",
     "appdata",
+    "layer-reset",
   ]);
 
   private clients = new Set<WSClient>();
@@ -47,9 +48,25 @@ export class WebSocketBroadcaster {
     return this.stateCache;
   }
 
+  // layer-reset時にキャッシュから削除するレイヤー別データ型
+  private static readonly LAYER_DATA_TYPES: readonly string[] = [
+    "metadata",
+    "artwork",
+    "cue",
+    "waveform-small",
+    "waveform-big",
+    "beatgrid",
+  ];
+
   broadcast(msg: WSMessage): void {
     const json = JSON.stringify(msg);
-    if (!WebSocketBroadcaster.TRANSIENT_TYPES.has(msg.type)) {
+    if (msg.type === "layer-reset") {
+      // レイヤーリセット時、該当レイヤーのキャッシュを全て削除する
+      const layer = msg.layer;
+      for (const type of WebSocketBroadcaster.LAYER_DATA_TYPES) {
+        this.stateCache.delete(`${type}-${layer}`);
+      }
+    } else if (!WebSocketBroadcaster.TRANSIENT_TYPES.has(msg.type)) {
       // 一過性でないメッセージのみtype+layerでキャッシュする
       const cacheKey =
         "layer" in msg && msg.layer !== undefined ? `${msg.type}-${msg.layer}` : msg.type;
