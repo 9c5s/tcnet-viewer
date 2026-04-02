@@ -101,6 +101,11 @@
   function onDragEnd(e: PointerEvent): void {
     dragging = false;
     (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+    try {
+      localStorage.setItem("packetLogHeight", String(store.packetLogHeight));
+    } catch {
+      // localStorage書き込みに失敗しても動作は継続する
+    }
   }
 
   // フィルタキーの表示名
