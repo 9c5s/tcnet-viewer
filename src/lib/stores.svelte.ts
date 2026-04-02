@@ -60,7 +60,21 @@ class ViewerStore {
       }
     })(),
   );
-  packetLogHeight = $state(200);
+  packetLogHeight: number = $state(
+    (() => {
+      try {
+        if (typeof localStorage === "undefined") return 200;
+        const stored = localStorage.getItem("packetLogHeight");
+        if (stored) {
+          const parsed = Number(stored);
+          if (Number.isFinite(parsed) && parsed > 0) return parsed;
+        }
+      } catch {
+        // パースに失敗した場合はデフォルトを返す
+      }
+      return 200;
+    })(),
+  );
 
   layers: LayerInfo[] = $state(
     Array.from({ length: 8 }, () => ({
