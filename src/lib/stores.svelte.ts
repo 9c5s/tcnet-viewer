@@ -60,6 +60,16 @@ class ViewerStore {
       }
     })(),
   );
+  hideIdleLayers: boolean = $state(
+    (() => {
+      try {
+        if (typeof localStorage === "undefined") return false;
+        return localStorage.getItem("hideIdleLayers") === "true";
+      } catch {
+        return false;
+      }
+    })(),
+  );
   packetLogHeight: number = $state(
     (() => {
       try {
@@ -156,6 +166,15 @@ class ViewerStore {
     })(),
   );
   private logIdCounter = 0;
+
+  toggleHideIdleLayers(): void {
+    this.hideIdleLayers = !this.hideIdleLayers;
+    try {
+      localStorage.setItem("hideIdleLayers", String(this.hideIdleLayers));
+    } catch {
+      // localStorage書き込みに失敗しても動作は継続する
+    }
+  }
 
   toggleLogFilter(key: string): void {
     this.logFilters[key] = !this.logFilters[key];
