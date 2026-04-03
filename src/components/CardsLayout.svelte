@@ -12,17 +12,41 @@
     return status === "PLAYING" || status === "LOOPING";
   }
 
+  // レイヤーがidle(データなし)かどうかを判定する
+  function isIdle(i: number): boolean {
+    return store.layers[i].status === "IDLE" && !store.metadata[i] && !store.metrics[i];
+  }
+
   // ミキサーの0-255値をパーセンテージに変換する
   function toPercent(val: number): string {
     return ((val / 255) * 100).toFixed(0);
+  }
+
+  // 表示対象のレイヤーインデックスを算出する
+  const visibleIndices = $derived(
+    store.hideIdleLayers
+      ? store.layers.map((_, i) => i).filter((i) => !isIdle(i))
+      : store.layers.map((_, i) => i),
+  );
+
+  // 表示枚数に応じた列数を算出する
+  function gridCols(count: number): number {
+    if (count <= 2) return count;
+    if (count <= 4) return 2;
+    if (count <= 6) return 3;
+    return 4;
   }
 </script>
 
 <div class="flex size-full flex-col overflow-hidden">
   <NodeInfoBar />
 
-  <div class="grid min-h-0 flex-1 grid-cols-4 grid-rows-2 gap-1.5 overflow-hidden p-1.5">
-    {#each store.layers as layer, i}
+  <div
+    class="grid min-h-0 flex-1 content-start gap-1.5 overflow-auto p-1.5"
+    style:grid-template-columns="repeat({gridCols(visibleIndices.length)}, 1fr)"
+  >
+    {#each visibleIndices as i (i)}
+      {@const layer = store.layers[i]}
       {@const active = isActive(layer.status)}
       {@const metrics = store.metrics[i]}
       {@const metadata = store.metadata[i]}
@@ -49,7 +73,7 @@
                   " />
                 {/if}
                 <div class="min-w-0 flex-1">
-                  <div class="truncate text-[11px] font-bold text-base-content">{metadata.trackTitle || "Unknown"}</div>
+                  <div class="text-[11px] leading-tight font-bold text-base-content">{metadata.trackTitle || "Unknown"}</div>
                   <div class="truncate text-[10px] text-base-content/60">{metadata.trackArtist || "Unknown"}</div>
                 </div>
               </div>
@@ -60,9 +84,9 @@
                 <div class="flex justify-between"><span class="text-base-content/40">BPM</span><span class="
                   text-[11px] font-bold text-accent tabular-nums
                 ">{metrics.bpm != null ? formatBPM(metrics.bpm) : "N/A"}</span></div>
-                <div class="flex justify-between"><span class="text-base-content/40">Speed</span><span class="
+                <div class="flex justify-between"><span class="text-base-content/40">Pitch</span><span class="
                   text-base-content tabular-nums
-                ">{metrics.speed != null ? ((metrics.speed / 1048576) * 100).toFixed(2) + "%" : "-"}</span></div>
+                ">{metrics.pitchBend != null ? ((metrics.pitchBend) / 100).toFixed(2) + "%" : "-"}</span></div>
                 <div class="flex justify-between"><span class="text-base-content/40">Pos</span><span class="
                   text-base-content tabular-nums
                 ">{metrics.currentPosition != null ? formatPosition(metrics.currentPosition) : "-"}</span></div>

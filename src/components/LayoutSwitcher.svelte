@@ -16,6 +16,17 @@
 </script>
 
 <div class="fixed top-1 right-2 z-1000 flex items-center gap-2">
+  {#if store.layoutMode === "cards"}
+    <label class="flex cursor-pointer items-center gap-1.5 text-[10px] text-base-content/60 select-none">
+      <input
+        type="checkbox"
+        class="toggle toggle-accent toggle-xs"
+        checked={store.hideIdleLayers}
+        onchange={() => store.toggleHideIdleLayers()}
+      />
+      Idle非表示
+    </label>
+  {/if}
   <div class="join">
     {#each modes as mode}
       <button
