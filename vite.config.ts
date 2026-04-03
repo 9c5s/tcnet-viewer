@@ -30,6 +30,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [tailwindcss(), svelte(), tcnetPlugin()],
     server: {
+      host: true,
       port: 5180,
     },
     resolve: {
