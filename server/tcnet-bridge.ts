@@ -188,6 +188,13 @@ export class TCNetBridge {
     this.client.on("authenticated", () => {
       console.log("[TCNet] TCNASDP認証成功");
       this.setAuthState("authenticated", true);
+      // 認証完了後、認証前に要求していたレイヤーデータを再要求する
+      for (let i = 0; i < this.trackIds.length; i++) {
+        if (this.trackIds[i] !== null) {
+          const gen = ++this.layerGeneration[i];
+          this.requestLayerData(i, gen);
+        }
+      }
     });
 
     this.client.on("authFailed", () => {
@@ -295,7 +302,6 @@ export class TCNetBridge {
         const buf: Buffer = p.buffer;
         const dataType: number = p.dataType;
         const layer: number = p.layer;
-
         try {
           switch (dataType) {
             case TCNetDataPacketType.CUEData: {
