@@ -12,7 +12,7 @@ import type {
   AuthState,
 } from "./types.js";
 import { STATUS_MAP } from "./types.js";
-import { formatBPM } from "./formatting.js";
+import { formatBPM, formatHex } from "./formatting.js";
 
 // ストアのinterface (テスト時にmockオブジェクトを注入可能にする)
 export interface MessageHandlerStore {
@@ -140,7 +140,7 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
       store.addLogEntry(
         "appdata",
         undefined,
-        `cmd=${msg.data.cmd} token=0x${msg.data.token.toString(16).padStart(8, "0")} dest=0x${msg.data.dest.toString(16).padStart(4, "0")} port=${msg.data.listenerPort}`,
+        `cmd=${msg.data.cmd} token=0x${formatHex(msg.data.token, 8)} dest=0x${formatHex(msg.data.dest, 4)} port=${msg.data.listenerPort}`,
       );
     },
     "server-log": (msg) => {

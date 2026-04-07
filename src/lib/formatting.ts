@@ -55,3 +55,22 @@ export function formatBPM(bpm: number): string {
   bpm = Math.max(0, bpm);
   return (bpm / 100).toFixed(2);
 }
+
+// TCNetプロトコル仕様でのSpeed値の100%基準値 (2の20乗)
+// Speedフィールドは固定小数点整数で送信され、1048576が再生速度100%を表す
+const SPEED_SCALE = 1_048_576;
+
+/**
+ * TCNet Speed値を「NN.NN%」形式の文字列に変換する
+ * 生値は固定小数点整数で、SPEED_SCALE (2^20) が100%に相当する
+ */
+export function formatSpeedPercent(speed: number): string {
+  return ((speed / SPEED_SCALE) * 100).toFixed(2) + "%";
+}
+
+/**
+ * 数値を指定幅のゼロ埋め16進数文字列に変換する
+ */
+export function formatHex(value: number, width: number): string {
+  return value.toString(16).padStart(width, "0");
+}

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
-  import { formatMmSs, formatBPM } from "$lib/formatting.js";
+  import { formatMmSs, formatBPM, formatSpeedPercent } from "$lib/formatting.js";
 
   interface Props {
     layer: number;
@@ -22,7 +22,7 @@
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Speed</span>
-        <span class="text-base-content tabular-nums">{((metrics.speed ?? 0) / 1048576 * 100).toFixed(2)}%</span>
+        <span class="text-base-content tabular-nums">{formatSpeedPercent(metrics.speed ?? 0)}</span>
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Pitch</span>
