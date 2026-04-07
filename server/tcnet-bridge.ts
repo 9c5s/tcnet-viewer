@@ -60,12 +60,17 @@ export class TCNetBridge {
   // requestLayerDataの世代管理 (トラック変更時にインクリメントし、古いリクエストの結果を破棄する)
   private layerGeneration: number[] = Array.from({ length: 8 }, () => 0);
   private authState: AuthState = "none";
+  // 認証失敗時の自動再試行カウンタ (authenticated/reconnect成功時にリセット)
+  private authRetryCount = 0;
+  private authRetryTimer: ReturnType<typeof setTimeout> | null = null;
   private beatGridAssemblers = new Map<number, MultiPacketAssembler>();
   private bigWaveformAssemblers = new Map<number, MultiPacketAssembler>();
 
   private static readonly HEARTBEAT_TIMEOUT = 10_000;
   private static readonly INITIAL_RETRY_DELAY = 2_000;
   private static readonly MAX_RETRY_DELAY = 30_000;
+  // 認証失敗時の最大リトライ回数 (設定ミス時の無限ループを防ぐ)
+  private static readonly MAX_AUTH_RETRIES = 3;
 
   constructor(options: TCNetBridgeOptions) {
     this.broadcast = options.broadcast;
@@ -105,6 +110,7 @@ export class TCNetBridge {
   async disconnect(): Promise<void> {
     this.running = false;
     this.stopHeartbeat();
+    this.clearAuthRetry();
     await this.client.disconnect();
     console.log("[TCNet] 切断完了");
   }
@@ -135,6 +141,13 @@ export class TCNetBridge {
     this.onStatusChange(connected, state);
   }
 
+  private clearAuthRetry(): void {
+    if (this.authRetryTimer) {
+      clearTimeout(this.authRetryTimer);
+      this.authRetryTimer = null;
+    }
+  }
+
   private stopHeartbeat(): void {
     if (this.heartbeatTimer) {
       clearTimeout(this.heartbeatTimer);
@@ -157,6 +170,7 @@ export class TCNetBridge {
     this.isReconnecting = true;
     try {
       this.stopHeartbeat();
+      this.clearAuthRetry();
       this.setAuthState("none", false);
       try {
         await this.client.disconnect();
@@ -187,6 +201,8 @@ export class TCNetBridge {
 
     this.client.on("authenticated", () => {
       console.log("[TCNet] TCNASDP認証成功");
+      this.authRetryCount = 0;
+      this.clearAuthRetry();
       this.setAuthState("authenticated", true);
       // 認証完了後、認証前に要求していたレイヤーデータを再要求する
       for (let i = 0; i < this.trackIds.length; i++) {
@@ -198,8 +214,30 @@ export class TCNetBridge {
     });
 
     this.client.on("authFailed", () => {
-      console.warn("[TCNet] TCNASDP認証失敗");
-      this.setAuthState("failed", true);
+      if (!this.running) return;
+      if (this.authRetryCount < TCNetBridge.MAX_AUTH_RETRIES) {
+        this.authRetryCount++;
+        // 指数バックオフ: 2秒 -> 4秒 -> 8秒 (タイミング問題による一時的失敗を自動回復する)
+        const delay = Math.min(
+          TCNetBridge.INITIAL_RETRY_DELAY * 2 ** (this.authRetryCount - 1),
+          TCNetBridge.MAX_RETRY_DELAY,
+        );
+        console.warn(
+          `[TCNet] TCNASDP認証失敗 (${this.authRetryCount}/${TCNetBridge.MAX_AUTH_RETRIES}), ${delay / 1000}秒後に再接続`,
+        );
+        this.setAuthState("pending", true);
+        this.clearAuthRetry();
+        this.authRetryTimer = setTimeout(() => {
+          this.authRetryTimer = null;
+          this.reconnect().catch((err) => {
+            console.error("[TCNet] 認証リトライ再接続エラー:", err);
+          });
+        }, delay);
+      } else {
+        // 上限到達 (設定ミスの可能性が高い) - 手動再接続を待つ
+        console.warn("[TCNet] TCNASDP認証失敗、リトライ上限到達");
+        this.setAuthState("failed", true);
+      }
     });
 
     this.client.on("broadcast", (packet: unknown) => {
