@@ -11,6 +11,7 @@ import type {
   BeatGridEntry,
   AuthState,
 } from "./types.js";
+import { getLocalStorageValue } from "./storage.js";
 
 export type LayoutMode = "cards" | "detail" | "table";
 
@@ -37,53 +38,25 @@ class ViewerStore {
     }
   }
   layoutMode: LayoutMode = $state(
-    (() => {
-      try {
-        if (typeof localStorage === "undefined") return "detail" as const;
-        const stored = localStorage.getItem("layoutMode");
-        const valid: LayoutMode[] = ["cards", "detail", "table"];
-        return valid.includes(stored as LayoutMode) ? (stored as LayoutMode) : ("detail" as const);
-      } catch {
-        return "detail" as const;
-      }
-    })(),
+    getLocalStorageValue<LayoutMode>("layoutMode", "detail", (raw) => {
+      const valid: LayoutMode[] = ["cards", "detail", "table"];
+      return valid.includes(raw as LayoutMode) ? (raw as LayoutMode) : "detail";
+    }),
   );
   theme: Theme = $state(
-    (() => {
-      try {
-        if (typeof localStorage === "undefined") return "tokyo-night" as const;
-        const stored = localStorage.getItem("theme");
-        const valid: Theme[] = ["tokyo-night", "tokyo-night-storm", "tokyo-night-light"];
-        return valid.includes(stored as Theme) ? (stored as Theme) : ("tokyo-night" as const);
-      } catch {
-        return "tokyo-night" as const;
-      }
-    })(),
+    getLocalStorageValue<Theme>("theme", "tokyo-night", (raw) => {
+      const valid: Theme[] = ["tokyo-night", "tokyo-night-storm", "tokyo-night-light"];
+      return valid.includes(raw as Theme) ? (raw as Theme) : "tokyo-night";
+    }),
   );
   hideIdleLayers: boolean = $state(
-    (() => {
-      try {
-        if (typeof localStorage === "undefined") return false;
-        return localStorage.getItem("hideIdleLayers") === "true";
-      } catch {
-        return false;
-      }
-    })(),
+    getLocalStorageValue<boolean>("hideIdleLayers", false, (raw) => raw === "true"),
   );
   packetLogHeight: number = $state(
-    (() => {
-      try {
-        if (typeof localStorage === "undefined") return 200;
-        const stored = localStorage.getItem("packetLogHeight");
-        if (stored) {
-          const parsed = Number(stored);
-          if (Number.isFinite(parsed) && parsed > 0) return parsed;
-        }
-      } catch {
-        // パースに失敗した場合はデフォルトを返す
-      }
-      return 200;
-    })(),
+    getLocalStorageValue<number>("packetLogHeight", 200, (raw) => {
+      const parsed = Number(raw);
+      return Number.isFinite(parsed) && parsed > 0 ? parsed : 200;
+    }),
   );
 
   layers: LayerInfo[] = $state(
@@ -150,20 +123,14 @@ class ViewerStore {
   };
 
   logFilters: Record<string, boolean> = $state(
-    (() => {
-      try {
-        if (typeof localStorage === "undefined") return { ...ViewerStore.DEFAULT_LOG_FILTERS };
-        const stored = localStorage.getItem("logFilters");
-        if (stored) {
-          const parsed = JSON.parse(stored) as Record<string, boolean>;
-          // デフォルトとマージし、新しいキーが追加されても対応する
-          return { ...ViewerStore.DEFAULT_LOG_FILTERS, ...parsed };
-        }
-      } catch {
-        // パースに失敗した場合はデフォルトを返す
-      }
-      return { ...ViewerStore.DEFAULT_LOG_FILTERS };
-    })(),
+    getLocalStorageValue<Record<string, boolean>>(
+      "logFilters",
+      { ...ViewerStore.DEFAULT_LOG_FILTERS },
+      (raw) => ({
+        ...ViewerStore.DEFAULT_LOG_FILTERS,
+        ...(JSON.parse(raw) as Record<string, boolean>),
+      }),
+    ),
   );
   private logIdCounter = 0;
 
