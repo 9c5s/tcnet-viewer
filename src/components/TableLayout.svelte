@@ -1,7 +1,7 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
   import { LAYER_NAMES, statusClass } from "$lib/types.js";
-  import { formatMmSs, formatBPM } from "$lib/formatting.js";
+  import { formatMmSs, formatBPM, formatSpeedPercent } from "$lib/formatting.js";
   import NodeInfoBar from "./NodeInfoBar.svelte";
   import PacketLog from "./PacketLog.svelte";
 
@@ -30,7 +30,7 @@
       case "BPM":
         return metrics?.bpm != null ? formatBPM(metrics.bpm) : "-";
       case "Speed":
-        return metrics?.speed != null ? ((metrics.speed / 1048576) * 100).toFixed(2) + "%" : "-";
+        return metrics?.speed != null ? formatSpeedPercent(metrics.speed) : "-";
       case "Position":
         return metrics?.currentPosition != null ? formatMmSs(metrics.currentPosition) : "-";
       case "Length":
