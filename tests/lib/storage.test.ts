@@ -75,7 +75,23 @@ test("getLocalStorageValue: parse結果が不正ならparse内でフォールバ
   expect(result).toBe("a");
 });
 
+test("getLocalStorageValue: localStorage.getItemが例外を投げる場合はデフォルト値を返す", () => {
+  // プライベートブラウジングや容量超過などで getItem 自体が例外を投げるケース
+  vi.stubGlobal("localStorage", {
+    getItem: (): string => {
+      throw new Error("QuotaExceededError");
+    },
+    setItem: (): void => {},
+    removeItem: (): void => {},
+    clear: (): void => {},
+    length: 0,
+    key: (): string | null => null,
+  });
+  expect(getLocalStorageValue("any", "fallback")).toBe("fallback");
+});
+
 test("getLocalStorageValue: localStorageがundefinedの場合はデフォルト値を返す", () => {
-  vi.unstubAllGlobals();
+  // SSR環境やlocalStorage未サポート環境を想定し、明示的にundefinedで上書きする
+  vi.stubGlobal("localStorage", undefined);
   expect(getLocalStorageValue("any", "fallback")).toBe("fallback");
 });

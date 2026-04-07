@@ -84,7 +84,7 @@ test("formatSpeedPercent: 0を0.00%に変換する", () => {
   expect(formatSpeedPercent(0)).toBe("0.00%");
 });
 
-test("formatSpeedPercent: 1073741 (約+2.38%のピッチベンド) を正しく変換する", () => {
+test("formatSpeedPercent: 1073741 (約+2.40%のピッチベンド) を正しく変換する", () => {
   // 1073741 / 1048576 * 100 = 102.400... → 102.40
   expect(formatSpeedPercent(1073741)).toBe("102.40%");
 });
