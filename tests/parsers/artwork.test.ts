@@ -4,6 +4,7 @@ import {
   detectArtworkMimeType,
   isValidImageData,
   processArtworkPacket,
+  trimJpegPadding,
 } from "../../server/parsers/artwork.js";
 
 // --- artworkToBase64 ---
@@ -97,6 +98,32 @@ describe("isValidImageData", () => {
   });
 });
 
+// --- trimJpegPadding ---
+
+describe("trimJpegPadding", () => {
+  test("EOI以降のnullパディングを除去する", () => {
+    const data = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0xff, 0xd9, 0x00, 0x00, 0x00]);
+    expect(trimJpegPadding(data)).toEqual(Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0xff, 0xd9]));
+  });
+
+  test("EOIが末尾にある場合はそのまま返す", () => {
+    const data = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0xff, 0xd9]);
+    expect(trimJpegPadding(data)).toEqual(data);
+  });
+
+  test("EOIマーカーがない場合はそのまま返す", () => {
+    const data = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00]);
+    expect(trimJpegPadding(data)).toEqual(data);
+  });
+
+  test("大量のnullパディングがあっても正しくトリミングする", () => {
+    const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0xff, 0xd9]);
+    const padding = Buffer.alloc(1000);
+    const data = Buffer.concat([jpeg, padding]);
+    expect(trimJpegPadding(data)).toEqual(jpeg);
+  });
+});
+
 // --- processArtworkPacket ---
 
 describe("processArtworkPacket", () => {
@@ -136,6 +163,14 @@ describe("processArtworkPacket", () => {
   test("base64を正しくデコードすると元のバッファに戻る", () => {
     const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0xaa, 0xbb, 0xcc, 0xff, 0xd9]);
     const result = processArtworkPacket(jpeg)!;
+    expect(Buffer.from(result.base64, "base64")).toEqual(jpeg);
+  });
+
+  test("nullパディング付きJPEGはトリミングされたbase64を返す", () => {
+    const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0xff, 0xd9]);
+    const padded = Buffer.concat([jpeg, Buffer.alloc(100)]);
+    const result = processArtworkPacket(padded)!;
+    expect(result).not.toBeNull();
     expect(Buffer.from(result.base64, "base64")).toEqual(jpeg);
   });
 });
