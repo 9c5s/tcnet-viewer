@@ -1,6 +1,14 @@
-// JPEG/PNGのマジックバイトが存在するか検証する
+// JPEG/PNGのマジックバイトとEOIマーカーが存在するか検証する
 export function isValidImageData(data: Buffer): boolean {
-  if (data.length >= 2 && data[0] === 0xff && data[1] === 0xd8) return true;
+  // JPEG: SOI (0xFF 0xD8) + EOI (0xFF 0xD9) の両方を検証する
+  if (data.length >= 4 && data[0] === 0xff && data[1] === 0xd8) {
+    // 末尾からEOIマーカーを探索する(パディングがある場合に対応)
+    for (let i = data.length - 1; i >= 1; i--) {
+      if (data[i] === 0xd9 && data[i - 1] === 0xff) return true;
+    }
+    return false;
+  }
+  // PNG: マジックバイト (0x89 0x50 0x4E 0x47) を検証する
   if (
     data.length >= 4 &&
     data[0] === 0x89 &&
