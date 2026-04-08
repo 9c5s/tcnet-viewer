@@ -513,8 +513,12 @@ export class TCNetBridge {
             layer,
             data: artworkData,
           });
+          break;
         }
-        break;
+        // 不完全なJPEG (EOIマーカーなし) の場合は再送要求する
+        console.log(
+          `[TCNet] アートワーク不正データ (レイヤー${layer}, 試行${attempt}/3, ${artPacket.data?.jpeg?.length ?? 0}B)`,
+        );
       } catch (err) {
         const reason = err instanceof Error ? err.message : String(err);
         console.log(`[TCNet] アートワーク取得失敗 (レイヤー${layer}, 試行${attempt}/3): ${reason}`);
