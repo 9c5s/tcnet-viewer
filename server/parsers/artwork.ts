@@ -39,14 +39,26 @@ export function artworkToBase64(data: Buffer): string {
   return data.toString("base64");
 }
 
+// JPEGのEOIマーカー (0xFF 0xD9) 以降のnullパディングを除去する
+// BridgeがFileパケットを固定サイズで送信するため、末尾にnullバイトが含まれることがある
+export function trimJpegPadding(data: Buffer): Buffer {
+  for (let i = data.length - 1; i >= 1; i--) {
+    if (data[i] === 0xd9 && data[i - 1] === 0xff) {
+      return data.subarray(0, i + 1);
+    }
+  }
+  return data;
+}
+
 // node-tcnetがアセンブル済みのJPEGバッファからブロードキャスト用ペイロードを生成する
 // 無効なデータの場合はnullを返す
 export function processArtworkPacket(
   jpeg: Buffer | undefined,
 ): { base64: string; mimeType: string } | null {
   if (!jpeg || jpeg.length === 0 || !isValidImageData(jpeg)) return null;
+  const trimmed = trimJpegPadding(jpeg);
   return {
-    base64: artworkToBase64(jpeg),
-    mimeType: detectArtworkMimeType(jpeg),
+    base64: artworkToBase64(trimmed),
+    mimeType: detectArtworkMimeType(trimmed),
   };
 }
