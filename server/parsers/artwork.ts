@@ -1,14 +1,20 @@
-// JPEG/PNGのマジックバイトとEOIマーカーが存在するか検証する
+// 末尾のnullバイト (0x00) を除去した終端位置を返す
+function findNonNullEnd(data: Buffer): number {
+  let end = data.length - 1;
+  while (end > 0 && data[end] === 0x00) end--;
+  return end;
+}
+
+// JPEG/PNGの完全性を検証する
+// JPEGはnullパディング除去後の末尾がEOIマーカー (0xFF 0xD9) であることを確認する
+// バッファ全体を後方検索しない (マーカーセグメント内の0xFF 0xD9との誤一致を防ぐ)
 export function isValidImageData(data: Buffer): boolean {
-  // JPEG: SOI (0xFF 0xD8) + EOI (0xFF 0xD9) の両方を検証する
+  // JPEG: SOI (0xFF 0xD8) + 末尾EOI (0xFF 0xD9)
   if (data.length >= 4 && data[0] === 0xff && data[1] === 0xd8) {
-    // 末尾からEOIマーカーを探索する(パディングがある場合に対応)
-    for (let i = data.length - 1; i >= 1; i--) {
-      if (data[i] === 0xd9 && data[i - 1] === 0xff) return true;
-    }
-    return false;
+    const end = findNonNullEnd(data);
+    return end >= 1 && data[end] === 0xd9 && data[end - 1] === 0xff;
   }
-  // PNG: マジックバイト (0x89 0x50 0x4E 0x47) を検証する
+  // PNG: マジックバイト (0x89 0x50 0x4E 0x47)
   if (
     data.length >= 4 &&
     data[0] === 0x89 &&
@@ -39,13 +45,12 @@ export function artworkToBase64(data: Buffer): string {
   return data.toString("base64");
 }
 
-// JPEGのEOIマーカー (0xFF 0xD9) 以降のnullパディングを除去する
-// BridgeがFileパケットを固定サイズで送信するため、末尾にnullバイトが含まれることがある
+// JPEGの末尾nullパディングを除去する
+// BridgeがFileパケットを固定サイズで送信するため、EOI以降にnullバイトが含まれることがある
 export function trimJpegPadding(data: Buffer): Buffer {
-  for (let i = data.length - 1; i >= 1; i--) {
-    if (data[i] === 0xd9 && data[i - 1] === 0xff) {
-      return data.subarray(0, i + 1);
-    }
+  const end = findNonNullEnd(data);
+  if (end >= 1 && data[end] === 0xd9 && data[end - 1] === 0xff) {
+    return data.subarray(0, end + 1);
   }
   return data;
 }
