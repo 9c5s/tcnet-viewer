@@ -88,3 +88,11 @@ test("statusIndicator: 接続済み+認証中はAuthenticating...を返す", asy
   store.authState = "pending";
   expect(store.statusIndicator).toEqual({ color: "bg-warning", text: "Authenticating..." });
 });
+
+test("statusIndicator: 接続済み+refreshingはAuthenticatedを返す", async () => {
+  const store = await loadResetStore();
+  store.connected = true;
+  store.tcnetConnected = true;
+  store.authState = "refreshing";
+  expect(store.statusIndicator).toEqual({ color: "bg-success", text: "Authenticated" });
+});
