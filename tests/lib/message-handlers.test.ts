@@ -241,3 +241,16 @@ test("appdata: ログにcmd, token, dest, portを記録する", () => {
     "cmd=1 token=0x12345678 dest=0xffff port=65023",
   );
 });
+
+test("tcnet-status: refreshing状態をストアに反映する", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  handlers["tcnet-status"]({
+    type: "tcnet-status",
+    connected: true,
+    authState: "refreshing",
+    timestamp: 1000,
+  });
+  expect(store.tcnetConnected).toBe(true);
+  expect(store.authState).toBe("refreshing");
+});
