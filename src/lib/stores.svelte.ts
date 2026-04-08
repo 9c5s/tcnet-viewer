@@ -28,6 +28,8 @@ class ViewerStore {
     if (!this.tcnetConnected) return { color: "bg-warning", text: "Waiting for Bridge..." };
     switch (this.authState) {
       case "authenticated":
+      // bridge実装ではrefreshingを通知しないが、AuthState型網羅のため追加
+      case "refreshing":
         return { color: "bg-success", text: "Authenticated" };
       case "failed":
         return { color: "bg-error", text: "Auth Failed" };
