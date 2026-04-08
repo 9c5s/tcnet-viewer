@@ -200,6 +200,8 @@ export class TCNetBridge {
     });
 
     this.client.on("authenticated", () => {
+      // reauth成功時はデータ再要求不要 (reauthenticatedハンドラで対応)
+      if (this.authState === "authenticated") return;
       console.log("[TCNet] TCNASDP認証成功");
       this.authRetryCount = 0;
       this.clearAuthRetry();
@@ -215,6 +217,8 @@ export class TCNetBridge {
 
     this.client.on("authFailed", () => {
       if (!this.running) return;
+      // reauth失敗時は再接続不要 (autoReauthタイマーが継続し自然回復する)
+      if (this.authState === "authenticated") return;
       if (this.authRetryCount < TCNetBridge.MAX_AUTH_RETRIES) {
         this.authRetryCount++;
         // 指数バックオフ: 2秒 -> 4秒 -> 8秒 (タイミング問題による一時的失敗を自動回復する)
@@ -238,6 +242,14 @@ export class TCNetBridge {
         console.warn("[TCNet] TCNASDP認証失敗、リトライ上限到達");
         this.setAuthState("failed", true);
       }
+    });
+
+    this.client.on("reauthenticated", () => {
+      console.log("[TCNet] TCNASDP再認証成功");
+    });
+
+    this.client.on("reauthFailed", (err: Error) => {
+      console.warn(`[TCNet] TCNASDP再認証失敗: ${err.message}`);
     });
 
     this.client.on("broadcast", (packet: unknown) => {
