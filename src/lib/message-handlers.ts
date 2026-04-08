@@ -119,6 +119,7 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
       store.waveformSmall[i] = null;
       store.waveformBig[i] = null;
       store.beatgrid[i] = null;
+      store.addLogEntry(msg.type, i, "layer data cleared");
     },
     beatgrid: (msg) => {
       store.beatgrid[msg.layer] = msg.data.entries;
