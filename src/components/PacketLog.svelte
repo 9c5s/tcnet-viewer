@@ -149,14 +149,20 @@
       {/each}
     </div>
   </div>
+  <!-- tableを使用する理由: flex+spanだとブラウザのコピー時に各spanで改行が挿入されてしまう。
+       tableは行単位のコピーを正しく扱い、セルはタブ区切り・行は改行区切りで貼り付けられる。 -->
   <div class="flex-1 overflow-y-auto text-[10px]" bind:this={logContainer} onscroll={onScroll}>
-    {#each filteredLogs as entry (entry.id)}
-      <div class="flex gap-2 px-3 py-px hover:bg-base-content/5">
-        <span class="min-w-[85px] text-base-content/40 tabular-nums">{formatTimestamp(entry.timestamp)}</span>
-        <span class="{getTypeClass(entry)} min-w-[65px] font-semibold">{entry.type}</span>
-        <span class="min-w-[55px] text-base-content/50">{entry.layer !== undefined ? LAYER_NAMES[entry.layer] : "--"}</span>
-        <span class="flex-1 truncate text-base-content/60">{entry.summary}</span>
-      </div>
-    {/each}
+    <table class="w-full table-fixed">
+      <tbody>
+        {#each filteredLogs as entry (entry.id)}
+          <tr class="hover:bg-base-content/5">
+            <td class="w-[95px] py-px pr-1 pl-3 text-base-content/40 tabular-nums">{formatTimestamp(entry.timestamp)}</td>
+            <td class="{getTypeClass(entry)} w-[100px] py-px pr-1 font-semibold">{entry.type}</td>
+            <td class="w-[45px] py-px pr-1 text-base-content/50">{entry.layer !== undefined ? LAYER_NAMES[entry.layer] : "--"}</td>
+            <td class="py-px pr-3 text-base-content/60"><span class="inline-block w-full truncate align-top">{entry.summary}</span></td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
   </div>
 </div>
