@@ -65,7 +65,7 @@ type ArtworkData = {
   mimeType: string;
 };
 
-export type AuthState = "none" | "pending" | "authenticated" | "refreshing" | "failed";
+export type AuthState = "none" | "pending" | "authenticated" | "failed";
 
 type TCNetErrorData = {
   errorData: number[];

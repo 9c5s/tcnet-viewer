@@ -80,6 +80,15 @@ export class TCNetBridge {
 
   private createClient(): void {
     const config = new TCNetConfiguration();
+    // Bridgeの固定サイズFileパケット送信間隔にばらつきがあるため、
+    // デフォルト200msでは最後のチャンクを取りこぼすことがある
+    config.fileCollectionTimeout = 500;
+    // 認証挙動追跡用にnode-tcnet内部のdebug/errorログを出力する
+    // 認証トークン受信、OS判定、認証成功/失敗タイムアウト等のイベントを拾える
+    config.logger = {
+      debug: (message: string) => console.log(`[TCNet][DEBUG] ${message}`),
+      error: (error: Error) => console.error(`[TCNet][ERROR] ${error.message}`),
+    };
     this.nodeName = config.nodeName;
     this.client = new TCNetClient(config);
     this.setupListeners();
@@ -200,8 +209,6 @@ export class TCNetBridge {
     });
 
     this.client.on("authenticated", () => {
-      // reauth成功時はデータ再要求不要 (reauthenticatedハンドラで対応)
-      if (this.authState === "authenticated") return;
       console.log("[TCNet] TCNASDP認証成功");
       this.authRetryCount = 0;
       this.clearAuthRetry();
@@ -217,8 +224,6 @@ export class TCNetBridge {
 
     this.client.on("authFailed", () => {
       if (!this.running) return;
-      // reauth失敗時は再接続不要 (autoReauthタイマーが継続し自然回復する)
-      if (this.authState === "authenticated") return;
       if (this.authRetryCount < TCNetBridge.MAX_AUTH_RETRIES) {
         this.authRetryCount++;
         // 指数バックオフ: 2秒 -> 4秒 -> 8秒 (タイミング問題による一時的失敗を自動回復する)
@@ -242,14 +247,6 @@ export class TCNetBridge {
         console.warn("[TCNet] TCNASDP認証失敗、リトライ上限到達");
         this.setAuthState("failed", true);
       }
-    });
-
-    this.client.on("reauthenticated", () => {
-      console.log("[TCNet] TCNASDP再認証成功");
-    });
-
-    this.client.on("reauthFailed", (err: Error) => {
-      console.warn(`[TCNet] TCNASDP再認証失敗: ${err.message}`);
     });
 
     this.client.on("broadcast", (packet: unknown) => {
