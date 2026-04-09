@@ -155,6 +155,13 @@ class ViewerStore {
   }
 
   addLogEntry(type: string, layer: number | undefined, summary: string): void {
+    // フィルタで非表示にされたtypeはバッファにも追加しない。
+    // timeのような高頻度イベント(50-60Hz)でバッファが埋まり他の重要なログ
+    // (server, tcnet-error, auth関連等)がevictされるのを防ぐ。
+    // トレードオフ: フィルタをON->OFF->ONと切り替えても過去のエントリは
+    // 戻らない(filter OFF中は記録自体されないため)。必要な時だけONにして
+    // ライブ観測する運用を想定している。
+    if (this.logFilters[type] === false) return;
     this.packetLog.push({
       id: this.logIdCounter++,
       timestamp: Date.now(),
