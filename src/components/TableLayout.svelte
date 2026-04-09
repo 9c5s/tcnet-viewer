@@ -78,6 +78,7 @@
                     <img
                       src="data:{store.artwork[i]!.mimeType};base64,{store.artwork[i]!.base64}"
                       alt="Art"
+                      onerror={() => { store.artwork[i] = null; }}
                       class="mx-auto size-8 rounded-sm object-cover"
                     />
                   {:else}

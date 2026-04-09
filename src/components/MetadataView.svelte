@@ -16,7 +16,8 @@
       {#if artwork}
         <div class="avatar">
           <div class="w-16 rounded-sm">
-            <img src="data:{artwork.mimeType};base64,{artwork.base64}" alt="Artwork" />
+            <img src="data:{artwork.mimeType};base64,{artwork.base64}" alt="Artwork"
+              onerror={() => { store.artwork[layer] = null; }} />
           </div>
         </div>
       {:else}

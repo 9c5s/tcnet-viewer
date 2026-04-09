@@ -68,9 +68,9 @@
             {#if metadata}
               <div class="flex shrink-0 items-center gap-2">
                 {#if artwork}
-                  <img src="data:{artwork.mimeType};base64,{artwork.base64}" alt="Art" class="
-                    size-8 shrink-0 rounded-sm object-cover
-                  " />
+                  <img src="data:{artwork.mimeType};base64,{artwork.base64}" alt="Art"
+                    onerror={() => { store.artwork[i] = null; }}
+                    class="size-8 shrink-0 rounded-sm object-cover" />
                 {/if}
                 <div class="min-w-0 flex-1">
                   <div class="text-[11px] leading-tight font-bold text-base-content">{metadata.trackTitle || "Unknown"}</div>
