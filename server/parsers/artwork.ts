@@ -14,15 +14,29 @@ export function isValidImageData(data: Buffer): boolean {
     const end = findNonNullEnd(data);
     return end >= 1 && data[end] === 0xd9 && data[end - 1] === 0xff;
   }
-  // PNG: マジックバイト (0x89 0x50 0x4E 0x47)
+  // PNG: マジックバイト (0x89 0x50 0x4E 0x47) + 末尾IENDチャンク
+  // JPEGと同様に開始・終了の両方を検証し、不完全なPNGがリトライループを抜けるのを防ぐ
   if (
-    data.length >= 4 &&
+    data.length >= 12 &&
     data[0] === 0x89 &&
     data[1] === 0x50 &&
     data[2] === 0x4e &&
     data[3] === 0x47
-  )
-    return true;
+  ) {
+    // IENDチャンク: length(4) + "IEND"(4) + CRC(4) = 末尾12バイト
+    const end = findNonNullEnd(data);
+    return (
+      end >= 11 &&
+      data[end - 7] === 0x49 && // I
+      data[end - 6] === 0x45 && // E
+      data[end - 5] === 0x4e && // N
+      data[end - 4] === 0x44 && // D
+      data[end - 3] === 0xae && // CRC bytes
+      data[end - 2] === 0x42 &&
+      data[end - 1] === 0x60 &&
+      data[end] === 0x82
+    );
+  }
   return false;
 }
 
