@@ -193,8 +193,9 @@ export class TCNetBridge {
       this.trackIds = Array.from({ length: 8 }, () => null);
       // 旧セッションのrequestLayerDataを無効化する (世代を進めることでawait中のリクエストが破棄される)
       for (let i = 0; i < this.layerGeneration.length; i++) this.layerGeneration[i]++;
-      // 新サイクルの認証リトライ回数をリセットする (前セッションの失敗回数を引き継がない)
-      this.authRetryCount = 0;
+      // authRetryCountはここでリセットしない
+      // authFailed→reconnect→authFailedのサイクルでMAX_AUTH_RETRIESに到達させるため
+      // カウンタはauthenticatedイベント成功時のみリセットする
       this.createClient();
       await this.connect();
     } finally {
