@@ -2,21 +2,21 @@ import { expect, test } from "vite-plus/test";
 import { parseBeatGrid } from "../../server/parsers/beat-grid.js";
 import { BeatGridBuilder } from "./builders.js";
 
-test("parseBeatGrid: 単一のdownbeatをパースする", () => {
+test("parseBeatGrid: 単一エントリをパースする", () => {
   const buffer = new BeatGridBuilder().addBeat(1, true, 500).build();
   const result = parseBeatGrid(buffer);
   expect(result).toHaveLength(1);
-  expect(result[0]).toEqual({ beatNumber: 1, beatType: "downbeat", timestampMs: 500 });
+  expect(result[0]).toEqual({ beatNumber: 1, beatType: 20, timestampMs: 500 });
 });
 
-test("parseBeatGrid: upbeatを正しく判定する", () => {
-  const buffer = new BeatGridBuilder().addBeat(2, false, 1000).build();
-  expect(parseBeatGrid(buffer)[0].beatType).toBe("upbeat");
-});
-
-test("parseBeatGrid: beatTypeRaw=20以外は全てupbeatになる", () => {
+test("parseBeatGrid: beatType生値をそのまま返す", () => {
   const buffer = new BeatGridBuilder().addRaw(1, 19, 100).build();
-  expect(parseBeatGrid(buffer)[0].beatType).toBe("upbeat");
+  expect(parseBeatGrid(buffer)[0].beatType).toBe(19);
+});
+
+test("parseBeatGrid: downbeat以外のbeatTypeも保持する", () => {
+  const buffer = new BeatGridBuilder().addBeat(2, false, 1000).build();
+  expect(parseBeatGrid(buffer)[0].beatType).toBe(0);
 });
 
 test("parseBeatGrid: 複数エントリをパースする", () => {
@@ -28,8 +28,8 @@ test("parseBeatGrid: 複数エントリをパースする", () => {
     .build();
   const result = parseBeatGrid(buffer);
   expect(result).toHaveLength(4);
-  expect(result[0].beatType).toBe("downbeat");
-  expect(result[3].beatType).toBe("downbeat");
+  expect(result[0].beatType).toBe(20);
+  expect(result[3].beatType).toBe(20);
 });
 
 test("parseBeatGrid: beatNumber=0かつtimestamp=0のエントリはスキップする", () => {

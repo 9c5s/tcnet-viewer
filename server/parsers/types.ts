@@ -1,6 +1,6 @@
 export type BeatGridEntry = {
   beatNumber: number;
-  beatType: "downbeat" | "upbeat";
+  beatType: number;
   timestampMs: number;
 };
 
@@ -14,7 +14,6 @@ export type CuePoint = {
 
 export type CueData = {
   loopInTime: number;
-  loopOutTime: number;
   cues: CuePoint[];
 };
 

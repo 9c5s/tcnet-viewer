@@ -2,11 +2,10 @@ import { expect, test } from "vite-plus/test";
 import { parseCueData } from "../../server/parsers/cue-data.js";
 import { CueDataBuilder } from "./builders.js";
 
-test("parseCueData: ループイン/アウト時間をパースする", () => {
-  const buffer = new CueDataBuilder().setLoopTimes(5000, 25000).build();
+test("parseCueData: ループイン時間をパースする", () => {
+  const buffer = new CueDataBuilder().setLoopInTime(5000).build();
   const result = parseCueData(buffer);
   expect(result.loopInTime).toBe(5000);
-  expect(result.loopOutTime).toBe(25000);
 });
 
 test("parseCueData: CUEポイントをパースする", () => {
@@ -22,14 +21,22 @@ test("parseCueData: CUEポイントをパースする", () => {
   });
 });
 
-test("parseCueData: inTime/outTime共に0のCUEはスキップする", () => {
+test("parseCueData: type=0かつinTime/outTime共に0のCUEはスキップする", () => {
   const buffer = new CueDataBuilder()
-    .addCue(1, 1, 0, 0, { r: 0, g: 0, b: 0 })
+    .addCue(1, 0, 0, 0, { r: 0, g: 0, b: 0 })
     .addCue(2, 1, 5000, 10000, { r: 0, g: 255, b: 0 })
     .build();
   const result = parseCueData(buffer);
   expect(result.cues).toHaveLength(1);
   expect(result.cues[0].index).toBe(2);
+});
+
+test("parseCueData: type>=1でinTime/outTime=0のCUEは保持する (トラック先頭CUE)", () => {
+  const buffer = new CueDataBuilder().addCue(1, 1, 0, 0, { r: 255, g: 0, b: 0 }).build();
+  const result = parseCueData(buffer);
+  expect(result.cues).toHaveLength(1);
+  expect(result.cues[0].type).toBe(1);
+  expect(result.cues[0].inTime).toBe(0);
 });
 
 test("parseCueData: type=0でもinTimeが非0ならエントリに含まれる", () => {
