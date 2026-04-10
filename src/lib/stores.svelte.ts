@@ -90,6 +90,9 @@ class ViewerStore {
   mixer: MixerData | null = $state(null);
   generalSMPTEMode = $state(0);
 
+  // WebSocket再接続時用の完全リセット (metadataも含めて全クリア)
+  // layer-resetハンドラはトラック変更時にmetadataを保持してレイアウト崩れを防ぐが、
+  // 再接続時はサーバーからキャッシュ済みデータが再送されるため全てクリアする
   resetLayerData(): void {
     for (let i = 0; i < 8; i++) {
       this.metadata[i] = null;
