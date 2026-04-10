@@ -25,8 +25,8 @@ export default defineConfig(({ mode }) => {
         "vp check --fix",
         "vp lint --deny-warnings",
       ],
-      "*.svelte": ["npx eslint --fix", "npx svelte-check --fail-on-warnings"],
-      ".github/workflows/*.{yml,yaml}": ["npx actionlint", "npx zizmor --fix --pedantic"],
+      "*.svelte": ["vp dlx eslint --fix", "vp dlx svelte-check --fail-on-warnings"],
+      ".github/workflows/*.{yml,yaml}": ["vp dlx actionlint", "vp dlx zizmor --fix --pedantic"],
     },
     plugins: [tailwindcss(), svelte(), tcnetPlugin()],
     server: {
