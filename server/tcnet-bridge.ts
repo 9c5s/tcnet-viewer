@@ -448,10 +448,24 @@ export class TCNetBridge {
     // trackIDが変化したレイヤーのデータをリセットしてリクエストする
     for (let i = 0; i < packet.layers.length; i++) {
       const layer = packet.layers[i];
-      if (layer && layer.trackID !== 0 && layer.trackID !== this.trackIds[i]) {
-        console.log(`[TCNet] レイヤー${i}: トラックID ${this.trackIds[i]} -> ${layer.trackID}`);
-        this.trackIds[i] = layer.trackID;
-        // 前曲のデータをクリアする (アートワークなし曲で前曲データが残る問題の防止)
+      const nextTrackId = layer?.trackID ?? 0;
+
+      // トラック取り出し (trackID → 0): 旧データをクリアするがリクエストは行わない
+      if (nextTrackId === 0) {
+        if (this.trackIds[i] !== null) {
+          console.log(`[TCNet] レイヤー${i}: トラックID ${this.trackIds[i]} -> 取り出し`);
+          this.trackIds[i] = null;
+          this.broadcast({ type: "layer-reset", timestamp: Date.now(), layer: i });
+          this.resetLayerAssemblers(i);
+          this.layerGeneration[i]++;
+        }
+        continue;
+      }
+
+      // トラック変更 (非ゼロの新ID): データをリセットして新データをリクエストする
+      if (nextTrackId !== this.trackIds[i]) {
+        console.log(`[TCNet] レイヤー${i}: トラックID ${this.trackIds[i]} -> ${nextTrackId}`);
+        this.trackIds[i] = nextTrackId;
         this.broadcast({ type: "layer-reset", timestamp: Date.now(), layer: i });
         this.resetLayerAssemblers(i);
         const gen = ++this.layerGeneration[i];
