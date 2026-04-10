@@ -71,21 +71,29 @@ test("add: totalPacketsが途中で変化するとリセットして現パケッ
   expect([...assembler.assemble()]).toEqual([10, 20]);
 });
 
-test("add: 範囲外packetNoがtotalPacketsを汚染しない", () => {
+test("add: 範囲外packetNoは進行中アセンブリを壊さない", () => {
   const assembler = new MultiPacketAssembler();
-  // 不正パケット: totalPackets=2, packetNo=2 (範囲外)
+  // 正常パケット0を受信
+  expect(assembler.add(createMultiPacketBuffer(2, 0, 2, [1, 2]))).toBe(false);
+  // 範囲外packetNo=2は無視される (進行中データは保持)
   expect(assembler.add(createMultiPacketBuffer(2, 2, 2, [99, 99]))).toBe(false);
-  // 後続の正常な転送 (異なるtotalPackets) が受け入れられること
-  expect(assembler.add(createMultiPacketBuffer(1, 0, 2, [10, 20]))).toBe(true);
-  expect([...assembler.assemble()]).toEqual([10, 20]);
+  // 正常パケット1で転送完了
+  expect(assembler.add(createMultiPacketBuffer(2, 1, 2, [10, 20]))).toBe(true);
+  expect([...assembler.assemble()]).toEqual([1, 2, 10, 20]);
 });
 
-test("add: clusterSizeがバッファ実長を超える切り詰めパケットは無視する", () => {
+test("add: 切り詰めパケットは進行中アセンブリを壊さない", () => {
   const assembler = new MultiPacketAssembler();
-  const buffer = Buffer.alloc(45);
-  buffer.writeUInt32LE(1, 30); // totalPackets
-  buffer.writeUInt32LE(0, 34); // packetNo
-  buffer.writeUInt32LE(100, 38); // clusterSize (バッファより大きい)
-  buffer.writeUInt8(10, 42);
-  expect(assembler.add(buffer)).toBe(false);
+  // 正常パケット0を受信
+  expect(assembler.add(createMultiPacketBuffer(2, 0, 2, [1, 2]))).toBe(false);
+  // clusterSize超過の切り詰めパケットは無視される (進行中データは保持)
+  const truncated = Buffer.alloc(45);
+  truncated.writeUInt32LE(2, 30);
+  truncated.writeUInt32LE(1, 34);
+  truncated.writeUInt32LE(100, 38); // clusterSize=100だがバッファは3バイトしかない
+  truncated.writeUInt8(10, 42);
+  expect(assembler.add(truncated)).toBe(false);
+  // 正常パケット1で転送完了
+  expect(assembler.add(createMultiPacketBuffer(2, 1, 2, [10, 20]))).toBe(true);
+  expect([...assembler.assemble()]).toEqual([1, 2, 10, 20]);
 });
