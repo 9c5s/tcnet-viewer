@@ -96,8 +96,14 @@ describe("isValidImageData", () => {
     expect(isValidImageData(png)).toBe(true);
   });
 
-  test("PNGマジックバイトのみ (IENDなし) を無効と判定する", () => {
-    expect(isValidImageData(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a]))).toBe(false);
+  test("PNGシグネチャのみ (IENDなし) を無効と判定する", () => {
+    expect(isValidImageData(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))).toBe(
+      false,
+    );
+  });
+
+  test("PNG 4バイトシグネチャのみ (不完全ヘッダー) を無効と判定する", () => {
+    expect(isValidImageData(Buffer.from([0x89, 0x50, 0x4e, 0x47]))).toBe(false);
   });
 
   test("不明なバイト列を無効と判定する", () => {
