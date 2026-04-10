@@ -63,11 +63,14 @@ test("add: totalPackets=0のパケットは無視する", () => {
   expect(assembler.add(buffer)).toBe(false);
 });
 
-test("add: totalPacketsが途中で変化したパケットは無視する", () => {
+test("add: totalPacketsが途中で変化するとリセットして後続転送を受け入れる", () => {
   const assembler = new MultiPacketAssembler();
   assembler.add(createMultiPacketBuffer(3, 0, 2, [1, 2]));
-  // totalPacketsが3→2に変化
+  // totalPacketsが3→2に変化 (古い転送は破棄される)
   expect(assembler.add(createMultiPacketBuffer(2, 1, 2, [3, 4]))).toBe(false);
+  // リセット後の新しい転送が受け入れられること
+  expect(assembler.add(createMultiPacketBuffer(1, 0, 2, [10, 20]))).toBe(true);
+  expect([...assembler.assemble()]).toEqual([10, 20]);
 });
 
 test("add: 範囲外packetNoがtotalPacketsを汚染しない", () => {
