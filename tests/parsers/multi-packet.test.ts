@@ -70,6 +70,15 @@ test("add: totalPacketsが途中で変化したパケットは無視する", () 
   expect(assembler.add(createMultiPacketBuffer(2, 1, 2, [3, 4]))).toBe(false);
 });
 
+test("add: 範囲外packetNoがtotalPacketsを汚染しない", () => {
+  const assembler = new MultiPacketAssembler();
+  // 不正パケット: totalPackets=2, packetNo=2 (範囲外)
+  expect(assembler.add(createMultiPacketBuffer(2, 2, 2, [99, 99]))).toBe(false);
+  // 後続の正常な転送 (異なるtotalPackets) が受け入れられること
+  expect(assembler.add(createMultiPacketBuffer(1, 0, 2, [10, 20]))).toBe(true);
+  expect([...assembler.assemble()]).toEqual([10, 20]);
+});
+
 test("add: clusterSizeがバッファ実長を超える切り詰めパケットは無視する", () => {
   const assembler = new MultiPacketAssembler();
   const buffer = Buffer.alloc(45);

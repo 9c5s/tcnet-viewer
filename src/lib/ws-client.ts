@@ -17,6 +17,10 @@ export function connect(): void {
     store.resetLayerData();
   };
 
+  ws.onerror = (event) => {
+    console.error("[WS] エラー:", event);
+  };
+
   ws.onclose = () => {
     store.connected = false;
     store.tcnetConnected = false;
