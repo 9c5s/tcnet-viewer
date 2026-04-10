@@ -87,6 +87,7 @@ export class TCNetBridge {
     // 認証トークン受信、OS判定、認証成功/失敗タイムアウト等のイベントを拾える
     config.logger = {
       debug: (message: string) => console.log(`[TCNet][DEBUG] ${message}`),
+      warn: (message: string) => console.warn(`[TCNet][WARN] ${message}`),
       error: (error: Error) => console.error(`[TCNet][ERROR] ${error.message}`),
     };
     this.nodeName = config.nodeName;

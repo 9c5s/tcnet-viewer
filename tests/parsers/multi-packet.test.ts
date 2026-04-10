@@ -49,26 +49,33 @@ test("reset: 内部状態をクリアする", () => {
   expect(assembler.assemble().readUInt8(0)).toBe(99);
 });
 
-test("add: packetNo=0の再到着で途中データを破棄する", () => {
+test("add: 42バイト未満のバッファは無視する", () => {
   const assembler = new MultiPacketAssembler();
-  assembler.add(createMultiPacketBuffer(3, 0, 2, [1, 2]));
-  assembler.add(createMultiPacketBuffer(3, 1, 2, [3, 4]));
-  // 新しいデータセットの先頭パケットが到着
-  assembler.add(createMultiPacketBuffer(1, 0, 2, [99, 88]));
-  const result = assembler.assemble();
-  expect([...result]).toEqual([99, 88]);
+  expect(assembler.add(Buffer.alloc(41))).toBe(false);
 });
 
-test("add: clusterSizeがバッファ実長を超える場合は実際の長さでクランプする", () => {
+test("add: totalPackets=0のパケットは無視する", () => {
   const assembler = new MultiPacketAssembler();
   const buffer = Buffer.alloc(45);
-  buffer.writeUInt32LE(1, 30);
+  buffer.writeUInt32LE(0, 30); // totalPackets = 0
   buffer.writeUInt32LE(0, 34);
-  buffer.writeUInt32LE(100, 38);
+  buffer.writeUInt32LE(3, 38);
+  expect(assembler.add(buffer)).toBe(false);
+});
+
+test("add: totalPacketsが途中で変化したパケットは無視する", () => {
+  const assembler = new MultiPacketAssembler();
+  assembler.add(createMultiPacketBuffer(3, 0, 2, [1, 2]));
+  // totalPacketsが3→2に変化
+  expect(assembler.add(createMultiPacketBuffer(2, 1, 2, [3, 4]))).toBe(false);
+});
+
+test("add: clusterSizeがバッファ実長を超える切り詰めパケットは無視する", () => {
+  const assembler = new MultiPacketAssembler();
+  const buffer = Buffer.alloc(45);
+  buffer.writeUInt32LE(1, 30); // totalPackets
+  buffer.writeUInt32LE(0, 34); // packetNo
+  buffer.writeUInt32LE(100, 38); // clusterSize (バッファより大きい)
   buffer.writeUInt8(10, 42);
-  buffer.writeUInt8(20, 43);
-  buffer.writeUInt8(30, 44);
-  assembler.add(buffer);
-  const result = assembler.assemble();
-  expect(result.length).toBe(3);
+  expect(assembler.add(buffer)).toBe(false);
 });
