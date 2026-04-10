@@ -14,21 +14,21 @@ test("add: 全パケット揃うまでfalseを返す", () => {
   expect(assembler.add(createMultiPacketBuffer(2, 1, 4, [5, 6, 7, 8]))).toBe(true);
 });
 
-test("assemble: パケット番号順に結合する", () => {
+test("assemble: 逆順で到着したパケットを番号順に結合する", () => {
   const assembler = new MultiPacketAssembler();
-  assembler.add(createMultiPacketBuffer(2, 0, 3, [10, 20, 30]));
   assembler.add(createMultiPacketBuffer(2, 1, 3, [40, 50, 60]));
+  assembler.add(createMultiPacketBuffer(2, 0, 3, [10, 20, 30]));
   const result = assembler.assemble();
   expect(result.readUInt8(0)).toBe(10);
   expect(result.readUInt8(3)).toBe(40);
   expect(result.length).toBe(6);
 });
 
-test("assemble: 3パケットを番号順に結合する", () => {
+test("assemble: 順不同の3パケットを番号順に結合する", () => {
   const assembler = new MultiPacketAssembler();
+  assembler.add(createMultiPacketBuffer(3, 2, 2, [50, 60]));
   assembler.add(createMultiPacketBuffer(3, 0, 2, [10, 20]));
   assembler.add(createMultiPacketBuffer(3, 1, 2, [30, 40]));
-  assembler.add(createMultiPacketBuffer(3, 2, 2, [50, 60]));
   const result = assembler.assemble();
   expect([...result]).toEqual([10, 20, 30, 40, 50, 60]);
 });
@@ -63,12 +63,10 @@ test("add: totalPackets=0のパケットは無視する", () => {
   expect(assembler.add(buffer)).toBe(false);
 });
 
-test("add: totalPacketsが途中で変化するとリセットして後続転送を受け入れる", () => {
+test("add: totalPacketsが途中で変化するとリセットして現パケットから新転送を開始する", () => {
   const assembler = new MultiPacketAssembler();
   assembler.add(createMultiPacketBuffer(3, 0, 2, [1, 2]));
-  // totalPacketsが3→2に変化 (古い転送は破棄される)
-  expect(assembler.add(createMultiPacketBuffer(2, 1, 2, [3, 4]))).toBe(false);
-  // リセット後の新しい転送が受け入れられること
+  // totalPacketsが3→1に変化: 古い転送は破棄され、このパケット自体が新転送として処理される
   expect(assembler.add(createMultiPacketBuffer(1, 0, 2, [10, 20]))).toBe(true);
   expect([...assembler.assemble()]).toEqual([10, 20]);
 });
