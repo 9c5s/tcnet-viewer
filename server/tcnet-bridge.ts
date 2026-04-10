@@ -503,6 +503,7 @@ export class TCNetBridge {
       if (this.layerGeneration[layer] !== generation) return;
       try {
         const packet = await this.client.requestData(TCNetDataPacketType.ArtworkData, layer);
+        if (this.layerGeneration[layer] !== generation) return;
         const artPacket = packet as unknown as TCNetDataPacketArtworkType;
         const artworkData = processArtworkPacket(artPacket.data?.jpeg);
         if (artworkData) {
