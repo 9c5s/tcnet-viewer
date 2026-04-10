@@ -69,12 +69,35 @@ describe("isValidImageData", () => {
     expect(isValidImageData(jpeg)).toBe(true);
   });
 
-  test("PNGマジックバイト (0x89 0x50 0x4E 0x47) を有効と判定する", () => {
-    expect(isValidImageData(Buffer.from([0x89, 0x50, 0x4e, 0x47]))).toBe(true);
+  test("PNGマジックバイト + IENDチャンクを有効と判定する", () => {
+    // 最小有効PNG: マジック(4) + ... + IEND length(4) + IEND(4) + CRC(4)
+    const png = Buffer.from([
+      0x89,
+      0x50,
+      0x4e,
+      0x47,
+      0x0d,
+      0x0a,
+      0x1a,
+      0x0a, // マジック
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x49,
+      0x45,
+      0x4e,
+      0x44,
+      0xae,
+      0x42,
+      0x60,
+      0x82, // IEND
+    ]);
+    expect(isValidImageData(png)).toBe(true);
   });
 
-  test("PNGマジックバイト + 後続データを有効と判定する", () => {
-    expect(isValidImageData(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a]))).toBe(true);
+  test("PNGマジックバイトのみ (IENDなし) を無効と判定する", () => {
+    expect(isValidImageData(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a]))).toBe(false);
   });
 
   test("不明なバイト列を無効と判定する", () => {
@@ -141,7 +164,28 @@ describe("processArtworkPacket", () => {
   });
 
   test("有効なPNGバッファからbase64とmimeTypeを返す", () => {
-    const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a]);
+    const png = Buffer.from([
+      0x89,
+      0x50,
+      0x4e,
+      0x47,
+      0x0d,
+      0x0a,
+      0x1a,
+      0x0a, // マジック
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x49,
+      0x45,
+      0x4e,
+      0x44,
+      0xae,
+      0x42,
+      0x60,
+      0x82, // IEND
+    ]);
     const result = processArtworkPacket(png);
     expect(result).not.toBeNull();
     expect(result!.mimeType).toBe("image/png");
