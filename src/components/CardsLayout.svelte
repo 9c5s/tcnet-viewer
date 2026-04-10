@@ -12,9 +12,9 @@
     return status === "PLAYING" || status === "LOOPING";
   }
 
-  // レイヤーがidle(データなし)かどうかを判定する
+  // レイヤーがidle(トラック未ロード)かどうかを判定する
   function isIdle(i: number): boolean {
-    return store.layers[i].status === "IDLE" && !store.metadata[i] && !store.metrics[i];
+    return store.layers[i].status === "IDLE" && store.layers[i].trackID === 0;
   }
 
   // ミキサーの0-255値をパーセンテージに変換する

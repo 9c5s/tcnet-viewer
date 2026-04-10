@@ -40,6 +40,9 @@ importers:
       daisyui:
         specifier: ^5.5.19
         version: 5.5.19
+      eslint:
+        specifier: ^10.1.0
+        version: 10.1.0(jiti@2.6.1)
       eslint-plugin-better-tailwindcss:
         specifier: ^4.3.2
         version: 4.3.2(eslint@10.1.0(jiti@2.6.1))(oxlint@1.56.0(oxlint-tsgolint@0.17.1))(tailwindcss@4.2.2)(typescript@5.9.3)
