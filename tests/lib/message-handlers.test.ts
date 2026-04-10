@@ -241,3 +241,12 @@ test("appdata: ログにcmd, token, dest, portを記録する", () => {
     "cmd=1 token=0x12345678 dest=0xffff port=65023",
   );
 });
+
+test("dispatchMessage: 未知のメッセージ型は警告を出す", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+  dispatchMessage({ type: "unknown-type" } as unknown as WSMessage, handlers);
+  expect(warnSpy).toHaveBeenCalledWith("[WS] 未処理のメッセージ型:", expect.anything());
+  warnSpy.mockRestore();
+});

@@ -88,3 +88,10 @@ test("statusIndicator: 接続済み+認証中はAuthenticating...を返す", asy
   store.authState = "pending";
   expect(store.statusIndicator).toEqual({ color: "bg-warning", text: "Authenticating..." });
 });
+
+test("addLogEntry: フィルタOFFのtypeはログに追加しない", async () => {
+  const store = await loadResetStore();
+  store.logFilters["time"] = false;
+  store.addLogEntry("time", undefined, "should not be logged");
+  expect(store.packetLog).toHaveLength(0);
+});

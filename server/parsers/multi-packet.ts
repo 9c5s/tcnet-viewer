@@ -9,8 +9,11 @@ export class MultiPacketAssembler {
     if (newTotalPackets === 0) return false;
     // totalPacketsが途中で変わった場合は不整合パケットとして無視する
     if (this.totalPackets > 0 && newTotalPackets !== this.totalPackets) return false;
-    this.totalPackets = newTotalPackets;
     const packetNo = buffer.readUInt32LE(34);
+    // packetNoの検証はtotalPackets代入前に行う
+    // (不正パケットがtotalPacketsを汚染してアセンブラをロックするのを防ぐ)
+    if (packetNo >= newTotalPackets) return false;
+    this.totalPackets = newTotalPackets;
     const clusterSize = buffer.readUInt32LE(38);
     const dataStart = 42;
     // clusterSize=0はFileパケット(Artwork等)のため、バッファ末尾までをデータとして扱う

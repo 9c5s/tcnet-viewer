@@ -38,6 +38,7 @@ export function detectArtworkMimeType(data: Buffer): string {
     data[3] === 0x47
   )
     return "image/png";
+  // TCNetは主にJPEGを送信するため、判定不可の場合はJPEGとして扱う
   return "image/jpeg";
 }
 
@@ -55,13 +56,13 @@ export function trimJpegPadding(data: Buffer): Buffer {
   return data;
 }
 
-// node-tcnetがアセンブル済みのJPEGバッファからブロードキャスト用ペイロードを生成する
+// node-tcnetがアセンブル済みの画像バッファからブロードキャスト用ペイロードを生成する
 // 無効なデータの場合はnullを返す
 export function processArtworkPacket(
-  jpeg: Buffer | undefined,
+  imageData: Buffer | undefined,
 ): { base64: string; mimeType: string } | null {
-  if (!jpeg || jpeg.length === 0 || !isValidImageData(jpeg)) return null;
-  const trimmed = trimJpegPadding(jpeg);
+  if (!imageData || imageData.length === 0 || !isValidImageData(imageData)) return null;
+  const trimmed = trimJpegPadding(imageData);
   return {
     base64: artworkToBase64(trimmed),
     mimeType: detectArtworkMimeType(trimmed),

@@ -190,6 +190,7 @@ export class TCNetBridge {
       if (!this.running) return;
       this.beatGridAssemblers.clear();
       this.bigWaveformAssemblers.clear();
+      this.trackIds = Array.from({ length: 8 }, () => null);
       this.createClient();
       await this.connect();
     } finally {
