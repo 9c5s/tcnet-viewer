@@ -7,8 +7,12 @@ export class MultiPacketAssembler {
     if (buffer.length < 42) return false;
     const newTotalPackets = buffer.readUInt32LE(30);
     if (newTotalPackets === 0) return false;
-    // totalPacketsが途中で変わった場合は不整合パケットとして無視する
-    if (this.totalPackets > 0 && newTotalPackets !== this.totalPackets) return false;
+    // totalPacketsが途中で変わった場合、古い転送を破棄して新しい転送を受け入れ可能にする
+    // (トラック変更がStatusパケットより先にデータで通知された場合のデッドロック防止)
+    if (this.totalPackets > 0 && newTotalPackets !== this.totalPackets) {
+      this.reset();
+      return false;
+    }
     const packetNo = buffer.readUInt32LE(34);
     // packetNoの検証はtotalPackets代入前に行う
     // (不正パケットがtotalPacketsを汚染してアセンブラをロックするのを防ぐ)
