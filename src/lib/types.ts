@@ -138,8 +138,27 @@ export function statusBadgeClass(status: LayerStatus): string {
   }
 }
 
+// パケットログに出現するパケット種別のユニオン型
+export type PacketType =
+  | "time"
+  | "status"
+  | "metrics"
+  | "metadata"
+  | "optin"
+  | "optout"
+  | "cue"
+  | "mixer"
+  | "waveform-small"
+  | "waveform-big"
+  | "artwork"
+  | "artwork-failed"
+  | "beatgrid"
+  | "server"
+  | "tcnet-error"
+  | "appdata";
+
 // パケットタイプに応じたTailwindセマンティックカラークラスのマッピング
-export const PACKET_TYPE_CLASSES: Record<string, string> = {
+export const PACKET_TYPE_CLASSES: Record<PacketType, string> = {
   time: "text-accent",
   status: "text-success",
   metrics: "text-warning",
@@ -159,7 +178,7 @@ export const PACKET_TYPE_CLASSES: Record<string, string> = {
 };
 
 // PacketLogフィルタの短縮ラベル
-export const PACKET_FILTER_LABELS: Record<string, string> = {
+export const PACKET_FILTER_LABELS: Record<PacketType, string> = {
   time: "Time",
   status: "Status",
   metrics: "Metrics",
