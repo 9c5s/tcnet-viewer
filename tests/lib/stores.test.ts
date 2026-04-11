@@ -187,7 +187,7 @@ test.each([
   {
     field: "metadata" as const,
     setup: (store: any) => {
-      for (let i = 0; i < 8; i++)
+      for (let i = 0; i < store.layers.length; i++)
         store.metadata[i] = {
           trackTitle: `Track ${i}`,
           trackArtist: "Artist",
@@ -200,21 +200,22 @@ test.each([
   {
     field: "artwork" as const,
     setup: (store: any) => {
-      for (let i = 0; i < 8; i++) store.artwork[i] = { base64: "data", mimeType: "image/jpeg" };
+      for (let i = 0; i < store.layers.length; i++)
+        store.artwork[i] = { base64: "data", mimeType: "image/jpeg" };
     },
     expected: null,
   },
   {
     field: "artworkFailed" as const,
     setup: (store: any) => {
-      for (let i = 0; i < 8; i++) store.artworkFailed[i] = true;
+      for (let i = 0; i < store.layers.length; i++) store.artworkFailed[i] = true;
     },
     expected: false,
   },
   {
     field: "cues" as const,
     setup: (store: any) => {
-      for (let i = 0; i < 8; i++)
+      for (let i = 0; i < store.layers.length; i++)
         store.cues[i] = [{ index: 1, type: 1, inTime: 0, outTime: 0, color: { r: 0, g: 0, b: 0 } }];
     },
     expected: null,
@@ -222,21 +223,23 @@ test.each([
   {
     field: "waveformSmall" as const,
     setup: (store: any) => {
-      for (let i = 0; i < 8; i++) store.waveformSmall[i] = [{ level: 100, color: 0 }];
+      for (let i = 0; i < store.layers.length; i++)
+        store.waveformSmall[i] = [{ level: 100, color: 0 }];
     },
     expected: null,
   },
   {
     field: "waveformBig" as const,
     setup: (store: any) => {
-      for (let i = 0; i < 8; i++) store.waveformBig[i] = [{ level: 100, color: 0 }];
+      for (let i = 0; i < store.layers.length; i++)
+        store.waveformBig[i] = [{ level: 100, color: 0 }];
     },
     expected: null,
   },
   {
     field: "beatgrid" as const,
     setup: (store: any) => {
-      for (let i = 0; i < 8; i++)
+      for (let i = 0; i < store.layers.length; i++)
         store.beatgrid[i] = [{ beatNumber: 1, beatType: 20, timestampMs: 0 }];
     },
     expected: null,
