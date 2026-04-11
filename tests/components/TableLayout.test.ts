@@ -106,6 +106,23 @@ test("TableLayout: artworkがある場合にimg要素が表示される", () => 
   expect(img.getAttribute("src")).toContain("data:image/jpeg;base64,dGVzdA==");
 });
 
+test("TableLayout: BPM=0のとき'0.00'が表示される", () => {
+  store.metrics[0] = {
+    state: 0,
+    syncMaster: 0,
+    beatMarker: 0,
+    trackLength: 0,
+    currentPosition: 0,
+    speed: 0,
+    beatNumber: 0,
+    bpm: 0,
+    pitchBend: 0,
+    trackID: 1,
+  };
+  render(TableLayout);
+  expect(screen.getByText("0.00")).toBeTruthy();
+});
+
 test("TableLayout: OnAir状態が表示される", () => {
   store.time[0] = {
     currentTimeMillis: 10000,

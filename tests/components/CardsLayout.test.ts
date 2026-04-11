@@ -117,6 +117,14 @@ test("CardsLayout: Syncマスター/スレーブバッジが表示される", ()
   expect(screen.getByText("MASTER")).toBeTruthy();
 });
 
+test("CardsLayout: hideIdleLayers=trueでもIDLE+trackID>0のレイヤーは表示される", () => {
+  // トラック取り出し直後の状態: IDLEだがtrackIDが残っている
+  store.layers[0] = { source: 0, status: "IDLE", trackID: 5, name: "" };
+  store.hideIdleLayers = true;
+  render(CardsLayout);
+  expect(screen.getAllByText("L1").length).toBeGreaterThanOrEqual(1);
+});
+
 test("CardsLayout: artworkFailed=trueのときエラーSVGインジケータが表示される", () => {
   store.layers[0] = { source: 0, status: "PLAYING", trackID: 1, name: "" };
   store.metadata[0] = {
