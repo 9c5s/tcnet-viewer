@@ -14,8 +14,8 @@
   height={size}
   viewBox="0 0 24 24"
   fill="none"
-  stroke="oklch(var(--er))"
-  stroke-opacity="0.6"
+  stroke="var(--color-error)"
+  opacity="0.6"
   stroke-width="2"
   stroke-linecap="round"
   {...rest}

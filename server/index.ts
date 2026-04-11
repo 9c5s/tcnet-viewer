@@ -105,13 +105,17 @@ export function tcnetPlugin(): Plugin {
         console.error("[TCNet] 接続失敗:", err);
       });
 
-      let cleanupCalled = false;
-      const cleanup = async () => {
-        if (cleanupCalled) return;
-        cleanupCalled = true;
-        restoreConsole();
-        await bridge.disconnect();
-        wss.close();
+      let cleanupPromise: Promise<void> | null = null;
+      const cleanup = () => {
+        cleanupPromise ??= (async () => {
+          restoreConsole();
+          try {
+            await bridge.disconnect();
+          } finally {
+            wss.close();
+          }
+        })();
+        return cleanupPromise;
       };
 
       server.httpServer.on("close", () => {
