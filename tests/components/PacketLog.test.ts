@@ -2,7 +2,7 @@
 import { render, screen } from "@testing-library/svelte";
 import { expect, test, beforeEach } from "vite-plus/test";
 import { store } from "$lib/stores.svelte.js";
-import PacketLog from "$lib/../components/PacketLog.svelte";
+import PacketLog from "../../src/components/PacketLog.svelte";
 import { resetStore } from "./helpers.js";
 
 beforeEach(() => {
@@ -11,7 +11,7 @@ beforeEach(() => {
 
 test("PacketLog: 空のログでPacket Logヘッダーが表示される", () => {
   render(PacketLog);
-  expect(screen.getByText("Packet Log")).toBeTruthy();
+  screen.getByText("Packet Log");
 });
 
 test("PacketLog: ログエントリのタイプとサマリーが表示される", () => {
@@ -23,8 +23,8 @@ test("PacketLog: ログエントリのタイプとサマリーが表示される
     summary: "Track loaded: TestSong",
   });
   render(PacketLog);
-  expect(screen.getByText("metadata")).toBeTruthy();
-  expect(screen.getByText("Track loaded: TestSong")).toBeTruthy();
+  screen.getByText("metadata");
+  screen.getByText("Track loaded: TestSong");
 });
 
 test("PacketLog: レイヤー名が表示される", () => {
@@ -33,14 +33,14 @@ test("PacketLog: レイヤー名が表示される", () => {
     { id: 2, timestamp: Date.now(), type: "metrics", layer: 4, summary: "test2" },
   );
   render(PacketLog);
-  expect(screen.getByText("L1")).toBeTruthy();
-  expect(screen.getByText("LA")).toBeTruthy();
+  screen.getByText("L1");
+  screen.getByText("LA");
 });
 
 test("PacketLog: layer未設定のエントリは'--'と表示される", () => {
   store.packetLog.push({ id: 1, timestamp: Date.now(), type: "server", summary: "connected" });
   render(PacketLog);
-  expect(screen.getByText("--")).toBeTruthy();
+  screen.getByText("--");
 });
 
 test("PacketLog: フィルタOFFのタイプはログに表示されない", () => {
@@ -51,7 +51,7 @@ test("PacketLog: フィルタOFFのタイプはログに表示されない", () 
   );
   render(PacketLog);
   expect(screen.queryByText("should be hidden")).toBeNull();
-  expect(screen.getByText("should be visible")).toBeTruthy();
+  screen.getByText("should be visible");
 });
 
 test("PacketLog: フィルタチェックボックスが全タイプ分表示される", () => {
