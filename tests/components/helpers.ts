@@ -44,6 +44,7 @@ export function resetStore(): void {
     store.waveformSmall[i] = null;
     store.waveformBig[i] = null;
     store.artwork[i] = null;
+    store.artworkFailed[i] = false;
     store.beatgrid[i] = null;
   }
 }
