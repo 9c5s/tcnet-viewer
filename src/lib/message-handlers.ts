@@ -27,6 +27,7 @@ export interface MessageHandlerStore {
   waveformSmall: (WaveformBar[] | null)[];
   waveformBig: (WaveformBar[] | null)[];
   artwork: ({ base64: string; mimeType: string } | null)[];
+  artworkFailed: boolean[];
   beatgrid: (BeatGridEntry[] | null)[];
   mixer: MixerData | null;
   generalSMPTEMode: number;
@@ -108,16 +109,20 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
     },
     artwork: (msg) => {
       store.artwork[msg.layer] = { base64: msg.data.base64, mimeType: msg.data.mimeType };
+      store.artworkFailed[msg.layer] = false;
       const sizeKB = Math.round((msg.data.base64.length * 3) / 4 / 1024);
       store.addLogEntry(msg.type, msg.layer, `${sizeKB}KB ${msg.data.mimeType}`);
     },
-    "artwork-failed": () => {
-      // Task 3で実装する
+    "artwork-failed": (msg) => {
+      store.artworkFailed[msg.layer] = true;
+      store.artwork[msg.layer] = null;
+      store.addLogEntry(msg.type, msg.layer, "artwork fetch failed");
     },
     "layer-reset": (msg) => {
       const i = msg.layer;
       // metadataはクリアしない (新データで上書きされるまで前曲を表示し、レイアウトの崩れを防ぐ)
       store.artwork[i] = null;
+      store.artworkFailed[i] = false;
       store.cues[i] = null;
       store.waveformSmall[i] = null;
       store.waveformBig[i] = null;
