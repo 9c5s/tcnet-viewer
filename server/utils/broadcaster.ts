@@ -20,7 +20,6 @@ export class WebSocketBroadcaster {
     "tcnet-error",
     "appdata",
     "layer-reset",
-    "artwork-failed",
   ]);
 
   private clients = new Set<WSClient>();
