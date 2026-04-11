@@ -24,6 +24,7 @@ function createMockStore(): MessageHandlerStore {
     waveformSmall: Array(8).fill(null),
     waveformBig: Array(8).fill(null),
     artwork: Array(8).fill(null),
+    artworkFailed: Array(8).fill(false),
     beatgrid: Array(8).fill(null),
     mixer: null,
     generalSMPTEMode: 0,
@@ -249,4 +250,40 @@ test("dispatchMessage: 未知のメッセージ型は警告を出す", () => {
   dispatchMessage({ type: "unknown-type" } as unknown as WSMessage, handlers);
   expect(warnSpy).toHaveBeenCalledWith("[WS] 未処理のメッセージ型:", expect.anything());
   warnSpy.mockRestore();
+});
+
+test("artwork-failed: artworkFailedフラグをtrueにしartworkをnullにしログに記録する", () => {
+  const store = createMockStore();
+  store.artwork[2] = { base64: "old", mimeType: "image/jpeg" };
+  const handlers = createHandlers(store);
+  handlers["artwork-failed"]({
+    type: "artwork-failed",
+    timestamp: 1000,
+    layer: 2,
+  });
+  expect(store.artworkFailed[2]).toBe(true);
+  expect(store.artwork[2]).toBeNull();
+  expect(store.artworkFailed[0]).toBe(false);
+  expect(store.addLogEntry).toHaveBeenCalledWith("artwork-failed", 2, "artwork fetch failed");
+});
+
+test("artwork: artworkFailedフラグをfalseにクリアする", () => {
+  const store = createMockStore();
+  store.artworkFailed[1] = true;
+  const handlers = createHandlers(store);
+  handlers.artwork({
+    type: "artwork",
+    timestamp: 1000,
+    layer: 1,
+    data: { base64: "AQID", mimeType: "image/jpeg" },
+  });
+  expect(store.artworkFailed[1]).toBe(false);
+});
+
+test("layer-reset: artworkFailedフラグをfalseにクリアする", () => {
+  const store = createMockStore();
+  store.artworkFailed[1] = true;
+  const handlers = createHandlers(store);
+  handlers["layer-reset"]({ type: "layer-reset", timestamp: 1000, layer: 1 });
+  expect(store.artworkFailed[1]).toBe(false);
 });
