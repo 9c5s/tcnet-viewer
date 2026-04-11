@@ -71,6 +71,16 @@
                   <img src="data:{artwork.mimeType};base64,{artwork.base64}" alt="Art"
                     onerror={() => { store.artwork[i] = null; }}
                     class="size-8 shrink-0 rounded-sm object-cover" />
+                {:else if store.artworkFailed[i]}
+                  <div class="
+                    flex size-8 shrink-0 items-center justify-center rounded-sm border border-error/50 bg-base-300
+                  ">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="oklch(var(--er))" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="15" y1="9" x2="9" y2="15" />
+                      <line x1="9" y1="9" x2="15" y2="15" />
+                    </svg>
+                  </div>
                 {/if}
                 <div class="min-w-0 flex-1">
                   <div class="text-[11px] leading-tight font-bold text-base-content">{metadata.trackTitle || "Unknown"}</div>
