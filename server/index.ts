@@ -105,11 +105,23 @@ export function tcnetPlugin(): Plugin {
         console.error("[TCNet] 接続失敗:", err);
       });
 
-      server.httpServer.on("close", () => {
+      const cleanup = async () => {
         restoreConsole();
-        bridge.disconnect();
+        await bridge.disconnect();
         wss.close();
+      };
+
+      server.httpServer.on("close", () => {
+        cleanup();
       });
+
+      // taskkill (Windows) や kill (Unix) でプロセスが終了する際にも
+      // TCNetクライアントの切断パケットを送信する
+      for (const signal of ["SIGINT", "SIGTERM"] as const) {
+        process.on(signal, () => {
+          cleanup().finally(() => process.exit(0));
+        });
+      }
     },
   };
 }
