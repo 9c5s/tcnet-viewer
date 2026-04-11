@@ -72,6 +72,12 @@ export class WebSocketBroadcaster {
       const cacheKey =
         "layer" in msg && msg.layer !== undefined ? `${msg.type}-${msg.layer}` : msg.type;
       this.stateCache.set(cacheKey, json);
+      // artworkとartwork-failedは相互排他 (再接続時に矛盾した状態を送信しない)
+      if (msg.type === "artwork" && "layer" in msg) {
+        this.stateCache.delete(`artwork-failed-${msg.layer}`);
+      } else if (msg.type === "artwork-failed" && "layer" in msg) {
+        this.stateCache.delete(`artwork-${msg.layer}`);
+      }
     }
     this.sendToAll(json);
   }
