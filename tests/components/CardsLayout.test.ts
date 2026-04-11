@@ -116,3 +116,24 @@ test("CardsLayout: Syncマスター/スレーブバッジが表示される", ()
   render(CardsLayout);
   expect(screen.getByText("MASTER")).toBeTruthy();
 });
+
+test("CardsLayout: artworkFailed=trueのときエラーSVGインジケータが表示される", () => {
+  store.layers[0] = { source: 0, status: "PLAYING", trackID: 1, name: "" };
+  store.metadata[0] = {
+    trackTitle: "Test",
+    trackArtist: "Artist",
+    trackKey: 0,
+    trackID: 1,
+  };
+  store.artwork[0] = null;
+  store.artworkFailed[0] = true;
+  render(CardsLayout);
+  // SVG要素が描画されることを確認する
+  const svgElements = document.querySelectorAll("svg");
+  expect(svgElements.length).toBeGreaterThanOrEqual(1);
+  // エラーカラー (oklch(var(--er))) でstroke属性が設定されたSVGが存在することを確認する
+  const errorSvg = Array.from(svgElements).find(
+    (svg) => svg.getAttribute("stroke") === "oklch(var(--er))",
+  );
+  expect(errorSvg).toBeTruthy();
+});
