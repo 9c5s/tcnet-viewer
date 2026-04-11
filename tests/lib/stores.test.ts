@@ -33,7 +33,10 @@ async function loadResetStore() {
   store.packetLog.splice(0, store.packetLog.length);
   // hideIdleLayersをデフォルト値に戻す
   store.hideIdleLayers = false;
-  // logFiltersをデフォルト値に戻す
+  // logFiltersをデフォルト値に完全初期化する (余剰キーも削除)
+  for (const key of Object.keys(store.logFilters)) {
+    delete store.logFilters[key];
+  }
   Object.assign(store.logFilters, { ...ViewerStore.DEFAULT_LOG_FILTERS });
   // 全レイヤーデータをリセットする
   store.resetLayerData();
@@ -242,7 +245,7 @@ test.each([
   const store = await loadResetStore();
   setup(store);
   store.resetLayerData();
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < store.layers.length; i++) {
     expect((store as any)[field][i]).toStrictEqual(expected);
   }
 });

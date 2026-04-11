@@ -106,8 +106,16 @@ export function tcnetPlugin(): Plugin {
       });
 
       let cleanupPromise: Promise<void> | null = null;
+      const signalHandlers = new Map<string, () => void>();
+      const removeSignalHandlers = () => {
+        for (const [signal, handler] of signalHandlers) {
+          process.off(signal, handler);
+        }
+        signalHandlers.clear();
+      };
       const cleanup = () => {
         cleanupPromise ??= (async () => {
+          removeSignalHandlers();
           restoreConsole();
           try {
             await bridge.disconnect();
@@ -127,13 +135,15 @@ export function tcnetPlugin(): Plugin {
       // taskkill (Windows) や kill (Unix) でプロセスが終了する際にも
       // TCNetクライアントの切断パケットを送信する
       for (const signal of ["SIGINT", "SIGTERM"] as const) {
-        process.once(signal, () => {
+        const handler = () => {
           cleanup()
             .catch((err) => {
               console.error("[Cleanup] クリーンアップ中にエラーが発生しました:", err);
             })
             .finally(() => process.exit(0));
-        });
+        };
+        signalHandlers.set(signal, handler);
+        process.on(signal, handler);
       }
     },
   };
