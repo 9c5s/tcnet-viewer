@@ -137,3 +137,43 @@ export function statusBadgeClass(status: LayerStatus): string {
       return "";
   }
 }
+
+// パケットタイプに応じたTailwindセマンティックカラークラスのマッピング
+export const PACKET_TYPE_CLASSES: Record<string, string> = {
+  time: "text-accent",
+  status: "text-success",
+  metrics: "text-warning",
+  metadata: "text-secondary",
+  optin: "text-base-content/40",
+  optout: "text-error",
+  cue: "text-warning",
+  mixer: "text-success",
+  "waveform-small": "text-base-content/70",
+  "waveform-big": "text-base-content/70",
+  artwork: "text-secondary",
+  "artwork-failed": "text-error",
+  beatgrid: "text-base-content/40",
+  server: "text-info",
+  "tcnet-error": "text-error",
+  appdata: "text-info",
+};
+
+// PacketLogフィルタの短縮ラベル
+export const PACKET_FILTER_LABELS: Record<string, string> = {
+  time: "Time",
+  status: "Status",
+  metrics: "Metrics",
+  metadata: "Meta",
+  optin: "OptIn",
+  optout: "OptOut",
+  cue: "Cue",
+  beatgrid: "Beat",
+  "waveform-small": "WfS",
+  "waveform-big": "WfB",
+  mixer: "Mixer",
+  artwork: "Art",
+  "artwork-failed": "ArtErr",
+  server: "Srv",
+  "tcnet-error": "Err",
+  appdata: "App",
+};

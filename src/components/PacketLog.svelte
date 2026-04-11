@@ -1,26 +1,6 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
-  import { LAYER_NAMES, type PacketLogEntry } from "$lib/types.js";
-
-  // パケットタイプに応じたTailwindセマンティックカラークラスのマッピング
-  const TYPE_CLASSES: Record<string, string> = {
-    time: "text-accent",
-    status: "text-success",
-    metrics: "text-warning",
-    metadata: "text-secondary",
-    optin: "text-base-content/40",
-    optout: "text-error",
-    cue: "text-warning",
-    mixer: "text-success",
-    "waveform-small": "text-base-content/70",
-    "waveform-big": "text-base-content/70",
-    artwork: "text-secondary",
-    "artwork-failed": "text-error",
-    beatgrid: "text-base-content/40",
-    server: "text-info",
-    "tcnet-error": "text-error",
-    appdata: "text-info",
-  };
+  import { LAYER_NAMES, PACKET_TYPE_CLASSES, PACKET_FILTER_LABELS, type PacketLogEntry } from "$lib/types.js";
 
   // serverタイプはログレベルに応じた色を返す
   function getTypeClass(entry: PacketLogEntry): string {
@@ -29,7 +9,7 @@
       if (entry.summary.startsWith("[WARN]")) return "text-warning";
       return "text-info";
     }
-    return TYPE_CLASSES[entry.type] ?? "text-base-content/70";
+    return PACKET_TYPE_CLASSES[entry.type] ?? "text-base-content/70";
   }
 
   // タイムスタンプをHH:MM:SS.mmm形式に変換する
@@ -57,10 +37,15 @@
   // 最下部付近にいる場合のみ自動スクロールする
   let isAtBottom = true;
 
+  let scrollRafId = 0;
   function onScroll(): void {
-    if (!logContainer) return;
-    // 1行分 (約16px) の余裕を持たせて最下部判定する
-    isAtBottom = logContainer.scrollHeight - logContainer.scrollTop - logContainer.clientHeight < 16;
+    if (scrollRafId) return;
+    scrollRafId = requestAnimationFrame(() => {
+      scrollRafId = 0;
+      if (!logContainer) return;
+      // 1行分 (約16px) の余裕を持たせて最下部判定する
+      isAtBottom = logContainer.scrollHeight - logContainer.scrollTop - logContainer.clientHeight < 16;
+    });
   }
 
   $effect(() => {
@@ -108,26 +93,6 @@
       // localStorage書き込みに失敗しても動作は継続する
     }
   }
-
-  // フィルタキーの表示名
-  const filterLabels: Record<string, string> = {
-    time: "Time",
-    status: "Status",
-    metrics: "Metrics",
-    metadata: "Meta",
-    optin: "OptIn",
-    optout: "OptOut",
-    cue: "Cue",
-    beatgrid: "Beat",
-    "waveform-small": "WfS",
-    "waveform-big": "WfB",
-    mixer: "Mixer",
-    artwork: "Art",
-    "artwork-failed": "ArtErr",
-    server: "Srv",
-    "tcnet-error": "Err",
-    appdata: "App",
-  };
 </script>
 
 <div class="flex h-full flex-col overflow-hidden bg-base-200">
@@ -146,7 +111,7 @@
       {#each Object.keys(store.logFilters) as key}
         <label class="flex cursor-pointer items-center gap-1 text-[9px]">
           <input type="checkbox" class="checkbox checkbox-xs" checked={store.logFilters[key]} onchange={() => store.toggleLogFilter(key)} />
-          <span class="{TYPE_CLASSES[key] ?? 'text-base-content/70'}">{filterLabels[key] ?? key}</span>
+          <span class="{PACKET_TYPE_CLASSES[key] ?? 'text-base-content/70'}">{PACKET_FILTER_LABELS[key] ?? key}</span>
         </label>
       {/each}
     </div>
