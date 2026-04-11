@@ -23,7 +23,7 @@
         </div>
       {:else if artworkFailed}
         <div class="
-          flex size-16 shrink-0 items-center justify-center rounded-sm border-1.5 border-error/50 bg-base-300
+          flex size-16 shrink-0 items-center justify-center rounded-sm border-[1.5px] border-error/50 bg-base-300
         ">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="oklch(var(--er))" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round">
             <circle cx="12" cy="12" r="10" />
