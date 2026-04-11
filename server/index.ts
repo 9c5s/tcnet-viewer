@@ -105,21 +105,30 @@ export function tcnetPlugin(): Plugin {
         console.error("[TCNet] 接続失敗:", err);
       });
 
+      let cleanupCalled = false;
       const cleanup = async () => {
+        if (cleanupCalled) return;
+        cleanupCalled = true;
         restoreConsole();
         await bridge.disconnect();
         wss.close();
       };
 
       server.httpServer.on("close", () => {
-        cleanup();
+        cleanup().catch((err) => {
+          console.error("[Cleanup] クリーンアップ中にエラーが発生しました:", err);
+        });
       });
 
       // taskkill (Windows) や kill (Unix) でプロセスが終了する際にも
       // TCNetクライアントの切断パケットを送信する
       for (const signal of ["SIGINT", "SIGTERM"] as const) {
         process.on(signal, () => {
-          cleanup().finally(() => process.exit(0));
+          cleanup()
+            .catch((err) => {
+              console.error("[Cleanup] クリーンアップ中にエラーが発生しました:", err);
+            })
+            .finally(() => process.exit(0));
         });
       }
     },
