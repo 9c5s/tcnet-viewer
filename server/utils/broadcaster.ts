@@ -52,6 +52,7 @@ export class WebSocketBroadcaster {
   private static readonly LAYER_DATA_TYPES: readonly string[] = [
     "metadata",
     "artwork",
+    "artwork-failed",
     "cue",
     "waveform-small",
     "waveform-big",

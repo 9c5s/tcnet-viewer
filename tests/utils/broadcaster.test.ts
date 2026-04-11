@@ -178,3 +178,19 @@ test("broadcast: artwork-failedはレイヤー別キーでキャッシュする"
   });
   expect(broadcaster.getCachedState().has("artwork-failed-2")).toBe(true);
 });
+
+test("broadcast: layer-resetはartwork-failedキャッシュも削除する", () => {
+  const broadcaster = createBroadcaster();
+  const ws = createMockWs();
+  broadcaster.addClient(ws as any);
+
+  broadcaster.broadcast({
+    type: "artwork-failed",
+    timestamp: 1000,
+    layer: 1,
+  });
+  expect(broadcaster.getCachedState().has("artwork-failed-1")).toBe(true);
+
+  broadcaster.broadcast({ type: "layer-reset", timestamp: 2000, layer: 1 });
+  expect(broadcaster.getCachedState().has("artwork-failed-1")).toBe(false);
+});
