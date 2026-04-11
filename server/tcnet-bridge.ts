@@ -518,6 +518,7 @@ export class TCNetBridge {
     // Artwork (マルチパケットのためパケットロス/タイムアウトが起きやすい、リトライする)
     // dataイベントではなくrequestDataの戻り値から直接処理する
     // (timeout後に届く未アセンブルの断片パケットを誤処理しないため)
+    let artworkSuccess = false;
     for (let attempt = 1; attempt <= 3; attempt++) {
       if (this.layerGeneration[layer] !== generation) return;
       try {
@@ -532,6 +533,7 @@ export class TCNetBridge {
             layer,
             data: artworkData,
           });
+          artworkSuccess = true;
           break;
         }
         // 不完全なJPEG (EOIマーカーなし) の場合は再送要求する
@@ -542,6 +544,13 @@ export class TCNetBridge {
         const reason = err instanceof Error ? err.message : String(err);
         console.log(`[TCNet] アートワーク取得失敗 (レイヤー${layer}, 試行${attempt}/3): ${reason}`);
       }
+    }
+    if (!artworkSuccess && this.layerGeneration[layer] === generation) {
+      this.broadcast({
+        type: "artwork-failed",
+        timestamp: Date.now(),
+        layer,
+      });
     }
   }
 }
