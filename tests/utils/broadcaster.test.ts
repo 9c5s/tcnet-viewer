@@ -194,3 +194,33 @@ test("broadcast: layer-resetはartwork-failedキャッシュも削除する", ()
   broadcaster.broadcast({ type: "layer-reset", timestamp: 2000, layer: 1 });
   expect(broadcaster.getCachedState().has("artwork-failed-1")).toBe(false);
 });
+
+test("broadcast: artwork成功時にartwork-failedキャッシュを削除する", () => {
+  const broadcaster = createBroadcaster();
+  broadcaster.broadcast({ type: "artwork-failed", timestamp: 1000, layer: 0 });
+  expect(broadcaster.getCachedState().has("artwork-failed-0")).toBe(true);
+
+  broadcaster.broadcast({
+    type: "artwork",
+    timestamp: 2000,
+    layer: 0,
+    data: { base64: "data", mimeType: "image/jpeg" },
+  });
+  expect(broadcaster.getCachedState().has("artwork-0")).toBe(true);
+  expect(broadcaster.getCachedState().has("artwork-failed-0")).toBe(false);
+});
+
+test("broadcast: artwork-failed時にartworkキャッシュを削除する", () => {
+  const broadcaster = createBroadcaster();
+  broadcaster.broadcast({
+    type: "artwork",
+    timestamp: 1000,
+    layer: 0,
+    data: { base64: "data", mimeType: "image/jpeg" },
+  });
+  expect(broadcaster.getCachedState().has("artwork-0")).toBe(true);
+
+  broadcaster.broadcast({ type: "artwork-failed", timestamp: 2000, layer: 0 });
+  expect(broadcaster.getCachedState().has("artwork-failed-0")).toBe(true);
+  expect(broadcaster.getCachedState().has("artwork-0")).toBe(false);
+});
