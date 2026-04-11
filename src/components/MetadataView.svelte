@@ -8,6 +8,7 @@
 
   let metadata = $derived(store.metadata[layer]);
   let artwork = $derived(store.artwork[layer]);
+  let artworkFailed = $derived(store.artworkFailed[layer]);
 </script>
 
 <div class="border-b border-base-content/20 p-3">
@@ -19,6 +20,16 @@
             <img src="data:{artwork.mimeType};base64,{artwork.base64}" alt="Artwork"
               onerror={() => { store.artwork[layer] = null; }} />
           </div>
+        </div>
+      {:else if artworkFailed}
+        <div class="
+          flex size-16 shrink-0 items-center justify-center rounded-sm border-1.5 border-error/50 bg-base-300
+        ">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="oklch(var(--er))" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+          </svg>
         </div>
       {:else}
         <div class="
