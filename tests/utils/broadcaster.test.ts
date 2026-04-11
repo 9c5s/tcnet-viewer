@@ -161,9 +161,16 @@ test("broadcast: 一過性メッセージはキャッシュしない", () => {
     timestamp: 1000,
     data: { cmd: 1, token: 0x12345678, dest: 0xffff, listenerPort: 65023 },
   });
+  broadcaster.broadcast({
+    type: "artwork-failed",
+    timestamp: 1000,
+    layer: 0,
+  });
 
   expect(broadcaster.getCachedState().has("tcnet-error")).toBe(false);
   expect(broadcaster.getCachedState().has("appdata")).toBe(false);
+  expect(broadcaster.getCachedState().has("artwork-failed")).toBe(false);
+  expect(broadcaster.getCachedState().has("artwork-failed-0")).toBe(false);
   // メッセージ自体は送信される
-  expect(ws.send).toHaveBeenCalledTimes(2);
+  expect(ws.send).toHaveBeenCalledTimes(3);
 });
