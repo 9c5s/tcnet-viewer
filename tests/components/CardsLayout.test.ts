@@ -85,7 +85,7 @@ test("CardsLayout: メトリクスのBPMが表示される", () => {
   screen.getByText("140.00");
 });
 
-test("CardsLayout: ON AIR/OFF AIRバッジが表示される", () => {
+test("CardsLayout: ON AIRバッジが表示される", () => {
   store.layers[0] = { source: 0, status: "PLAYING", trackID: 1, name: "" };
   store.time[0] = {
     currentTimeMillis: 10000,

@@ -544,6 +544,7 @@ export class TCNetBridge {
         const reason = err instanceof Error ? err.message : String(err);
         console.log(`[TCNet] アートワーク取得失敗 (レイヤー${layer}, 試行${attempt}/3): ${reason}`);
       }
+      if (attempt < 3) await this.sleep(500);
     }
     if (!artworkSuccess && this.layerGeneration[layer] === generation) {
       this.broadcast({

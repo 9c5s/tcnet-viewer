@@ -26,7 +26,7 @@ afterEach(() => {
 });
 
 async function loadResetStore() {
-  const { store } = await import("$lib/stores.svelte.js");
+  const { store, ViewerStore } = await import("$lib/stores.svelte.js");
   store.connected = false;
   store.tcnetConnected = false;
   store.authState = "none";
@@ -34,7 +34,6 @@ async function loadResetStore() {
   // hideIdleLayersをデフォルト値に戻す
   store.hideIdleLayers = false;
   // logFiltersをデフォルト値に戻す
-  const { ViewerStore } = await import("$lib/stores.svelte.js");
   Object.assign(store.logFilters, { ...ViewerStore.DEFAULT_LOG_FILTERS });
   // 全レイヤーデータをリセットする
   store.resetLayerData();
