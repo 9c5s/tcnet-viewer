@@ -3,6 +3,7 @@
   import { LAYER_NAMES, statusBadgeClass } from "$lib/types.js";
   import type { LayerStatus } from "$lib/types.js";
   import { formatBPM, formatPosition } from "$lib/formatting.js";
+  import ArtworkErrorIcon from "./ArtworkErrorIcon.svelte";
   import NodeInfoBar from "./NodeInfoBar.svelte";
   import WaveformSvg from "./WaveformSvg.svelte";
   import PacketLog from "./PacketLog.svelte";
@@ -75,11 +76,7 @@
                   <div class="
                     flex size-8 shrink-0 items-center justify-center rounded-sm border border-error/50 bg-base-300
                   ">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="oklch(var(--er))" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="15" y1="9" x2="9" y2="15" />
-                      <line x1="9" y1="9" x2="15" y2="15" />
-                    </svg>
+                    <ArtworkErrorIcon size={16} />
                   </div>
                 {/if}
                 <div class="min-w-0 flex-1">

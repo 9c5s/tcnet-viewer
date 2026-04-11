@@ -1,5 +1,6 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
+  import ArtworkErrorIcon from "./ArtworkErrorIcon.svelte";
 
   interface Props {
     layer: number;
@@ -25,11 +26,7 @@
         <div class="
           flex size-16 shrink-0 items-center justify-center rounded-sm border-[1.5px] border-error/50 bg-base-300
         ">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="oklch(var(--er))" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="15" y1="9" x2="9" y2="15" />
-            <line x1="9" y1="9" x2="15" y2="15" />
-          </svg>
+          <ArtworkErrorIcon />
         </div>
       {:else}
         <div class="
