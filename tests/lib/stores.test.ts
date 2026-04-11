@@ -179,85 +179,70 @@ test("toggleLogFilter: 他のキーには影響しない", async () => {
   expect(store.logFilters["artwork"]).toBe(beforeArtwork);
 });
 
-test("resetLayerData: 全8レイヤーのmetadataをnullにする", async () => {
+// resetLayerDataのフィールド別リセット検証 (テーブル駆動)
+test.each([
+  {
+    field: "metadata" as const,
+    setup: (store: any) => {
+      for (let i = 0; i < 8; i++)
+        store.metadata[i] = {
+          trackTitle: `Track ${i}`,
+          trackArtist: "Artist",
+          trackKey: 1,
+          trackID: i,
+        };
+    },
+    expected: null,
+  },
+  {
+    field: "artwork" as const,
+    setup: (store: any) => {
+      for (let i = 0; i < 8; i++) store.artwork[i] = { base64: "data", mimeType: "image/jpeg" };
+    },
+    expected: null,
+  },
+  {
+    field: "artworkFailed" as const,
+    setup: (store: any) => {
+      for (let i = 0; i < 8; i++) store.artworkFailed[i] = true;
+    },
+    expected: false,
+  },
+  {
+    field: "cues" as const,
+    setup: (store: any) => {
+      for (let i = 0; i < 8; i++)
+        store.cues[i] = [{ index: 1, type: 1, inTime: 0, outTime: 0, color: { r: 0, g: 0, b: 0 } }];
+    },
+    expected: null,
+  },
+  {
+    field: "waveformSmall" as const,
+    setup: (store: any) => {
+      for (let i = 0; i < 8; i++) store.waveformSmall[i] = [{ level: 100, color: 0 }];
+    },
+    expected: null,
+  },
+  {
+    field: "waveformBig" as const,
+    setup: (store: any) => {
+      for (let i = 0; i < 8; i++) store.waveformBig[i] = [{ level: 100, color: 0 }];
+    },
+    expected: null,
+  },
+  {
+    field: "beatgrid" as const,
+    setup: (store: any) => {
+      for (let i = 0; i < 8; i++)
+        store.beatgrid[i] = [{ beatNumber: 1, beatType: 20, timestampMs: 0 }];
+    },
+    expected: null,
+  },
+])("resetLayerData: 全8レイヤーの$fieldをリセットする", async ({ field, setup, expected }) => {
   const store = await loadResetStore();
-  // 事前にメタデータをセットする
-  for (let i = 0; i < 8; i++) {
-    store.metadata[i] = {
-      trackTitle: `Track ${i}`,
-      trackArtist: "Artist",
-      trackKey: 1,
-      trackID: i,
-    };
-  }
+  setup(store);
   store.resetLayerData();
   for (let i = 0; i < 8; i++) {
-    expect(store.metadata[i]).toBeNull();
-  }
-});
-
-test("resetLayerData: 全8レイヤーのartworkをnullにする", async () => {
-  const store = await loadResetStore();
-  for (let i = 0; i < 8; i++) {
-    store.artwork[i] = { base64: "data", mimeType: "image/jpeg" };
-  }
-  store.resetLayerData();
-  for (let i = 0; i < 8; i++) {
-    expect(store.artwork[i]).toBeNull();
-  }
-});
-
-test("resetLayerData: 全8レイヤーのartworkFailedをfalseにする", async () => {
-  const store = await loadResetStore();
-  for (let i = 0; i < 8; i++) {
-    store.artworkFailed[i] = true;
-  }
-  store.resetLayerData();
-  for (let i = 0; i < 8; i++) {
-    expect(store.artworkFailed[i]).toBe(false);
-  }
-});
-
-test("resetLayerData: 全8レイヤーのcuesをnullにする", async () => {
-  const store = await loadResetStore();
-  for (let i = 0; i < 8; i++) {
-    store.cues[i] = [{ index: 1, type: 1, inTime: 0, outTime: 0, color: { r: 0, g: 0, b: 0 } }];
-  }
-  store.resetLayerData();
-  for (let i = 0; i < 8; i++) {
-    expect(store.cues[i]).toBeNull();
-  }
-});
-
-test("resetLayerData: 全8レイヤーのwaveformSmallをnullにする", async () => {
-  const store = await loadResetStore();
-  for (let i = 0; i < 8; i++) {
-    store.waveformSmall[i] = [{ level: 100, color: 0 }];
-  }
-  store.resetLayerData();
-  for (let i = 0; i < 8; i++) {
-    expect(store.waveformSmall[i]).toBeNull();
-  }
-});
-
-test("resetLayerData: 全8レイヤーのwaveformBigをnullにする", async () => {
-  const store = await loadResetStore();
-  for (let i = 0; i < 8; i++) {
-    store.waveformBig[i] = [{ level: 100, color: 0 }];
-  }
-  store.resetLayerData();
-  for (let i = 0; i < 8; i++) {
-    expect(store.waveformBig[i]).toBeNull();
-  }
-});
-
-test("resetLayerData: 全8レイヤーのbeatgridをnullにする", async () => {
-  const store = await loadResetStore();
-  for (let i = 0; i < 8; i++) {
-    store.beatgrid[i] = [{ beatNumber: 1, beatType: 20, timestampMs: 0 }];
-  }
-  store.resetLayerData();
-  for (let i = 0; i < 8; i++) {
-    expect(store.beatgrid[i]).toBeNull();
+    expect((store as any)[field][i]).toStrictEqual(expected);
   }
 });

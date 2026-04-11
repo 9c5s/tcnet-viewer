@@ -127,7 +127,7 @@ export function tcnetPlugin(): Plugin {
       // taskkill (Windows) や kill (Unix) でプロセスが終了する際にも
       // TCNetクライアントの切断パケットを送信する
       for (const signal of ["SIGINT", "SIGTERM"] as const) {
-        process.on(signal, () => {
+        process.once(signal, () => {
           cleanup()
             .catch((err) => {
               console.error("[Cleanup] クリーンアップ中にエラーが発生しました:", err);
