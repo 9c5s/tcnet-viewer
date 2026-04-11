@@ -17,7 +17,7 @@ export type LayoutMode = "cards" | "detail" | "table";
 
 export type Theme = "tokyo-night" | "tokyo-night-storm" | "tokyo-night-light";
 
-class ViewerStore {
+export class ViewerStore {
   node: NodeInfo | null = $state(null);
   connected = $state(false);
   tcnetConnected = $state(false);
@@ -109,7 +109,7 @@ class ViewerStore {
   selectedLayer = $state(0);
 
   packetLog: PacketLogEntry[] = $state([]);
-  private static readonly DEFAULT_LOG_FILTERS: Record<string, boolean> = {
+  static readonly DEFAULT_LOG_FILTERS: Record<string, boolean> = {
     time: false,
     status: false,
     metrics: true,

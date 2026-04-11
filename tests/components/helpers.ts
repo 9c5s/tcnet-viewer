@@ -1,22 +1,6 @@
-import { store } from "$lib/stores.svelte.js";
+import { store, ViewerStore } from "$lib/stores.svelte.js";
 
-const DEFAULT_LOG_FILTERS: Record<string, boolean> = {
-  time: false,
-  status: false,
-  metrics: true,
-  metadata: true,
-  optin: false,
-  optout: true,
-  cue: true,
-  beatgrid: true,
-  "waveform-small": true,
-  "waveform-big": true,
-  mixer: true,
-  artwork: true,
-  server: true,
-  "tcnet-error": true,
-  appdata: true,
-};
+const DEFAULT_LOG_FILTERS = ViewerStore.DEFAULT_LOG_FILTERS;
 
 // ストアを初期状態にリセットする
 export function resetStore(): void {
