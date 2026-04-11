@@ -84,6 +84,7 @@ class ViewerStore {
   artwork: ({ base64: string; mimeType: string } | null)[] = $state(
     Array.from({ length: 8 }, (): { base64: string; mimeType: string } | null => null),
   );
+  artworkFailed: boolean[] = $state(Array.from({ length: 8 }, () => false));
   beatgrid: (BeatGridEntry[] | null)[] = $state(
     Array.from({ length: 8 }, (): BeatGridEntry[] | null => null),
   );
@@ -97,6 +98,7 @@ class ViewerStore {
     for (let i = 0; i < 8; i++) {
       this.metadata[i] = null;
       this.artwork[i] = null;
+      this.artworkFailed[i] = false;
       this.cues[i] = null;
       this.waveformSmall[i] = null;
       this.waveformBig[i] = null;
@@ -120,6 +122,7 @@ class ViewerStore {
     "waveform-big": true,
     mixer: true,
     artwork: true,
+    "artwork-failed": true,
     server: true,
     "tcnet-error": true,
     appdata: true,
