@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from "vite-plus";
 import tailwindcss from "@tailwindcss/vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { svelteTesting } from "@testing-library/svelte/vite";
 import { tcnetPlugin } from "./server/index.ts";
 
 export default defineConfig(({ mode }) => {
@@ -28,7 +29,7 @@ export default defineConfig(({ mode }) => {
       "*.svelte": ["npx eslint --fix", "npx svelte-check --fail-on-warnings"],
       ".github/workflows/*.{yml,yaml}": ["npx actionlint", "npx zizmor --fix --pedantic"],
     },
-    plugins: [tailwindcss(), svelte(), tcnetPlugin()],
+    plugins: [tailwindcss(), svelte(), svelteTesting(), tcnetPlugin()],
     server: {
       host: true,
       port: 5180,
