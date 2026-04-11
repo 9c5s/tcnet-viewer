@@ -40,6 +40,9 @@
 
   let scrollRafId = 0;
   function onScroll(): void {
+    // スクロール操作があったら即座にfalseにする (自動スクロールの誤発火を防ぐ)
+    // 正確な最下部判定はRAFで遅延計算する
+    isAtBottom = false;
     if (scrollRafId) return;
     scrollRafId = requestAnimationFrame(() => {
       scrollRafId = 0;
