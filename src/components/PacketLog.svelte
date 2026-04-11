@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from "svelte";
   import { store } from "$lib/stores.svelte.js";
   import { LAYER_NAMES, PACKET_TYPE_CLASSES, PACKET_FILTER_LABELS, type PacketLogEntry } from "$lib/types.js";
 
@@ -9,7 +10,7 @@
       if (entry.summary.startsWith("[WARN]")) return "text-warning";
       return "text-info";
     }
-    return PACKET_TYPE_CLASSES[entry.type] ?? "text-base-content/70";
+    return PACKET_TYPE_CLASSES[entry.type as keyof typeof PACKET_TYPE_CLASSES] ?? "text-base-content/70";
   }
 
   // タイムスタンプをHH:MM:SS.mmm形式に変換する
@@ -47,6 +48,13 @@
       isAtBottom = logContainer.scrollHeight - logContainer.scrollTop - logContainer.clientHeight < 16;
     });
   }
+
+  // コンポーネント破棄時にスクロールスロットル用RAFをキャンセルする
+  onDestroy(() => {
+    if (scrollRafId) {
+      cancelAnimationFrame(scrollRafId);
+    }
+  });
 
   $effect(() => {
     void filteredLogs.length;
@@ -111,7 +119,7 @@
       {#each Object.keys(store.logFilters) as key}
         <label class="flex cursor-pointer items-center gap-1 text-[9px]">
           <input type="checkbox" class="checkbox checkbox-xs" checked={store.logFilters[key]} onchange={() => store.toggleLogFilter(key)} />
-          <span class="{PACKET_TYPE_CLASSES[key] ?? 'text-base-content/70'}">{PACKET_FILTER_LABELS[key] ?? key}</span>
+          <span class="{PACKET_TYPE_CLASSES[key as keyof typeof PACKET_TYPE_CLASSES] ?? 'text-base-content/70'}">{PACKET_FILTER_LABELS[key as keyof typeof PACKET_FILTER_LABELS] ?? key}</span>
         </label>
       {/each}
     </div>
