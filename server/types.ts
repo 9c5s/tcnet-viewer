@@ -96,6 +96,7 @@ export type WSMessage =
   | { type: "artwork"; timestamp: number; layer: number; data: ArtworkData }
   | { type: "beatgrid"; timestamp: number; layer: number; data: BeatGridData }
   | { type: "layer-reset"; timestamp: number; layer: number }
+  | { type: "artwork-failed"; timestamp: number; layer: number }
   | { type: "tcnet-error"; timestamp: number; data: TCNetErrorData }
   | { type: "appdata"; timestamp: number; data: AppDataData }
   | { type: "server-log"; timestamp: number; level: "log" | "warn" | "error"; message: string }

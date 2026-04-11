@@ -111,6 +111,9 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
       const sizeKB = Math.round((msg.data.base64.length * 3) / 4 / 1024);
       store.addLogEntry(msg.type, msg.layer, `${sizeKB}KB ${msg.data.mimeType}`);
     },
+    "artwork-failed": () => {
+      // Task 3で実装する
+    },
     "layer-reset": (msg) => {
       const i = msg.layer;
       // metadataはクリアしない (新データで上書きされるまで前曲を表示し、レイアウトの崩れを防ぐ)
