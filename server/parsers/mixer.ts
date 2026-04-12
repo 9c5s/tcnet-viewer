@@ -1,7 +1,7 @@
 import type { MixerData, MixerChannel } from "./types.js";
 
 export function parseMixerData(buffer: Buffer): MixerData {
-  // チャンネル6のcrossfaderAssign (offset 245+13=258) が最大読み取り位置
+  // チャンネル6のcrossFaderAssign (offset 245+13=258) が最大読み取り位置
   if (buffer.length < 259) {
     throw new RangeError(`MixerData buffer too short: ${buffer.length} < 259`);
   }
@@ -19,7 +19,7 @@ export function parseMixerData(buffer: Buffer): MixerData {
     send: buffer.readUInt8(offset + 10),
     cueA: buffer.readUInt8(offset + 11),
     cueB: buffer.readUInt8(offset + 12),
-    crossfaderAssign: buffer.readUInt8(offset + 13),
+    crossFaderAssign: buffer.readUInt8(offset + 13),
   });
 
   return {

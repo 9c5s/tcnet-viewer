@@ -129,7 +129,7 @@ export class MixerDataBuilder {
       send: number;
       cueA: number;
       cueB: number;
-      crossfaderAssign: number;
+      crossFaderAssign: number;
     }>,
   ): this {
     const offsets = [125, 149, 173, 197, 221, 245];
@@ -149,7 +149,7 @@ export class MixerDataBuilder {
       "send",
       "cueA",
       "cueB",
-      "crossfaderAssign",
+      "crossFaderAssign",
     ];
     for (let i = 0; i < fieldOrder.length; i++) {
       const val = fields[fieldOrder[i]];

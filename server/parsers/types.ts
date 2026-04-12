@@ -40,7 +40,7 @@ export type MixerChannel = {
   send: number;
   cueA: number;
   cueB: number;
-  crossfaderAssign: number;
+  crossFaderAssign: number;
 };
 
 export type MixerData = {
