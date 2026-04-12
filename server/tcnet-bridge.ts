@@ -58,6 +58,24 @@ for (const [name, value] of Object.entries(expectedTcnetClasses)) {
 if (typeof TCNetDataPacketType !== "object" || TCNetDataPacketType === null) {
   throw new Error("[TCNet] node-tcnet から TCNetDataPacketType 定数をロードできない");
 }
+// switch分岐とrequestData呼び出しで参照している個別メンバーが数値として存在するかも検証する
+// (enum keyがrenameされた場合の無言の分岐外れを防ぐ)
+const expectedTcnetDataPacketTypeKeys = [
+  "MetaData",
+  "CUEData",
+  "SmallWaveFormData",
+  "BigWaveFormData",
+  "MixerData",
+  "BeatGridData",
+  "ArtworkData",
+] as const;
+for (const key of expectedTcnetDataPacketTypeKeys) {
+  if (typeof TCNetDataPacketType[key] !== "number") {
+    throw new Error(
+      `[TCNet] node-tcnet から TCNetDataPacketType.${key} をロードできない (typeof=${typeof TCNetDataPacketType[key]})`,
+    );
+  }
+}
 
 import { processArtworkPacket } from "./parsers/artwork.js";
 import { parseBeatGrid } from "./parsers/beat-grid.js";
