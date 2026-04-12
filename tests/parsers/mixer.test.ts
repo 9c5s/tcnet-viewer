@@ -64,6 +64,40 @@ test("parseMixerData: デフォルト値で全フィールドが0/falseになる
   expect(result.boothEqHi).toBe(0);
 });
 
+test("parseMixerData: 拡張フィールドがUInt8境界値 (0/255) を正しく読み取る", () => {
+  // 0 はデフォルト値と等価なため「default test」と重複しない形にするため、
+  // オフセットごとに 255 を書き込み、read側のオフセット指定ミスを検出する
+  const buffer = new MixerDataBuilder()
+    .setByte(59, 255)
+    .setByte(71, 255)
+    .setByte(91, 255)
+    .setByte(94, 255)
+    .setByte(113, 255)
+    .build();
+  const result = parseMixerData(buffer);
+  expect(result.micEqHi).toBe(255);
+  expect(result.masterCueA).toBe(255);
+  expect(result.sendFxLevel).toBe(255);
+  expect(result.sendReturn3On).toBe(255);
+  expect(result.boothEqHi).toBe(255);
+});
+
+test("parseMixerData: 隣接オフセットは相互に干渉しない", () => {
+  // micEqHi(59) と micEqLow(60) は隣接しており、オフセットのoff-by-oneを検出する
+  const hiOnly = parseMixerData(new MixerDataBuilder().setByte(59, 123).build());
+  expect(hiOnly.micEqHi).toBe(123);
+  expect(hiOnly.micEqLow).toBe(0);
+
+  const lowOnly = parseMixerData(new MixerDataBuilder().setByte(60, 234).build());
+  expect(lowOnly.micEqHi).toBe(0);
+  expect(lowOnly.micEqLow).toBe(234);
+
+  // boothEqHi(113) と boothEqLow(114) も同様に隣接する最終フィールド
+  const booth = parseMixerData(new MixerDataBuilder().setByte(113, 50).build());
+  expect(booth.boothEqHi).toBe(50);
+  expect(booth.boothEqLow).toBe(0);
+});
+
 test("parseMixerData: 拡張フィールドを仕様オフセット通り読み取る", () => {
   // node-tcnet側のオフセットに整合:
   // micEqHi=59, micEqLow=60, linkCueA=67, linkCueB=68, masterCueA=71, masterCueB=72,
