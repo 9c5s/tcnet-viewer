@@ -28,6 +28,37 @@ const {
   TCNetApplicationDataPacket,
 } = tcnet;
 
+// node-tcnetパッケージの更新やdestructure失敗で期待するclass値がundefinedに
+// なった場合を早期検出する。undefinedに対するinstanceof判定は常にfalseを返し、
+// パケット処理が無言で停止するため、モジュールロード時点でエラーを投げる。
+const expectedTcnetClasses = {
+  TCNetClient,
+  TCNetConfiguration,
+  TCNetStatusPacket,
+  TCNetOptInPacket,
+  TCNetOptOutPacket,
+  TCNetTimePacket,
+  TCNetDataPacket,
+  TCNetDataPacketMetrics,
+  TCNetDataPacketMetadata,
+  TCNetDataPacketSmallWaveForm,
+  TCNetDataPacketBigWaveForm,
+  TCNetDataPacketBeatGrid,
+  TCNetDataPacketArtwork,
+  TCNetErrorPacket,
+  TCNetApplicationDataPacket,
+};
+for (const [name, value] of Object.entries(expectedTcnetClasses)) {
+  if (typeof value !== "function") {
+    throw new Error(
+      `[TCNet] node-tcnet から class ${name} をロードできない (typeof=${typeof value})`,
+    );
+  }
+}
+if (typeof TCNetDataPacketType !== "object" || TCNetDataPacketType === null) {
+  throw new Error("[TCNet] node-tcnet から TCNetDataPacketType 定数をロードできない");
+}
+
 import { processArtworkPacket } from "./parsers/artwork.js";
 import { parseBeatGrid } from "./parsers/beat-grid.js";
 import { parseCueData } from "./parsers/cue-data.js";
