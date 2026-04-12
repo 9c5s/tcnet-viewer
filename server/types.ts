@@ -68,7 +68,10 @@ type ArtworkData = {
 export type AuthState = "none" | "pending" | "authenticated" | "failed";
 
 type TCNetErrorData = {
-  errorData: number[];
+  dataType: number;
+  layerId: number;
+  code: number;
+  messageType: number;
 };
 
 type AppDataData = {

@@ -155,7 +155,7 @@ test("broadcast: 一過性メッセージはキャッシュしない", () => {
   broadcaster.broadcast({
     type: "tcnet-error",
     timestamp: 1000,
-    data: { errorData: [0xff, 0xff, 0xff] },
+    data: { dataType: 0x04, layerId: 1, code: 13, messageType: 0x0003 },
   });
   broadcaster.broadcast({
     type: "appdata",

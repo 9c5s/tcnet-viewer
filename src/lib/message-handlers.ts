@@ -143,7 +143,12 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
       );
     },
     "tcnet-error": (msg) => {
-      store.addLogEntry("tcnet-error", undefined, `${msg.data.errorData.length} bytes`);
+      const { dataType, layerId, code, messageType } = msg.data;
+      store.addLogEntry(
+        "tcnet-error",
+        undefined,
+        `code=${code} layer=${layerId} dataType=0x${formatHex(dataType, 2)} messageType=0x${formatHex(messageType, 4)}`,
+      );
     },
     appdata: (msg) => {
       store.addLogEntry(

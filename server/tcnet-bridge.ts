@@ -302,7 +302,12 @@ export class TCNetBridge {
         this.broadcast({
           type: "tcnet-error",
           timestamp: Date.now(),
-          data: { errorData: Array.from(p.errorData) },
+          data: {
+            dataType: p.dataType,
+            layerId: p.layerId,
+            code: p.code,
+            messageType: p.messageType,
+          },
         });
         return;
       }
