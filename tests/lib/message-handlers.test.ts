@@ -165,15 +165,19 @@ test("tcnet-status: authStateをストアに反映する", () => {
   expect(store.authState).toBe("authenticated");
 });
 
-test("tcnet-error: ログにerrorDataのサイズを記録する", () => {
+test("tcnet-error: ログに構造化フィールドを記録する", () => {
   const store = createMockStore();
   const handlers = createHandlers(store);
   handlers["tcnet-error"]({
     type: "tcnet-error",
     timestamp: 1000,
-    data: { errorData: [0xff, 0xff, 0xff] },
+    data: { dataType: 0x04, layerId: 1, code: 13, messageType: 0x0003 },
   });
-  expect(store.addLogEntry).toHaveBeenCalledWith("tcnet-error", undefined, "3 bytes");
+  expect(store.addLogEntry).toHaveBeenCalledWith(
+    "tcnet-error",
+    undefined,
+    "code=13 layer=1 dataType=0x04 messageType=0x0003",
+  );
 });
 
 test("artwork: base64とmimeTypeをストアに反映する", () => {
