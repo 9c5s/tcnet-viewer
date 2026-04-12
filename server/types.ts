@@ -37,7 +37,7 @@ type StatusData = {
 export type Timecode = {
   smpteMode: number;
   // TCNetTimecodeState: 0=Stopped, 1=Running, 2=ForceReSync
-  state: number;
+  state: 0 | 1 | 2;
   hours: number;
   minutes: number;
   seconds: number;
