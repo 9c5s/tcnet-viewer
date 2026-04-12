@@ -43,6 +43,7 @@ import { parseBeatGrid } from "./parsers/beat-grid.js";
 import { parseCueData } from "./parsers/cue-data.js";
 import { parseBigWaveform } from "./parsers/waveform.js";
 import { parseMixerData } from "./parsers/mixer.js";
+import { decodeAppSpecific } from "./parsers/status.js";
 import { MultiPacketAssembler } from "./parsers/multi-packet.js";
 import type { BroadcastFn, AuthState } from "./types.js";
 
@@ -50,18 +51,6 @@ type TCNetBridgeOptions = {
   broadcast: BroadcastFn;
   onStatusChange: (connected: boolean, authState: AuthState) => void;
 };
-
-// StatusパケットのAPP SPECIFIC (72B) から印字可能ASCII (0x20-0x7E) のみ連結して返す
-// NULLバイトや制御文字を含む可変長のパディングを除去し、"PRODJLINK BR..." のような識別子を取り出す
-function decodeAppSpecific(buf: Buffer | null): string | undefined {
-  if (!buf) return undefined;
-  let out = "";
-  for (let i = 0; i < buf.length; i++) {
-    const byte = buf[i];
-    if (byte >= 0x20 && byte <= 0x7e) out += String.fromCharCode(byte);
-  }
-  return out || undefined;
-}
 
 export class TCNetBridge {
   private client!: TCNetClientType;
