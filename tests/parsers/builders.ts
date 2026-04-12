@@ -188,3 +188,22 @@ export function createMultiPacketBuffer(
   }
   return buffer;
 }
+
+// node-tcnet側のMultiPacketHeader相当 (テスト用の最小構成)
+export function makeMultiPacketHeader(
+  totalPackets: number,
+  packetNo: number,
+  clusterSize: number,
+): {
+  totalDataSize: number;
+  totalPackets: number;
+  packetNo: number;
+  dataClusterSize: number;
+} {
+  return {
+    totalDataSize: totalPackets * clusterSize,
+    totalPackets,
+    packetNo,
+    dataClusterSize: clusterSize,
+  };
+}
