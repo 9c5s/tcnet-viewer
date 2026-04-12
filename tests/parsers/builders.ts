@@ -113,7 +113,11 @@ export class MixerDataBuilder {
     return this;
   }
 
-  // スポットチェック用の汎用setter (拡張フィールドのオフセットごとの値を書く)
+  // スポットチェック用の汎用setter。offset は node-tcnet
+  // (TCNetDataPacketMixer.read) で定義されるバイト位置に対応する。主な位置:
+  //   59=micEqHi, 60=micEqLow, 67/68=linkCueA/B, 71/72=masterCueA/B,
+  //   84-95=sendFx/sendReturn3, 104-106=beatFxFreq*, 107-111=headphones*,
+  //   113/114=boothEqHi/Low
   setByte(offset: number, value: number): this {
     this.data.writeUInt8(value, offset);
     return this;
