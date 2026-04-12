@@ -17,12 +17,24 @@ export type LayerInfo = {
   name: string;
 };
 
+export type Timecode = {
+  smpteMode: number;
+  // 0=Stopped, 1=Running, 2=ForceReSync
+  state: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  frames: number;
+};
+
 export type TimeInfo = {
   currentTimeMillis: number;
   totalTimeMillis: number;
   beatMarker: number;
   state: number;
   onAir: number;
+  // レイヤー別タイムコード (パケット長154以上のTimeパケットでのみ含まれる)
+  timecode?: Timecode;
 };
 
 export type MetricsInfo = {

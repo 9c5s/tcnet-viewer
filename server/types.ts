@@ -32,8 +32,28 @@ type StatusData = {
   [key: string]: unknown;
 };
 
+export type Timecode = {
+  smpteMode: number;
+  // TCNetTimecodeState: 0=Stopped, 1=Running, 2=ForceReSync
+  state: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  frames: number;
+};
+
+export type TimeLayerData = {
+  currentTimeMillis: number;
+  totalTimeMillis: number;
+  beatMarker: number;
+  state: number;
+  onAir: number;
+  // レイヤー別タイムコード (バッファ長154以上のパケットでのみ届く)
+  timecode?: Timecode;
+};
+
 type TimeData = {
-  layers: Array<Record<string, unknown>>;
+  layers: TimeLayerData[];
   generalSMPTEMode: number;
 };
 

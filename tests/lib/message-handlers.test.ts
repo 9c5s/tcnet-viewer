@@ -83,6 +83,33 @@ test("status: 未知のステータス値はIDLEにフォールバックする",
   expect(store.layers[0].status).toBe("IDLE");
 });
 
+test("time: layersとtimecodeをストアに反映しgeneralSMPTEModeを更新する", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  handlers.time({
+    type: "time",
+    timestamp: 1000,
+    data: {
+      layers: [
+        {
+          currentTimeMillis: 1000,
+          totalTimeMillis: 300000,
+          beatMarker: 1,
+          state: 3,
+          onAir: 0,
+          timecode: { smpteMode: 2, state: 1, hours: 0, minutes: 1, seconds: 2, frames: 15 },
+        },
+      ],
+      generalSMPTEMode: 2,
+    },
+  });
+  expect(store.time[0]?.currentTimeMillis).toBe(1000);
+  expect(store.time[0]?.timecode?.state).toBe(1);
+  expect(store.time[0]?.timecode?.frames).toBe(15);
+  expect(store.generalSMPTEMode).toBe(2);
+  expect(store.addLogEntry).toHaveBeenCalledWith("time", undefined, "smpte=2");
+});
+
 test("metrics: BPMをストアに反映しログに記録する", () => {
   const store = createMockStore();
   const handlers = createHandlers(store);
