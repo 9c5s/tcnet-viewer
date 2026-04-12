@@ -463,14 +463,16 @@ export class TCNetBridge {
     };
     // APP SPECIFIC (72B) はASCII印字可能文字を抽出して文字列として送る (含まれない場合はundefined)
     const appSpecific = decodeAppSpecific(packet.appSpecific);
+    // node-tcnet の TCNetStatusPacket.layers は read() で index 0-7 を必ず埋めるため
+    // null/undefined 要素は入らない。以前は filter で null 除外していたが、それは
+    // 添字(=layer番号)を詰めてしまい、途中に null が現れた場合に後続レイヤーを
+    // 別デッキにマッピングしてしまう副作用があったため削除する
     this.broadcast({
       type: "status",
       timestamp: Date.now(),
       data: {
         ...statusData,
-        layers: packet.layers.filter(
-          (l: (typeof packet.layers)[number]): l is NonNullable<typeof l> => l != null,
-        ),
+        layers: packet.layers,
         ...(appSpecific !== undefined ? { appSpecific } : {}),
       },
     });
