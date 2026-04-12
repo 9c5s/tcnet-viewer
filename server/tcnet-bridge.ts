@@ -32,6 +32,8 @@ import type {
   TCNetDataPacketMetadata as TCNetDataPacketMetadataType,
   TCNetDataPacketArtwork as TCNetDataPacketArtworkType,
   TCNetDataPacketSmallWaveForm as TCNetDataPacketSmallWaveFormType,
+  TCNetDataPacketBigWaveForm as TCNetDataPacketBigWaveFormType,
+  TCNetDataPacketBeatGrid as TCNetDataPacketBeatGridType,
   TCNetErrorPacket as TCNetErrorPacketType,
   TCNetApplicationDataPacket as TCNetApplicationDataPacketType,
 } from "@9c5s/node-tcnet";
@@ -389,7 +391,8 @@ export class TCNetBridge {
             }
             case TCNetDataPacketType.BigWaveFormData: {
               const asm = this.getAssembler(this.bigWaveformAssemblers, layer);
-              if (asm.add(buf)) {
+              const bigWf = p as TCNetDataPacketBigWaveFormType;
+              if (asm.add(buf, bigWf.multiPacketHeader)) {
                 const assembled = asm.assemble();
                 const waveform = parseBigWaveform(assembled);
                 this.broadcast({
@@ -413,7 +416,8 @@ export class TCNetBridge {
             }
             case TCNetDataPacketType.BeatGridData: {
               const asm = this.getAssembler(this.beatGridAssemblers, layer);
-              if (asm.add(buf)) {
+              const beatGrid = p as TCNetDataPacketBeatGridType;
+              if (asm.add(buf, beatGrid.multiPacketHeader)) {
                 const assembled = asm.assemble();
                 const beatgrid = parseBeatGrid(assembled);
                 this.broadcast({
