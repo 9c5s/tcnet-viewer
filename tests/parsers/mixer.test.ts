@@ -98,42 +98,64 @@ test("parseMixerData: 隣接オフセットは相互に干渉しない", () => {
   expect(booth.boothEqLow).toBe(0);
 });
 
-test("parseMixerData: 拡張フィールドを仕様オフセット通り読み取る", () => {
-  // node-tcnet側のオフセットに整合:
-  // micEqHi=59, micEqLow=60, linkCueA=67, linkCueB=68, masterCueA=71, masterCueB=72,
-  // sendFxEffect=84, sendFxLevel=91, sendReturn3On=94, beatFxFreqHi=104,
-  // headphonesPreEq=107, headphonesAMix=109, headphonesBMix=111, boothEqHi=113, boothEqLow=114
+test("parseMixerData: PR#86追加の拡張フィールド26個に互いに異なる非ゼロ値を与え全て正しく読み出す", () => {
+  // node-tcnet仕様に整合するオフセットごとに1-26の連番を書き込み、
+  // (a) どのフィールドも0のまま取り残されない (b) offset取り違えが起きないことを
+  // 同時に検証する。境界値テストやデフォルト0テストでは捕まえにくい
+  // 「隣接しない2フィールドを入れ違えた場合」の退行検出を担う
   const buffer = new MixerDataBuilder()
-    .setByte(59, 11)
-    .setByte(60, 12)
-    .setByte(67, 21)
-    .setByte(68, 22)
-    .setByte(71, 31)
-    .setByte(72, 32)
-    .setByte(84, 41)
-    .setByte(91, 51)
-    .setByte(94, 61)
-    .setByte(104, 71)
-    .setByte(107, 81)
-    .setByte(109, 91)
-    .setByte(111, 101)
-    .setByte(113, 111)
-    .setByte(114, 121)
+    .setByte(59, 1) // micEqHi
+    .setByte(60, 2) // micEqLow
+    .setByte(67, 3) // linkCueA
+    .setByte(68, 4) // linkCueB
+    .setByte(71, 5) // masterCueA
+    .setByte(72, 6) // masterCueB
+    .setByte(84, 7) // sendFxEffect
+    .setByte(85, 8) // sendFxExt1
+    .setByte(86, 9) // sendFxExt2
+    .setByte(87, 10) // sendFxMasterMix
+    .setByte(88, 11) // sendFxSizeFeedback
+    .setByte(89, 12) // sendFxTime
+    .setByte(90, 13) // sendFxHpf
+    .setByte(91, 14) // sendFxLevel
+    .setByte(92, 15) // sendReturn3Source
+    .setByte(93, 16) // sendReturn3Type
+    .setByte(94, 17) // sendReturn3On
+    .setByte(95, 18) // sendReturn3Level
+    .setByte(104, 19) // beatFxFreqHi
+    .setByte(105, 20) // beatFxFreqMid
+    .setByte(106, 21) // beatFxFreqLow
+    .setByte(107, 22) // headphonesPreEq
+    .setByte(109, 23) // headphonesAMix
+    .setByte(111, 24) // headphonesBMix
+    .setByte(113, 25) // boothEqHi
+    .setByte(114, 26) // boothEqLow
     .build();
   const result = parseMixerData(buffer);
-  expect(result.micEqHi).toBe(11);
-  expect(result.micEqLow).toBe(12);
-  expect(result.linkCueA).toBe(21);
-  expect(result.linkCueB).toBe(22);
-  expect(result.masterCueA).toBe(31);
-  expect(result.masterCueB).toBe(32);
-  expect(result.sendFxEffect).toBe(41);
-  expect(result.sendFxLevel).toBe(51);
-  expect(result.sendReturn3On).toBe(61);
-  expect(result.beatFxFreqHi).toBe(71);
-  expect(result.headphonesPreEq).toBe(81);
-  expect(result.headphonesAMix).toBe(91);
-  expect(result.headphonesBMix).toBe(101);
-  expect(result.boothEqHi).toBe(111);
-  expect(result.boothEqLow).toBe(121);
+  expect(result.micEqHi).toBe(1);
+  expect(result.micEqLow).toBe(2);
+  expect(result.linkCueA).toBe(3);
+  expect(result.linkCueB).toBe(4);
+  expect(result.masterCueA).toBe(5);
+  expect(result.masterCueB).toBe(6);
+  expect(result.sendFxEffect).toBe(7);
+  expect(result.sendFxExt1).toBe(8);
+  expect(result.sendFxExt2).toBe(9);
+  expect(result.sendFxMasterMix).toBe(10);
+  expect(result.sendFxSizeFeedback).toBe(11);
+  expect(result.sendFxTime).toBe(12);
+  expect(result.sendFxHpf).toBe(13);
+  expect(result.sendFxLevel).toBe(14);
+  expect(result.sendReturn3Source).toBe(15);
+  expect(result.sendReturn3Type).toBe(16);
+  expect(result.sendReturn3On).toBe(17);
+  expect(result.sendReturn3Level).toBe(18);
+  expect(result.beatFxFreqHi).toBe(19);
+  expect(result.beatFxFreqMid).toBe(20);
+  expect(result.beatFxFreqLow).toBe(21);
+  expect(result.headphonesPreEq).toBe(22);
+  expect(result.headphonesAMix).toBe(23);
+  expect(result.headphonesBMix).toBe(24);
+  expect(result.boothEqHi).toBe(25);
+  expect(result.boothEqLow).toBe(26);
 });
