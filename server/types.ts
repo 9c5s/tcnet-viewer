@@ -29,6 +29,8 @@ type StatusData = {
     trackID: number;
     name: string;
   }>;
+  // StatusパケットのAPP SPECIFICセクション (72B) を印字可能ASCIIに抽出した文字列
+  appSpecific?: string;
   [key: string]: unknown;
 };
 

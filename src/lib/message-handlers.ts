@@ -70,7 +70,10 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
           name: l.name,
         };
       }
-      store.addLogEntry(msg.type, undefined, `nodes=${msg.data.nodeCount}`);
+      // APP SPECIFIC が取得できた場合のみ末尾に追記する (ログの肥大化を避けるため先頭32文字で切り詰める)
+      const app = msg.data.appSpecific;
+      const appSuffix = app ? ` app="${app.length > 32 ? `${app.slice(0, 32)}…` : app}"` : "";
+      store.addLogEntry(msg.type, undefined, `nodes=${msg.data.nodeCount}${appSuffix}`);
     },
     time: (msg) => {
       for (let i = 0; i < msg.data.layers.length; i++) {

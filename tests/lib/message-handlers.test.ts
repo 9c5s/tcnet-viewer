@@ -83,6 +83,36 @@ test("status: 未知のステータス値はIDLEにフォールバックする",
   expect(store.layers[0].status).toBe("IDLE");
 });
 
+test("status: appSpecificがあるときログ末尾に付加する", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  handlers.status({
+    type: "status",
+    timestamp: 1000,
+    data: { nodeCount: 2, layers: [], appSpecific: "PRODJLINK BRIDGE" },
+  });
+  expect(store.addLogEntry).toHaveBeenCalledWith(
+    "status",
+    undefined,
+    'nodes=2 app="PRODJLINK BRIDGE"',
+  );
+});
+
+test("status: appSpecificが32文字超なら切り詰める", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  handlers.status({
+    type: "status",
+    timestamp: 1000,
+    data: { nodeCount: 1, layers: [], appSpecific: "A".repeat(50) },
+  });
+  expect(store.addLogEntry).toHaveBeenCalledWith(
+    "status",
+    undefined,
+    `nodes=1 app="${"A".repeat(32)}…"`,
+  );
+});
+
 test("time: layersとtimecodeをストアに反映しgeneralSMPTEModeを更新する", () => {
   const store = createMockStore();
   const handlers = createHandlers(store);
