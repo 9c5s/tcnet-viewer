@@ -113,32 +113,41 @@ test("status: appSpecificが32文字超なら切り詰める", () => {
   );
 });
 
-test("time: layersとtimecodeをストアに反映しgeneralSMPTEModeを更新する", () => {
-  const store = createMockStore();
-  const handlers = createHandlers(store);
-  handlers.time({
-    type: "time",
-    timestamp: 1000,
-    data: {
-      layers: [
-        {
-          currentTimeMillis: 1000,
-          totalTimeMillis: 300000,
-          beatMarker: 1,
-          state: 3,
-          onAir: 0,
-          timecode: { smpteMode: 2, state: 1, hours: 0, minutes: 1, seconds: 2, frames: 15 },
-        },
-      ],
-      generalSMPTEMode: 2,
-    },
-  });
-  expect(store.time[0]?.currentTimeMillis).toBe(1000);
-  expect(store.time[0]?.timecode?.state).toBe(1);
-  expect(store.time[0]?.timecode?.frames).toBe(15);
-  expect(store.generalSMPTEMode).toBe(2);
-  expect(store.addLogEntry).toHaveBeenCalledWith("time", undefined, "smpte=2");
-});
+test.each([
+  { smpteMode: 0, state: 0 as const },
+  { smpteMode: 1, state: 1 as const },
+  { smpteMode: 2, state: 2 as const },
+])(
+  "time: Timecode(smpteMode=$smpteMode state=$state)をストアに反映しgeneralSMPTEModeを更新する",
+  ({ smpteMode, state }) => {
+    const store = createMockStore();
+    const handlers = createHandlers(store);
+    handlers.time({
+      type: "time",
+      timestamp: 1000,
+      data: {
+        layers: [
+          {
+            currentTimeMillis: 1000,
+            totalTimeMillis: 300000,
+            beatMarker: 1,
+            state: 3,
+            onAir: 0,
+            timecode: { smpteMode, state, hours: 1, minutes: 2, seconds: 3, frames: 24 },
+          },
+        ],
+        generalSMPTEMode: smpteMode,
+      },
+    });
+    expect(store.time[0]?.currentTimeMillis).toBe(1000);
+    expect(store.time[0]?.timecode?.smpteMode).toBe(smpteMode);
+    expect(store.time[0]?.timecode?.state).toBe(state);
+    expect(store.time[0]?.timecode?.hours).toBe(1);
+    expect(store.time[0]?.timecode?.frames).toBe(24);
+    expect(store.generalSMPTEMode).toBe(smpteMode);
+    expect(store.addLogEntry).toHaveBeenCalledWith("time", undefined, `smpte=${smpteMode}`);
+  },
+);
 
 test("metrics: BPMをストアに反映しログに記録する", () => {
   const store = createMockStore();
