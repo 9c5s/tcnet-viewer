@@ -31,6 +31,7 @@ import type {
   TCNetDataPacketMetrics as TCNetDataPacketMetricsType,
   TCNetDataPacketMetadata as TCNetDataPacketMetadataType,
   TCNetDataPacketArtwork as TCNetDataPacketArtworkType,
+  TCNetDataPacketSmallWaveForm as TCNetDataPacketSmallWaveFormType,
   TCNetErrorPacket as TCNetErrorPacketType,
   TCNetApplicationDataPacket as TCNetApplicationDataPacketType,
 } from "@9c5s/node-tcnet";
@@ -38,7 +39,7 @@ import type {
 import { processArtworkPacket } from "./parsers/artwork.js";
 import { parseBeatGrid } from "./parsers/beat-grid.js";
 import { parseCueData } from "./parsers/cue-data.js";
-import { parseSmallWaveform, parseBigWaveform } from "./parsers/waveform.js";
+import { parseBigWaveform } from "./parsers/waveform.js";
 import { parseMixerData } from "./parsers/mixer.js";
 import { MultiPacketAssembler } from "./parsers/multi-packet.js";
 import type { BroadcastFn, AuthState } from "./types.js";
@@ -374,13 +375,16 @@ export class TCNetBridge {
               break;
             }
             case TCNetDataPacketType.SmallWaveFormData: {
-              const waveform = parseSmallWaveform(buf);
-              this.broadcast({
-                type: "waveform-small",
-                timestamp: Date.now(),
-                layer,
-                data: waveform,
-              });
+              // node-tcnet側のTCNetDataPacketSmallWaveForm.dataにパース済みのwaveformを使う
+              const smallWf = p as TCNetDataPacketSmallWaveFormType;
+              if (smallWf.data) {
+                this.broadcast({
+                  type: "waveform-small",
+                  timestamp: Date.now(),
+                  layer,
+                  data: smallWf.data,
+                });
+              }
               break;
             }
             case TCNetDataPacketType.BigWaveFormData: {
