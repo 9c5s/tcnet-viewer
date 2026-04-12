@@ -1,11 +1,14 @@
 import type { MultiPacketHeader } from "@9c5s/node-tcnet";
 
+// TCNetマルチパケットのヘッダー長 (node-tcnet readMultiPacketHeader の仕様)
+const MULTI_PACKET_HEADER_SIZE = 42;
+
 export class MultiPacketAssembler {
   private packets: Map<number, Buffer> = new Map();
   private totalPackets = 0;
 
   // bufferはパケット全体、headerはnode-tcnet側のreadMultiPacketHeaderでパース済みの値を受ける
-  // headerがnullの場合 (42バイト未満等) は不正パケットとして無視する
+  // headerがnullの場合 (バッファ長がMULTI_PACKET_HEADER_SIZE未満等) は不正パケットとして無視する
   add(buffer: Buffer, header: MultiPacketHeader | null): boolean {
     if (!header) return false;
     const { totalPackets: newTotalPackets, packetNo, dataClusterSize: clusterSize } = header;
@@ -18,7 +21,7 @@ export class MultiPacketAssembler {
     // packetNoの検証はtotalPackets代入前に行う
     // (不正パケットがtotalPacketsを汚染してアセンブラをロックするのを防ぐ)
     if (packetNo >= newTotalPackets) return false;
-    const dataStart = 42;
+    const dataStart = MULTI_PACKET_HEADER_SIZE;
     // clusterSize=0はFileパケット(Artwork等)のため、バッファ末尾までをデータとして扱う
     const end = clusterSize > 0 ? Math.min(dataStart + clusterSize, buffer.length) : buffer.length;
     // clusterSize指定時にバッファが不足している場合は切り詰めパケットとして無視する
