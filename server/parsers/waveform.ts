@@ -1,15 +1,7 @@
 import type { WaveformBar, WaveformData } from "./types.js";
 
-export function parseSmallWaveform(buffer: Buffer): WaveformData {
-  const dataStart = 42;
-  return parseWaveformBars(buffer.slice(dataStart, dataStart + 2400));
-}
-
+// BigWaveFormはマルチパケット組み立て後の連続バッファを受ける (SmallWaveFormはnode-tcnet側でパース済み)
 export function parseBigWaveform(data: Buffer): WaveformData {
-  return parseWaveformBars(data);
-}
-
-function parseWaveformBars(data: Buffer): WaveformData {
   const bars: WaveformBar[] = [];
   for (let i = 0; i + 1 < data.length; i += 2) {
     bars.push({

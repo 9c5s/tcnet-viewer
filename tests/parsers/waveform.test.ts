@@ -1,17 +1,5 @@
 import { expect, test } from "vite-plus/test";
-import { parseSmallWaveform, parseBigWaveform } from "../../server/parsers/waveform.js";
-
-test("parseSmallWaveform: offset 42から2400バイトをパースする", () => {
-  const buffer = Buffer.alloc(2442);
-  buffer.writeUInt8(100, 42);
-  buffer.writeUInt8(5, 43);
-  buffer.writeUInt8(200, 44);
-  buffer.writeUInt8(3, 45);
-  const result = parseSmallWaveform(buffer);
-  expect(result.bars[0]).toEqual({ color: 100, level: 5 });
-  expect(result.bars[1]).toEqual({ color: 200, level: 3 });
-  expect(result.bars).toHaveLength(1200);
-});
+import { parseBigWaveform } from "../../server/parsers/waveform.js";
 
 test("parseBigWaveform: バッファ全体をパースする", () => {
   const buffer = Buffer.alloc(4);
