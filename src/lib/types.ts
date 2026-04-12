@@ -17,25 +17,8 @@ export type LayerInfo = {
   name: string;
 };
 
-export type Timecode = {
-  smpteMode: number;
-  // 0=Stopped, 1=Running, 2=ForceReSync
-  state: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-  frames: number;
-};
-
-export type TimeInfo = {
-  currentTimeMillis: number;
-  totalTimeMillis: number;
-  beatMarker: number;
-  state: number;
-  onAir: number;
-  // レイヤー別タイムコード (パケット長154以上のTimeパケットでのみ含まれる)
-  timecode?: Timecode;
-};
+// server/types.ts の単一定義を再エクスポートする (重複定義を避ける)
+export type { Timecode, TimeLayerData as TimeInfo } from "../../server/types.js";
 
 export type MetricsInfo = {
   state: number;
