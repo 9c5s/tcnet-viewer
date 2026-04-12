@@ -4,7 +4,7 @@ import {
   dispatchMessage,
   type MessageHandlerStore,
 } from "$lib/message-handlers.js";
-import type { WSMessage } from "$lib/types.js";
+import type { MixerData, WSMessage } from "$lib/types.js";
 
 function createMockStore(): MessageHandlerStore {
   return {
@@ -184,6 +184,98 @@ test("metadata: トラック情報をストアに反映する", () => {
     data: { trackArtist: "Artist", trackTitle: "Title", trackKey: 1, trackID: 50 },
   });
   expect(store.metadata[2]?.trackTitle).toBe("Title");
+});
+
+test("optout: ノード離脱をログに記録する", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  handlers.optout({
+    type: "optout",
+    timestamp: 1000,
+    data: { nodeCount: 1 },
+  });
+  expect(store.addLogEntry).toHaveBeenCalledWith("optout", undefined, "node left");
+});
+
+test("cue: cueポイントをレイヤー別にストアに反映する", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  const cues = [
+    { index: 1, type: 2, inTime: 1000, outTime: 2000, color: { r: 255, g: 0, b: 0 } },
+    { index: 2, type: 0, inTime: 3000, outTime: 0, color: { r: 0, g: 255, b: 0 } },
+  ];
+  handlers.cue({
+    type: "cue",
+    timestamp: 1000,
+    layer: 3,
+    data: { loopInTime: 500, cues },
+  });
+  expect(store.cues[3]).toBe(cues);
+  expect(store.addLogEntry).toHaveBeenCalledWith("cue", 3, "2 cues");
+});
+
+test("waveform-small: barsをレイヤー別に反映しログに本数を記録する", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  const bars = [
+    { color: 1, level: 10 },
+    { color: 2, level: 20 },
+  ];
+  handlers["waveform-small"]({
+    type: "waveform-small",
+    timestamp: 1000,
+    layer: 0,
+    data: { bars },
+  });
+  expect(store.waveformSmall[0]).toBe(bars);
+  expect(store.addLogEntry).toHaveBeenCalledWith("waveform-small", 0, "2 bars");
+});
+
+test("waveform-big: barsをレイヤー別に反映しログに本数を記録する", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  const bars = [{ color: 5, level: 50 }];
+  handlers["waveform-big"]({
+    type: "waveform-big",
+    timestamp: 1000,
+    layer: 5,
+    data: { bars },
+  });
+  expect(store.waveformBig[5]).toBe(bars);
+  expect(store.addLogEntry).toHaveBeenCalledWith("waveform-big", 5, "1 bars");
+});
+
+test("mixer: MixerDataをストアに反映しmasterAudioLevelをログに記録する", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  // ハンドラはmsg.data全体をstoreに透過するため、テスト検証にはmasterAudioLevelの
+  // 伝達のみ確認すれば十分。47フィールド全部を埋めるのは冗長なのでキャストで省略する
+  const mixerData = { masterAudioLevel: 180 } as unknown as MixerData;
+  handlers.mixer({
+    type: "mixer",
+    timestamp: 1000,
+    data: mixerData,
+  });
+  expect(store.mixer).toBe(mixerData);
+  expect(store.addLogEntry).toHaveBeenCalledWith("mixer", undefined, "master=180");
+});
+
+test("beatgrid: entriesをレイヤー別に反映しログに件数を記録する", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  const entries = [
+    { beatNumber: 1, beatType: 20, timestampMs: 0 },
+    { beatNumber: 2, beatType: 0, timestampMs: 500 },
+    { beatNumber: 3, beatType: 0, timestampMs: 1000 },
+  ];
+  handlers.beatgrid({
+    type: "beatgrid",
+    timestamp: 1000,
+    layer: 4,
+    data: { entries },
+  });
+  expect(store.beatgrid[4]).toBe(entries);
+  expect(store.addLogEntry).toHaveBeenCalledWith("beatgrid", 4, "3 beats");
 });
 
 test("tcnet-status: 接続状態を更新する", () => {
