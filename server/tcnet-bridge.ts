@@ -2,8 +2,13 @@
 // node-tcnetのバンドル成果物にあるdynamic requireが失敗する
 // createRequireを使ってCJSとしてロードすることで回避する
 import { createRequire } from "node:module";
+// import type * as で値と型を同時に取得し、require結果をtypeof TCNetModuleで
+// キャストすることで、destructuredされた各クラスが TypeScript に「クラス値」と
+// 認識されるようにする。これにより instanceof 後の型絞り込みが自動で動き、
+// 各イベントハンドラで as キャストが不要になる
+import type * as TCNetModule from "@9c5s/node-tcnet";
 const require = createRequire(import.meta.url);
-const tcnet = require("@9c5s/node-tcnet");
+const tcnet = require("@9c5s/node-tcnet") as typeof TCNetModule;
 const {
   TCNetClient,
   TCNetConfiguration,
@@ -14,29 +19,14 @@ const {
   TCNetDataPacket,
   TCNetDataPacketMetrics,
   TCNetDataPacketMetadata,
+  TCNetDataPacketSmallWaveForm,
+  TCNetDataPacketBigWaveForm,
+  TCNetDataPacketBeatGrid,
+  TCNetDataPacketArtwork,
   TCNetDataPacketType,
   TCNetErrorPacket,
   TCNetApplicationDataPacket,
 } = tcnet;
-
-// createRequireでロードしたクラスは値のみ存在し型情報がないため、
-// 型注釈用にimport typeで型を別途取得する
-import type {
-  TCNetClient as TCNetClientType,
-  TCNetStatusPacket as TCNetStatusPacketType,
-  TCNetOptInPacket as TCNetOptInPacketType,
-  TCNetOptOutPacket as TCNetOptOutPacketType,
-  TCNetTimePacket as TCNetTimePacketType,
-  TCNetDataPacket as TCNetDataPacketType_,
-  TCNetDataPacketMetrics as TCNetDataPacketMetricsType,
-  TCNetDataPacketMetadata as TCNetDataPacketMetadataType,
-  TCNetDataPacketArtwork as TCNetDataPacketArtworkType,
-  TCNetDataPacketSmallWaveForm as TCNetDataPacketSmallWaveFormType,
-  TCNetDataPacketBigWaveForm as TCNetDataPacketBigWaveFormType,
-  TCNetDataPacketBeatGrid as TCNetDataPacketBeatGridType,
-  TCNetErrorPacket as TCNetErrorPacketType,
-  TCNetApplicationDataPacket as TCNetApplicationDataPacketType,
-} from "@9c5s/node-tcnet";
 
 import { processArtworkPacket } from "./parsers/artwork.js";
 import { parseBeatGrid } from "./parsers/beat-grid.js";
@@ -53,7 +43,7 @@ type TCNetBridgeOptions = {
 };
 
 export class TCNetBridge {
-  private client!: TCNetClientType;
+  private client!: TCNetModule.TCNetClient;
   private broadcast: BroadcastFn;
   private onStatusChange: (connected: boolean, authState: AuthState) => void;
   private nodeName!: string;
@@ -262,69 +252,65 @@ export class TCNetBridge {
 
     this.client.on("broadcast", (packet: unknown) => {
       if (packet instanceof TCNetOptInPacket) {
-        const p = packet as TCNetOptInPacketType;
         // 自ノードのOptInはスキップする (node-tcnetが定期送信する自身のOptInを
         // 受信するため、ハートビートリセットも行わない)
-        if (p.header.nodeName === this.nodeName) return;
+        if (packet.header.nodeName === this.nodeName) return;
         this.resetHeartbeat();
         this.broadcast({
           type: "optin",
           timestamp: Date.now(),
           data: {
-            nodeCount: p.nodeCount,
-            nodeListenerPort: p.nodeListenerPort,
-            uptime: p.uptime,
-            vendorName: p.vendorName,
-            appName: p.appName,
-            majorVersion: p.majorVersion,
-            minorVersion: p.minorVersion,
-            bugVersion: p.bugVersion,
-            nodeName: p.header.nodeName,
-            nodeType: p.header.nodeType,
-            nodeId: p.header.nodeId,
-            protocolMinorVersion: p.header.minorVersion,
+            nodeCount: packet.nodeCount,
+            nodeListenerPort: packet.nodeListenerPort,
+            uptime: packet.uptime,
+            vendorName: packet.vendorName,
+            appName: packet.appName,
+            majorVersion: packet.majorVersion,
+            minorVersion: packet.minorVersion,
+            bugVersion: packet.bugVersion,
+            nodeName: packet.header.nodeName,
+            nodeType: packet.header.nodeType,
+            nodeId: packet.header.nodeId,
+            protocolMinorVersion: packet.header.minorVersion,
           },
         });
         return;
       }
       this.resetHeartbeat();
       if (packet instanceof TCNetOptOutPacket) {
-        const p = packet as TCNetOptOutPacketType;
         this.broadcast({
           type: "optout",
           timestamp: Date.now(),
-          data: { nodeCount: p.nodeCount },
+          data: { nodeCount: packet.nodeCount },
         });
         return;
       }
       if (packet instanceof TCNetStatusPacket) {
-        this.handleStatus(packet as TCNetStatusPacketType);
+        this.handleStatus(packet);
         return;
       }
       if (packet instanceof TCNetErrorPacket) {
-        const p = packet as TCNetErrorPacketType;
         this.broadcast({
           type: "tcnet-error",
           timestamp: Date.now(),
           data: {
-            dataType: p.dataType,
-            layerId: p.layerId,
-            code: p.code,
-            messageType: p.messageType,
+            dataType: packet.dataType,
+            layerId: packet.layerId,
+            code: packet.code,
+            messageType: packet.messageType,
           },
         });
         return;
       }
       if (packet instanceof TCNetApplicationDataPacket) {
-        const p = packet as TCNetApplicationDataPacketType;
         this.broadcast({
           type: "appdata",
           timestamp: Date.now(),
           data: {
-            cmd: p.cmd,
-            token: p.token,
-            dest: p.dest,
-            listenerPort: p.listenerPort,
+            cmd: packet.cmd,
+            token: packet.token,
+            dest: packet.dest,
+            listenerPort: packet.listenerPort,
           },
         });
         return;
@@ -334,13 +320,12 @@ export class TCNetBridge {
     this.client.on("time", (packet: unknown) => {
       this.resetHeartbeat();
       if (packet instanceof TCNetTimePacket) {
-        const p = packet as TCNetTimePacketType;
         this.broadcast({
           type: "time",
           timestamp: Date.now(),
           data: {
-            layers: p.layers,
-            generalSMPTEMode: p.generalSMPTEMode,
+            layers: packet.layers,
+            generalSMPTEMode: packet.generalSMPTEMode,
           },
         });
       }
@@ -349,22 +334,20 @@ export class TCNetBridge {
     this.client.on("data", (packet: unknown) => {
       this.resetHeartbeat();
       if (packet instanceof TCNetDataPacketMetrics) {
-        const p = packet as TCNetDataPacketMetricsType;
         this.broadcast({
           type: "metrics",
           timestamp: Date.now(),
-          layer: p.layer,
-          data: p.data ?? {},
+          layer: packet.layer,
+          data: packet.data ?? {},
         });
         return;
       }
 
       // TCNetDataPacket基底クラスで受信されるパケットをdataTypeで分岐処理する
       if (packet instanceof TCNetDataPacket) {
-        const p = packet as TCNetDataPacketType_;
-        const buf: Buffer = p.buffer;
-        const dataType: number = p.dataType;
-        const layer: number = p.layer;
+        const buf: Buffer = packet.buffer;
+        const dataType: number = packet.dataType;
+        const layer: number = packet.layer;
         try {
           switch (dataType) {
             case TCNetDataPacketType.CUEData: {
@@ -379,21 +362,20 @@ export class TCNetBridge {
             }
             case TCNetDataPacketType.SmallWaveFormData: {
               // node-tcnet側のTCNetDataPacketSmallWaveForm.dataにパース済みのwaveformを使う
-              const smallWf = p as TCNetDataPacketSmallWaveFormType;
-              if (smallWf.data) {
+              if (packet instanceof TCNetDataPacketSmallWaveForm && packet.data) {
                 this.broadcast({
                   type: "waveform-small",
                   timestamp: Date.now(),
                   layer,
-                  data: smallWf.data,
+                  data: packet.data,
                 });
               }
               break;
             }
             case TCNetDataPacketType.BigWaveFormData: {
+              if (!(packet instanceof TCNetDataPacketBigWaveForm)) break;
               const asm = this.getAssembler(this.bigWaveformAssemblers, layer);
-              const bigWf = p as TCNetDataPacketBigWaveFormType;
-              if (asm.add(buf, bigWf.multiPacketHeader)) {
+              if (asm.add(buf, packet.multiPacketHeader)) {
                 const assembled = asm.assemble();
                 const waveform = parseBigWaveform(assembled);
                 this.broadcast({
@@ -416,9 +398,9 @@ export class TCNetBridge {
               break;
             }
             case TCNetDataPacketType.BeatGridData: {
+              if (!(packet instanceof TCNetDataPacketBeatGrid)) break;
               const asm = this.getAssembler(this.beatGridAssemblers, layer);
-              const beatGrid = p as TCNetDataPacketBeatGridType;
-              if (asm.add(buf, beatGrid.multiPacketHeader)) {
+              if (asm.add(buf, packet.multiPacketHeader)) {
                 const assembled = asm.assemble();
                 const beatgrid = parseBeatGrid(assembled);
                 this.broadcast({
@@ -441,7 +423,7 @@ export class TCNetBridge {
     });
   }
 
-  private handleStatus(packet: TCNetStatusPacketType): void {
+  private handleStatus(packet: TCNetModule.TCNetStatusPacket): void {
     const statusData = packet.data ?? {
       nodeCount: 0,
       nodeListenerPort: 0,
@@ -501,22 +483,19 @@ export class TCNetBridge {
       try {
         const packet = await this.client.requestData(TCNetDataPacketType.MetaData, layer);
         if (this.layerGeneration[layer] !== generation) return;
-        if (packet instanceof TCNetDataPacketMetadata) {
-          const p = packet as TCNetDataPacketMetadataType;
-          if (p.info) {
-            const info = p.info;
-            if (info.trackTitle || info.trackArtist) {
-              console.log(
-                `[TCNet] メタデータ取得 レイヤー${layer} (試行${attempt}): "${info.trackTitle}"`,
-              );
-              this.broadcast({
-                type: "metadata",
-                timestamp: Date.now(),
-                layer,
-                data: info,
-              });
-              break;
-            }
+        if (packet instanceof TCNetDataPacketMetadata && packet.info) {
+          const info = packet.info;
+          if (info.trackTitle || info.trackArtist) {
+            console.log(
+              `[TCNet] メタデータ取得 レイヤー${layer} (試行${attempt}): "${info.trackTitle}"`,
+            );
+            this.broadcast({
+              type: "metadata",
+              timestamp: Date.now(),
+              layer,
+              data: info,
+            });
+            break;
           }
         }
       } catch (err) {
@@ -541,8 +520,11 @@ export class TCNetBridge {
       try {
         const packet = await this.client.requestData(TCNetDataPacketType.ArtworkData, layer);
         if (this.layerGeneration[layer] !== generation) return;
-        const artPacket = packet as unknown as TCNetDataPacketArtworkType;
-        const artworkData = processArtworkPacket(artPacket.data?.jpeg);
+        if (!(packet instanceof TCNetDataPacketArtwork)) {
+          console.log(`[TCNet] アートワーク応答が不正なパケット型 (レイヤー${layer})`);
+          continue;
+        }
+        const artworkData = processArtworkPacket(packet.data?.jpeg);
         if (artworkData) {
           this.broadcast({
             type: "artwork",
@@ -555,7 +537,7 @@ export class TCNetBridge {
         }
         // 不完全なJPEG (EOIマーカーなし) の場合は再送要求する
         console.log(
-          `[TCNet] アートワーク不正データ (レイヤー${layer}, 試行${attempt}/3, ${artPacket.data?.jpeg?.length ?? 0}B)`,
+          `[TCNet] アートワーク不正データ (レイヤー${layer}, 試行${attempt}/3, ${packet.data?.jpeg?.length ?? 0}B)`,
         );
       } catch (err) {
         const reason = err instanceof Error ? err.message : String(err);
