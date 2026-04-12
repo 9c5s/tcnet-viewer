@@ -113,6 +113,12 @@ export class MixerDataBuilder {
     return this;
   }
 
+  // スポットチェック用の汎用setter (拡張フィールドのオフセットごとの値を書く)
+  setByte(offset: number, value: number): this {
+    this.data.writeUInt8(value, offset);
+    return this;
+  }
+
   setChannel(
     index: number,
     fields: Partial<{
