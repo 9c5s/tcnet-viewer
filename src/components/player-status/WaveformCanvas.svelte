@@ -23,6 +23,15 @@
   let canvasWidth = $state(800);
   let win = $derived(calcWindow({ currentMs: currentTimeMs, trackLengthMs, zoomScale, canvasWidth }));
 
+  // BWFはBridgeが返すlevelのダイナミックレンジが狭い (max 48 前後) ため、
+  // bars 全体の max level で正規化して視認性を確保する。0 除算回避の下限を設ける
+  let levelScale = $derived.by(() => {
+    if (!bars || bars.length === 0) return 1;
+    let maxLevel = 0;
+    for (const b of bars) if (b.level > maxLevel) maxLevel = b.level;
+    return 255 / Math.max(maxLevel, 1);
+  });
+
   function draw() {
     if (!canvasEl) return;
     const ctx = canvasEl.getContext("2d");
@@ -45,7 +54,7 @@
       const barStartMs = i * barDurationMs;
       const x = timeToX(barStartMs, windowLeft, windowMs, canvasWidth);
       const w = Math.max((barDurationMs / windowMs) * canvasWidth, 1);
-      const level = (bar.level / 255) * height;
+      const level = Math.min((bar.level * levelScale) / 255, 1) * height;
       ctx.globalAlpha = Math.max(bar.color / 255, 0.1);
       ctx.fillStyle = "rgb(122,162,247)";
       ctx.fillRect(x, height - level, w, level);
