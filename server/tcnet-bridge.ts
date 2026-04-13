@@ -167,6 +167,40 @@ export class TCNetBridge {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  /**
+   * BigWaveFormDataをリトライ付きで要求しbroadcastする。
+   * Bridge/CDJ側のロード状況によってパケットロスや中間パケットの空応答が起きうるため、
+   * 一時的な失敗をリトライで救う。世代不一致は即座に中断する。
+   */
+  private async requestBigWaveFormWithRetry(
+    layer: number,
+    generation: number,
+    maxAttempts: number,
+  ): Promise<void> {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      if (this.layerGeneration[layer] !== generation) return;
+      try {
+        const packet = await this.client.requestData(TCNetDataPacketType.BigWaveFormData, layer);
+        if (this.layerGeneration[layer] !== generation) return;
+        if (packet instanceof TCNetDataPacketBigWaveForm && packet.data) {
+          this.broadcast({
+            type: "waveform-big",
+            timestamp: Date.now(),
+            layer,
+            data: packet.data,
+          });
+          return;
+        }
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : String(err);
+        console.log(
+          `[TCNet] BigWaveForm取得失敗 (レイヤー${layer}, 試行${attempt}/${maxAttempts}): ${reason}`,
+        );
+      }
+      if (attempt < maxAttempts) await this.sleep(500);
+    }
+  }
+
   private setAuthState(state: AuthState, connected: boolean): void {
     this.authState = state;
     this.onStatusChange(connected, state);
@@ -509,19 +543,14 @@ export class TCNetBridge {
 
     // BigWaveForm, BeatGridはマルチパケットだがBridgeは要求されなければ送信しない。
     // node-tcnet側でアセンブル済みpacketをPromiseで返すため、そのdataを直接broadcastする
-    this.client
-      .requestData(TCNetDataPacketType.BigWaveFormData, layer)
-      .then((packet) => {
-        if (this.layerGeneration[layer] !== generation) return;
-        if (!(packet instanceof TCNetDataPacketBigWaveForm) || !packet.data) return;
-        this.broadcast({
-          type: "waveform-big",
-          timestamp: Date.now(),
-          layer,
-          data: packet.data,
-        });
-      })
-      .catch(() => {});
+    // BigWaveFormはCDJ側のロード状況によって中間パケットが空応答になることがあるため
+    // 初回3回リトライに加え、5秒後の遅延再要求でCDJロード完了後のデータに上書きする
+    void this.requestBigWaveFormWithRetry(layer, generation, 3);
+    void (async () => {
+      await this.sleep(5000);
+      if (this.layerGeneration[layer] !== generation) return;
+      await this.requestBigWaveFormWithRetry(layer, generation, 1);
+    })();
     this.client
       .requestData(TCNetDataPacketType.BeatGridData, layer)
       .then((packet) => {
