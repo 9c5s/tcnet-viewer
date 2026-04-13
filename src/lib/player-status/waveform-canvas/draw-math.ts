@@ -12,7 +12,7 @@ export type WindowResult = {
 };
 
 export const ZOOM_MIN = 1;
-export const ZOOM_MAX = 8;
+export const ZOOM_MAX = 32;
 export const CURSOR_ANCHOR_RATIO = 0.25;
 
 function clamp(v: number, min: number, max: number): number {

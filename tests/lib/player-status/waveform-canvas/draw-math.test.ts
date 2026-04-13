@@ -2,6 +2,8 @@ import { describe, expect, test } from "vite-plus/test";
 import {
   calcWindow,
   timeToX,
+  ZOOM_MAX,
+  ZOOM_MIN,
 } from "../../../../src/lib/player-status/waveform-canvas/draw-math.js";
 
 describe("calcWindow", () => {
@@ -36,21 +38,21 @@ describe("calcWindow", () => {
     expect(w.windowLeft).toBe(180_000 - 90_000);
     expect(w.cursorX).toBeCloseTo(((170_000 - 90_000) / 90_000) * 400);
   });
-  test("zoomScale範囲外はclamp (1-8)", () => {
+  test("zoomScale範囲外はZOOM_MIN-ZOOM_MAXにclamp", () => {
     const w1 = calcWindow({
       currentMs: 0,
       trackLengthMs: 100_000,
       zoomScale: 0.5,
       canvasWidth: 400,
     });
-    expect(w1.windowMs).toBe(100_000);
+    expect(w1.windowMs).toBe(100_000 / ZOOM_MIN);
     const w2 = calcWindow({
       currentMs: 0,
       trackLengthMs: 100_000,
-      zoomScale: 10,
+      zoomScale: ZOOM_MAX * 2,
       canvasWidth: 400,
     });
-    expect(w2.windowMs).toBe(100_000 / 8);
+    expect(w2.windowMs).toBe(100_000 / ZOOM_MAX);
   });
   test("trackLength=0はwindowMs=0、cursorX=0", () => {
     const w = calcWindow({ currentMs: 0, trackLengthMs: 0, zoomScale: 2, canvasWidth: 400 });

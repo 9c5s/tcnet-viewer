@@ -1,6 +1,7 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
   import type { Arrangement } from "$lib/types.js";
+  import { ZOOM_MAX, ZOOM_MIN } from "$lib/player-status/waveform-canvas/draw-math.js";
   import PlayerCard from "./PlayerCard.svelte";
   import PlayerToolbar from "./PlayerToolbar.svelte";
 
@@ -34,7 +35,7 @@
 
   function onZoomChange(layerIndex: number, v: number) {
     const next = [...store.playerStatusZoom];
-    next[layerIndex] = Math.min(Math.max(v, 1), 8);
+    next[layerIndex] = Math.min(Math.max(v, ZOOM_MIN), ZOOM_MAX);
     store.playerStatusZoom = next;
     try {
       localStorage.setItem("playerStatusZoom", JSON.stringify(next));

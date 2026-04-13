@@ -13,6 +13,7 @@ import type {
   Arrangement,
 } from "./types.js";
 import { getLocalStorageValue } from "./storage.js";
+import { ZOOM_MAX, ZOOM_MIN } from "./player-status/waveform-canvas/draw-math.js";
 
 export type LayoutMode = "cards" | "detail" | "table" | "player-status";
 
@@ -76,7 +77,7 @@ export class ViewerStore {
           parsed.length === 4 &&
           parsed.every((v) => typeof v === "number")
         ) {
-          return parsed.map((v) => Math.min(Math.max(v, 1), 8));
+          return parsed.map((v) => Math.min(Math.max(v, ZOOM_MIN), ZOOM_MAX));
         }
       } catch {
         // fallthrough
