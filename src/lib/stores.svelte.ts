@@ -10,10 +10,12 @@ import type {
   PacketLogEntry,
   BeatGridEntry,
   AuthState,
+  Arrangement,
 } from "./types.js";
 import { getLocalStorageValue } from "./storage.js";
+import { normalizeOrder } from "./player-status/ordering.js";
 
-export type LayoutMode = "cards" | "detail" | "table";
+export type LayoutMode = "cards" | "detail" | "table" | "player-status";
 
 export type Theme = "tokyo-night" | "tokyo-night-storm" | "tokyo-night-light";
 
@@ -39,7 +41,7 @@ export class ViewerStore {
   }
   layoutMode: LayoutMode = $state(
     getLocalStorageValue<LayoutMode>("layoutMode", "detail", (raw) => {
-      const valid: LayoutMode[] = ["cards", "detail", "table"];
+      const valid: LayoutMode[] = ["cards", "detail", "table", "player-status"];
       return valid.includes(raw as LayoutMode) ? (raw as LayoutMode) : "detail";
     }),
   );
@@ -56,6 +58,42 @@ export class ViewerStore {
     getLocalStorageValue<number>("packetLogHeight", 200, (raw) => {
       const parsed = Number(raw);
       return Number.isFinite(parsed) && parsed > 0 ? parsed : 200;
+    }),
+  );
+
+  playerStatusArrange: Arrangement = $state(
+    getLocalStorageValue<Arrangement>("playerStatusArrange", "stack", (raw) => {
+      const valid: Arrangement[] = ["stack", "row", "grid"];
+      return valid.includes(raw as Arrangement) ? (raw as Arrangement) : "stack";
+    }),
+  );
+
+  playerStatusOrder: number[] = $state(
+    getLocalStorageValue<number[]>("playerStatusOrder", [0, 1, 2, 3], (raw) => {
+      try {
+        const parsed = JSON.parse(raw) as unknown;
+        return normalizeOrder(parsed as number[]);
+      } catch {
+        return [0, 1, 2, 3];
+      }
+    }),
+  );
+
+  playerStatusZoom: number[] = $state(
+    getLocalStorageValue<number[]>("playerStatusZoom", [2, 2, 2, 2], (raw) => {
+      try {
+        const parsed = JSON.parse(raw) as unknown;
+        if (
+          Array.isArray(parsed) &&
+          parsed.length === 4 &&
+          parsed.every((v) => typeof v === "number")
+        ) {
+          return parsed.map((v) => Math.min(Math.max(v, 1), 8));
+        }
+      } catch {
+        // fallthrough
+      }
+      return [2, 2, 2, 2];
     }),
   );
 
@@ -97,6 +135,8 @@ export class ViewerStore {
   resetLayerData(): void {
     for (let i = 0; i < 8; i++) {
       this.metadata[i] = null;
+      this.metrics[i] = null;
+      this.time[i] = null;
       this.artwork[i] = null;
       this.artworkFailed[i] = false;
       this.cues[i] = null;
