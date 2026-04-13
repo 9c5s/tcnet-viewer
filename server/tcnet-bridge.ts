@@ -78,12 +78,9 @@ for (const key of expectedTcnetDataPacketTypeKeys) {
 }
 
 import { processArtworkPacket } from "./parsers/artwork.js";
-import { parseBeatGrid } from "./parsers/beat-grid.js";
 import { parseCueData } from "./parsers/cue-data.js";
-import { parseBigWaveform } from "./parsers/waveform.js";
 import { parseMixerData } from "./parsers/mixer.js";
 import { decodeAppSpecific } from "./parsers/status.js";
-import { MultiPacketAssembler } from "./parsers/multi-packet.js";
 import type { BroadcastFn, AuthState } from "./types.js";
 
 type TCNetBridgeOptions = {
@@ -106,8 +103,6 @@ export class TCNetBridge {
   // 認証失敗時の自動再試行カウンタ (authenticated/reconnect成功時にリセット)
   private authRetryCount = 0;
   private authRetryTimer: ReturnType<typeof setTimeout> | null = null;
-  private beatGridAssemblers = new Map<number, MultiPacketAssembler>();
-  private bigWaveformAssemblers = new Map<number, MultiPacketAssembler>();
 
   private static readonly HEARTBEAT_TIMEOUT = 10_000;
   private static readonly INITIAL_RETRY_DELAY = 2_000;
@@ -172,23 +167,6 @@ export class TCNetBridge {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  private resetLayerAssemblers(layer: number): void {
-    this.beatGridAssemblers.get(layer)?.reset();
-    this.bigWaveformAssemblers.get(layer)?.reset();
-  }
-
-  private getAssembler(
-    map: Map<number, MultiPacketAssembler>,
-    layer: number,
-  ): MultiPacketAssembler {
-    let asm = map.get(layer);
-    if (!asm) {
-      asm = new MultiPacketAssembler();
-      map.set(layer, asm);
-    }
-    return asm;
-  }
-
   private setAuthState(state: AuthState, connected: boolean): void {
     this.authState = state;
     this.onStatusChange(connected, state);
@@ -231,8 +209,6 @@ export class TCNetBridge {
         // 切断時のエラーは無視する
       }
       if (!this.running) return;
-      this.beatGridAssemblers.clear();
-      this.bigWaveformAssemblers.clear();
       this.trackIds = Array.from({ length: 8 }, () => null);
       // 旧セッションのrequestLayerDataを無効化する (世代を進めることでawait中のリクエストが破棄される)
       for (let i = 0; i < this.layerGeneration.length; i++) this.layerGeneration[i]++;
@@ -421,22 +397,6 @@ export class TCNetBridge {
               }
               break;
             }
-            case TCNetDataPacketType.BigWaveFormData: {
-              if (!(packet instanceof TCNetDataPacketBigWaveForm)) break;
-              const asm = this.getAssembler(this.bigWaveformAssemblers, layer);
-              if (asm.add(buf, packet.multiPacketHeader)) {
-                const assembled = asm.assemble();
-                const waveform = parseBigWaveform(assembled);
-                this.broadcast({
-                  type: "waveform-big",
-                  timestamp: Date.now(),
-                  layer,
-                  data: waveform,
-                });
-                asm.reset();
-              }
-              break;
-            }
             case TCNetDataPacketType.MixerData: {
               const mixer = parseMixerData(buf);
               this.broadcast({
@@ -446,24 +406,9 @@ export class TCNetBridge {
               });
               break;
             }
-            case TCNetDataPacketType.BeatGridData: {
-              if (!(packet instanceof TCNetDataPacketBeatGrid)) break;
-              const asm = this.getAssembler(this.beatGridAssemblers, layer);
-              if (asm.add(buf, packet.multiPacketHeader)) {
-                const assembled = asm.assemble();
-                const beatgrid = parseBeatGrid(assembled);
-                this.broadcast({
-                  type: "beatgrid",
-                  timestamp: Date.now(),
-                  layer,
-                  data: { entries: beatgrid },
-                });
-                asm.reset();
-              }
-              break;
-            }
-            // ArtworkDataはrequestLayerDataで直接処理する
-            // (dataイベントで処理するとtimeout後の未アセンブル断片パケットを誤処理するため)
+            // マルチパケット (BigWaveForm/BeatGrid/Artwork) はrequestLayerDataで直接処理する
+            // node-tcnet側がアセンブル完了後のpacketをPromise解決するため、
+            // dataイベントで未アセンブル断片を自前で扱うと二重処理になる
           }
         } catch (err) {
           console.error(`[TCNet] パーサーエラー (dataType=${dataType}):`, err);
@@ -506,7 +451,6 @@ export class TCNetBridge {
           console.log(`[TCNet] レイヤー${i}: トラックID ${this.trackIds[i]} -> 取り出し`);
           this.trackIds[i] = null;
           this.broadcast({ type: "layer-reset", timestamp: Date.now(), layer: i });
-          this.resetLayerAssemblers(i);
           this.layerGeneration[i]++;
         }
         continue;
@@ -517,7 +461,6 @@ export class TCNetBridge {
         console.log(`[TCNet] レイヤー${i}: トラックID ${this.trackIds[i]} -> ${nextTrackId}`);
         this.trackIds[i] = nextTrackId;
         this.broadcast({ type: "layer-reset", timestamp: Date.now(), layer: i });
-        this.resetLayerAssemblers(i);
         const gen = ++this.layerGeneration[i];
         this.requestLayerData(i, gen);
       }
@@ -540,11 +483,13 @@ export class TCNetBridge {
             console.log(
               `[TCNet] メタデータ取得 レイヤー${layer} (試行${attempt}): "${info.trackTitle}"`,
             );
+            // Bridge (BRIDGE64) は metadata.trackID を 0 で返すため、
+            // status で確定済みの現行 trackID に差し替えて UI 側の trackID 整合性チェックを通す
             this.broadcast({
               type: "metadata",
               timestamp: Date.now(),
               layer,
-              data: info,
+              data: { ...info, trackID: this.trackIds[layer] ?? info.trackID },
             });
             break;
           }
@@ -561,6 +506,35 @@ export class TCNetBridge {
     // CUE, SmallWaveFormはfire-and-forget (単一パケットのため失敗しにくい)
     this.client.requestData(TCNetDataPacketType.CUEData, layer).catch(() => {});
     this.client.requestData(TCNetDataPacketType.SmallWaveFormData, layer).catch(() => {});
+
+    // BigWaveForm, BeatGridはマルチパケットだがBridgeは要求されなければ送信しない。
+    // node-tcnet側でアセンブル済みpacketをPromiseで返すため、そのdataを直接broadcastする
+    this.client
+      .requestData(TCNetDataPacketType.BigWaveFormData, layer)
+      .then((packet) => {
+        if (this.layerGeneration[layer] !== generation) return;
+        if (!(packet instanceof TCNetDataPacketBigWaveForm) || !packet.data) return;
+        this.broadcast({
+          type: "waveform-big",
+          timestamp: Date.now(),
+          layer,
+          data: packet.data,
+        });
+      })
+      .catch(() => {});
+    this.client
+      .requestData(TCNetDataPacketType.BeatGridData, layer)
+      .then((packet) => {
+        if (this.layerGeneration[layer] !== generation) return;
+        if (!(packet instanceof TCNetDataPacketBeatGrid) || !packet.data) return;
+        this.broadcast({
+          type: "beatgrid",
+          timestamp: Date.now(),
+          layer,
+          data: packet.data,
+        });
+      })
+      .catch(() => {});
 
     // Artwork (マルチパケットのためパケットロス/タイムアウトが起きやすい、リトライする)
     // dataイベントではなくrequestDataの戻り値から直接処理する
