@@ -1,14 +1,23 @@
 <script lang="ts">
-  import type { WaveformBar } from "$lib/types.js";
+  import type { CuePoint, WaveformBar } from "$lib/types.js";
+  import CueMarkerLayer from "./player-status/CueMarkerLayer.svelte";
 
   interface Props {
     bars: WaveformBar[] | null;
     currentPosition: number;
     trackLength: number;
     height?: number;
+    cues?: CuePoint[] | null;
     class?: string;
   }
-  let { bars, currentPosition, trackLength, height = 80, class: className = "" }: Props = $props();
+  let {
+    bars,
+    currentPosition,
+    trackLength,
+    height = 80,
+    cues = null,
+    class: className = "",
+  }: Props = $props();
 
   const VIEW_WIDTH = 400;
   let barWidth = $derived(bars && bars.length > 0 ? VIEW_WIDTH / bars.length : 0);
@@ -16,6 +25,9 @@
 </script>
 
 <div class="border-b border-base-content/20 px-2 py-1 {className}">
+  {#if cues && cues.length > 0}
+    <CueMarkerLayer {cues} trackLengthMs={trackLength} />
+  {/if}
   {#if bars && bars.length > 0}
     <svg
       viewBox="0 0 {VIEW_WIDTH} {height}"
