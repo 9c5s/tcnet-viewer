@@ -13,7 +13,7 @@ import type {
   Arrangement,
 } from "./types.js";
 import { getLocalStorageValue } from "./storage.js";
-import { ZOOM_MAX, ZOOM_MIN } from "./player-status/waveform-canvas/draw-math.js";
+import { ZOOM_DEFAULT, ZOOM_MAX, ZOOM_MIN } from "./player-status/waveform-canvas/draw-math.js";
 
 /**
  * 配列の index 位置に値を入れた新しい配列を返す。
@@ -85,7 +85,7 @@ export class ViewerStore {
   playerStatusZoom: number[] = $state.raw(
     getLocalStorageValue<number[]>(
       "playerStatusZoom",
-      [ZOOM_MIN, ZOOM_MIN, ZOOM_MIN, ZOOM_MIN],
+      [ZOOM_DEFAULT, ZOOM_DEFAULT, ZOOM_DEFAULT, ZOOM_DEFAULT],
       (raw) => {
         try {
           const parsed = JSON.parse(raw) as unknown;
@@ -99,7 +99,7 @@ export class ViewerStore {
         } catch {
           // fallthrough
         }
-        return [ZOOM_MIN, ZOOM_MIN, ZOOM_MIN, ZOOM_MIN];
+        return [ZOOM_DEFAULT, ZOOM_DEFAULT, ZOOM_DEFAULT, ZOOM_DEFAULT];
       },
     ),
   );

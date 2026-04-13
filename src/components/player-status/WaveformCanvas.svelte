@@ -1,6 +1,12 @@
 <script lang="ts">
   import type { BeatGridEntry, CuePoint, WaveformBar } from "$lib/types.js";
-  import { calcWindow, timeToX, ZOOM_MAX, ZOOM_MIN } from "$lib/player-status/waveform-canvas/draw-math.js";
+  import {
+    calcWindow,
+    stepToWindowMs,
+    timeToX,
+    ZOOM_MAX,
+    ZOOM_MIN,
+  } from "$lib/player-status/waveform-canvas/draw-math.js";
   import CueMarkerLayer from "./CueMarkerLayer.svelte";
 
   interface Props {
@@ -126,7 +132,9 @@
         ontouchstart={(e) => e.stopPropagation()}
         class="range w-36 range-primary range-xs"
       />
-      <span class="w-8 text-right text-[11px] text-base-content">{zoomScale}×</span>
+      <span class="w-10 text-right text-[11px] text-base-content"
+        >{Math.round(stepToWindowMs(zoomScale) / 1000)}s</span
+      >
     </div>
   </div>
 

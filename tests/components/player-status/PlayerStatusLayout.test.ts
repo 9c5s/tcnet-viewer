@@ -29,7 +29,7 @@ function resetStore() {
     store.artworkFailed[i] = false;
   }
   store.playerStatusArrange = "stack";
-  store.playerStatusZoom = [8, 8, 8, 8];
+  store.playerStatusZoom = [14, 14, 14, 14];
 }
 
 describe("PlayerStatusLayout", () => {

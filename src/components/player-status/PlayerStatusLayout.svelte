@@ -1,7 +1,11 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
   import type { Arrangement } from "$lib/types.js";
-  import { ZOOM_MAX, ZOOM_MIN } from "$lib/player-status/waveform-canvas/draw-math.js";
+  import {
+    ZOOM_DEFAULT,
+    ZOOM_MAX,
+    ZOOM_MIN,
+  } from "$lib/player-status/waveform-canvas/draw-math.js";
   import PlayerCard from "./PlayerCard.svelte";
   import PlayerToolbar from "./PlayerToolbar.svelte";
 
@@ -70,7 +74,7 @@
             waveformSmall={store.waveformSmall[i] ?? null}
             cues={store.cues[i] ?? null}
             beatgrid={store.beatgrid[i] ?? null}
-            zoomScale={store.playerStatusZoom[i] ?? ZOOM_MIN}
+            zoomScale={store.playerStatusZoom[i] ?? ZOOM_DEFAULT}
             onZoomChange={(v) => onZoomChange(i, v)}
           />
         </div>
