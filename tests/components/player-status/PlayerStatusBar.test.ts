@@ -76,4 +76,22 @@ describe("PlayerStatusBar", () => {
     expect(getAllByText("—").length).toBeGreaterThanOrEqual(2);
     expect(queryByText("126.00")).toBeNull();
   });
+  test("Pitch (pitchBend=123、100倍スケール) を +1.23% で表示", () => {
+    const { getByText } = render(PlayerStatusBar, {
+      props: { layer, time: time(1, 0), metrics: metrics({ pitchBend: 123 }) },
+    });
+    expect(getByText("+1.23%")).toBeTruthy();
+  });
+  test("Pitch (pitchBend=-123) は -1.23% で表示する (符号は toFixed 由来)", () => {
+    const { getByText } = render(PlayerStatusBar, {
+      props: { layer, time: time(1, 0), metrics: metrics({ pitchBend: -123 }) },
+    });
+    expect(getByText("-1.23%")).toBeTruthy();
+  });
+  test("Pitch (pitchBend=0) は 0.00% で表示する (符号なし)", () => {
+    const { getByText } = render(PlayerStatusBar, {
+      props: { layer, time: time(1, 0), metrics: metrics({ pitchBend: 0 }) },
+    });
+    expect(getByText("0.00%")).toBeTruthy();
+  });
 });

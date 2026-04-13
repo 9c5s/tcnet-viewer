@@ -18,11 +18,13 @@
     if (!metricsOk || metrics?.bpm === undefined) return "—";
     return (metrics.bpm / 100).toFixed(2);
   });
+  // pitchBend は node-tcnet 側で 100 倍スケールの Int16 として読まれている。
+  // 既存 MetricsView / CardsLayout と合わせて /100 した % 値に変換する。
   let pitchText = $derived.by(() => {
     if (!metricsOk || metrics?.pitchBend === undefined) return "—";
-    const p = metrics.pitchBend;
-    const sign = p > 0 ? "+" : p < 0 ? "" : "+";
-    return `${sign}${p.toFixed(2)}%`;
+    const percent = metrics.pitchBend / 100;
+    const sign = percent > 0 ? "+" : "";
+    return `${sign}${percent.toFixed(2)}%`;
   });
   let isMaster = $derived(metricsOk && metrics?.syncMaster === 1);
   let beatIndex = $derived(

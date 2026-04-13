@@ -52,25 +52,24 @@
   let position = $derived(derivePlaybackPosition(time, metricsOk ? metrics : null));
 </script>
 
+<!--
+  ドラッグハンドルは PlayerHeader 部分のみに限定する。
+  波形領域やスライダー・ステータスバーで pointerdown しても dndzone が反応しないよう、
+  各セクションで stopPropagation する。
+-->
 <div
   data-testid="player-card"
   class="
-    card relative cursor-grab overflow-hidden rounded-xl border border-base-content/20 bg-base-100 shadow-xl
-    transition-colors
+    card relative overflow-hidden rounded-xl border border-base-content/20 bg-base-100 shadow-xl transition-colors
     hover:border-primary
   "
 >
-  <div
-    class="pointer-events-none absolute top-2.5 left-2.5 h-4 w-3 opacity-0 transition-opacity"
-    style:background-image="radial-gradient(circle, var(--color-base-content/40) 1px, transparent 1px)"
-    style:background-size="4px 6px"
-  ></div>
-
-  <div data-testid="player-header">
+  <div data-testid="player-header" class="cursor-grab" title="Drag here to reorder">
     <PlayerHeader {layer} {playerNumber} {metadata} {metrics} {artwork} {artworkFailed} />
   </div>
 
-  <div data-testid="player-zoom">
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div data-testid="player-zoom" onpointerdown={(e) => e.stopPropagation()}>
     <WaveformCanvas
       bars={waveformBig}
       {cues}
@@ -82,11 +81,13 @@
     />
   </div>
 
-  <div data-testid="player-status-bar">
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div data-testid="player-status-bar" onpointerdown={(e) => e.stopPropagation()}>
     <PlayerStatusBar {layer} {time} {metrics} />
   </div>
 
-  <div data-testid="player-full" class="px-5 pb-4">
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div data-testid="player-full" class="px-5 pb-4" onpointerdown={(e) => e.stopPropagation()}>
     <span class="mb-1 block text-[9px] tracking-widest text-base-content/40 uppercase">Full Track</span>
     <WaveformSvg
       bars={waveformSmall}
