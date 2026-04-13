@@ -13,7 +13,6 @@ import type {
   Arrangement,
 } from "./types.js";
 import { getLocalStorageValue } from "./storage.js";
-import { normalizeOrder } from "./player-status/ordering.js";
 
 export type LayoutMode = "cards" | "detail" | "table" | "player-status";
 
@@ -65,17 +64,6 @@ export class ViewerStore {
     getLocalStorageValue<Arrangement>("playerStatusArrange", "stack", (raw) => {
       const valid: Arrangement[] = ["stack", "row", "grid"];
       return valid.includes(raw as Arrangement) ? (raw as Arrangement) : "stack";
-    }),
-  );
-
-  playerStatusOrder: number[] = $state(
-    getLocalStorageValue<number[]>("playerStatusOrder", [0, 1, 2, 3], (raw) => {
-      try {
-        const parsed = JSON.parse(raw) as unknown;
-        return normalizeOrder(parsed as number[]);
-      } catch {
-        return [0, 1, 2, 3];
-      }
     }),
   );
 

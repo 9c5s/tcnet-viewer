@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "@9c5s/node-tcnet": "link:../node-tcnet",
-    "svelte-dnd-action": "^0.9.69",
     "ws": "^8.18.0"
   },
   "devDependencies": {

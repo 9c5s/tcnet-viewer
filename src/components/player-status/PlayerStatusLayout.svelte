@@ -1,47 +1,16 @@
 <script lang="ts">
-  import { dndzone, type DndEvent } from "svelte-dnd-action";
   import { store } from "$lib/stores.svelte.js";
   import type { Arrangement } from "$lib/types.js";
-  import { mergeDraggedOrder, pickActive } from "$lib/player-status/ordering.js";
   import PlayerCard from "./PlayerCard.svelte";
   import PlayerToolbar from "./PlayerToolbar.svelte";
 
-  type CardItem = { id: string; layerIndex: number };
-
-  // L1-L4 (index 0-3) のうち status !== "IDLE" の index を集める
+  // L1-L4 (index 0-3) のうち status !== "IDLE" の index を L1->L4 順で抽出する
   let activeIndexes = $derived(
-    new Set(
-      store.layers
-        .slice(0, 4)
-        .map((l, i) => (l.status !== "IDLE" ? i : -1))
-        .filter((i) => i >= 0),
-    ),
+    store.layers
+      .slice(0, 4)
+      .map((l, i) => (l.status !== "IDLE" ? i : -1))
+      .filter((i) => i >= 0),
   );
-
-  let orderedActive = $derived(pickActive(store.playerStatusOrder, activeIndexes));
-
-  // svelte-dnd-action は items を書き換え可能な state として要求するため、
-  // $derived で読み取り専用値にせず $state + $effect で store から反映する
-  let items = $state<CardItem[]>([]);
-  $effect(() => {
-    items = orderedActive.map((i) => ({ id: `player-${i}`, layerIndex: i }));
-  });
-
-  function onConsider(e: CustomEvent<DndEvent<CardItem>>) {
-    items = e.detail.items;
-  }
-
-  function onFinalize(e: CustomEvent<DndEvent<CardItem>>) {
-    const dragged = e.detail.items.map((it) => it.layerIndex);
-    const merged = mergeDraggedOrder(store.playerStatusOrder, activeIndexes, dragged);
-    store.playerStatusOrder = merged;
-    try {
-      localStorage.setItem("playerStatusOrder", JSON.stringify(merged));
-    } catch {
-      // localStorage 失敗は握り潰して動作継続する
-    }
-    items = e.detail.items;
-  }
 
   function arrangeClass(a: Arrangement, count: number): string {
     if (a === "row") return "flex flex-row gap-5";
@@ -78,21 +47,15 @@
 <div class="min-h-screen bg-base-300 p-5">
   <PlayerToolbar arrangement={store.playerStatusArrange} onChange={onArrangeChange} />
 
-  {#if items.length === 0}
+  {#if activeIndexes.length === 0}
     <div class="mt-20 flex flex-col items-center gap-2 text-base-content/40">
       <p class="text-lg">No active players</p>
       <p class="text-sm">Load a track on CDJ 1-4</p>
     </div>
   {:else}
-    <div
-      class={arrangeClass(store.playerStatusArrange, items.length)}
-      use:dndzone={{ items, flipDurationMs: 200, type: "player-status-cards" }}
-      onconsider={onConsider}
-      onfinalize={onFinalize}
-    >
-      {#each items as item, idx (item.id)}
-        {@const i = item.layerIndex}
-        <div class={itemSpanClass(store.playerStatusArrange, items.length, idx)}>
+    <div class={arrangeClass(store.playerStatusArrange, activeIndexes.length)}>
+      {#each activeIndexes as i, idx (i)}
+        <div class={itemSpanClass(store.playerStatusArrange, activeIndexes.length, idx)}>
           <PlayerCard
             layer={store.layers[i]!}
             layerIndex={i}

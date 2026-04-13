@@ -14,7 +14,7 @@
   ];
 </script>
 
-<div class="mb-4 flex items-center justify-between rounded-md border border-base-content/20 bg-base-100 p-3 px-4">
+<div class="mb-4 flex items-center rounded-md border border-base-content/20 bg-base-100 p-3 px-4">
   <div class="flex items-center gap-3">
     <span class="text-[10px] tracking-widest text-base-content/40 uppercase">Arrange</span>
     <div class="join">
@@ -30,5 +30,4 @@
       {/each}
     </div>
   </div>
-  <span class="text-[11px] text-base-content/40">Drag any card to reorder</span>
 </div>
