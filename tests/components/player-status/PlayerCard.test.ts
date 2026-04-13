@@ -22,7 +22,7 @@ describe("PlayerCard", () => {
         waveformSmall: null,
         cues: null,
         beatgrid: null,
-        zoomScale: 2,
+        zoomScale: 8,
         onZoomChange: () => {},
       },
     });

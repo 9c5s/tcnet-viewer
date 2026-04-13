@@ -11,7 +11,7 @@ export type WindowResult = {
   cursorX: number;
 };
 
-export const ZOOM_MIN = 1;
+export const ZOOM_MIN = 8;
 export const ZOOM_MAX = 32;
 export const CURSOR_ANCHOR_RATIO = 0.25;
 

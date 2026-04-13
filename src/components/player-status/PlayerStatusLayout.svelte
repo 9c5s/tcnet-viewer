@@ -35,7 +35,7 @@
 
   function onZoomChange(layerIndex: number, v: number) {
     const next = [...store.playerStatusZoom];
-    next[layerIndex] = Math.min(Math.max(v, ZOOM_MIN), ZOOM_MAX);
+    next[layerIndex] = Math.min(Math.max(Math.round(v), ZOOM_MIN), ZOOM_MAX);
     store.playerStatusZoom = next;
     try {
       localStorage.setItem("playerStatusZoom", JSON.stringify(next));
@@ -70,7 +70,7 @@
             waveformSmall={store.waveformSmall[i] ?? null}
             cues={store.cues[i] ?? null}
             beatgrid={store.beatgrid[i] ?? null}
-            zoomScale={store.playerStatusZoom[i] ?? 2}
+            zoomScale={store.playerStatusZoom[i] ?? ZOOM_MIN}
             onZoomChange={(v) => onZoomChange(i, v)}
           />
         </div>

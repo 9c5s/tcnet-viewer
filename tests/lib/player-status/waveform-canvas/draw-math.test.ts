@@ -8,35 +8,32 @@ import {
 
 describe("calcWindow", () => {
   test("通常時: currentの左25%にカーソル", () => {
-    const w = calcWindow({
-      currentMs: 60_000,
-      trackLengthMs: 180_000,
-      zoomScale: 2,
-      canvasWidth: 400,
-    });
-    expect(w.windowMs).toBe(90_000);
-    expect(w.windowLeft).toBe(37_500);
+    const trackLengthMs = 180_000;
+    const zoomScale = ZOOM_MIN;
+    const windowMs = trackLengthMs / zoomScale;
+    const currentMs = 60_000;
+    const w = calcWindow({ currentMs, trackLengthMs, zoomScale, canvasWidth: 400 });
+    expect(w.windowMs).toBe(windowMs);
+    expect(w.windowLeft).toBe(currentMs - windowMs * 0.25);
     expect(w.cursorX).toBe(100);
   });
   test("曲頭: windowLeftは0にclamp、カーソルは左端から右へ移動", () => {
-    const w = calcWindow({
-      currentMs: 20_000,
-      trackLengthMs: 360_000,
-      zoomScale: 2,
-      canvasWidth: 400,
-    });
+    const trackLengthMs = 360_000;
+    const zoomScale = ZOOM_MIN;
+    const windowMs = trackLengthMs / zoomScale;
+    const currentMs = Math.floor(windowMs * 0.1); // anchor (windowMs*0.25) 未満
+    const w = calcWindow({ currentMs, trackLengthMs, zoomScale, canvasWidth: 400 });
     expect(w.windowLeft).toBe(0);
-    expect(w.cursorX).toBeCloseTo((20_000 / 180_000) * 400);
+    expect(w.cursorX).toBeCloseTo((currentMs / windowMs) * 400);
   });
   test("曲末: windowLeftは曲末-windowMsにclamp、カーソルは右側へ", () => {
-    const w = calcWindow({
-      currentMs: 170_000,
-      trackLengthMs: 180_000,
-      zoomScale: 2,
-      canvasWidth: 400,
-    });
-    expect(w.windowLeft).toBe(180_000 - 90_000);
-    expect(w.cursorX).toBeCloseTo(((170_000 - 90_000) / 90_000) * 400);
+    const trackLengthMs = 180_000;
+    const zoomScale = ZOOM_MIN;
+    const windowMs = trackLengthMs / zoomScale;
+    const currentMs = trackLengthMs - Math.floor(windowMs * 0.1); // 曲末境界を超える
+    const w = calcWindow({ currentMs, trackLengthMs, zoomScale, canvasWidth: 400 });
+    expect(w.windowLeft).toBe(trackLengthMs - windowMs);
+    expect(w.cursorX).toBeCloseTo(((currentMs - (trackLengthMs - windowMs)) / windowMs) * 400);
   });
   test("zoomScale範囲外はZOOM_MIN-ZOOM_MAXにclamp", () => {
     const w1 = calcWindow({

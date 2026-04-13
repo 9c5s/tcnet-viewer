@@ -118,14 +118,14 @@
         type="range"
         min={ZOOM_MIN}
         max={ZOOM_MAX}
-        step="0.5"
+        step="1"
         value={zoomScale}
         oninput={(e) => onZoomChange(Number(e.currentTarget.value))}
         onpointerdown={(e) => e.stopPropagation()}
         ontouchstart={(e) => e.stopPropagation()}
         class="range w-36 range-primary range-xs"
       />
-      <span class="w-8 text-right text-[11px] text-base-content">{zoomScale.toFixed(1)}×</span>
+      <span class="w-8 text-right text-[11px] text-base-content">{zoomScale}×</span>
     </div>
   </div>
 

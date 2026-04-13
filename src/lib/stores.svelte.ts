@@ -69,21 +69,25 @@ export class ViewerStore {
   );
 
   playerStatusZoom: number[] = $state(
-    getLocalStorageValue<number[]>("playerStatusZoom", [2, 2, 2, 2], (raw) => {
-      try {
-        const parsed = JSON.parse(raw) as unknown;
-        if (
-          Array.isArray(parsed) &&
-          parsed.length === 4 &&
-          parsed.every((v) => typeof v === "number")
-        ) {
-          return parsed.map((v) => Math.min(Math.max(v, ZOOM_MIN), ZOOM_MAX));
+    getLocalStorageValue<number[]>(
+      "playerStatusZoom",
+      [ZOOM_MIN, ZOOM_MIN, ZOOM_MIN, ZOOM_MIN],
+      (raw) => {
+        try {
+          const parsed = JSON.parse(raw) as unknown;
+          if (
+            Array.isArray(parsed) &&
+            parsed.length === 4 &&
+            parsed.every((v) => typeof v === "number")
+          ) {
+            return parsed.map((v) => Math.min(Math.max(Math.round(v), ZOOM_MIN), ZOOM_MAX));
+          }
+        } catch {
+          // fallthrough
         }
-      } catch {
-        // fallthrough
-      }
-      return [2, 2, 2, 2];
-    }),
+        return [ZOOM_MIN, ZOOM_MIN, ZOOM_MIN, ZOOM_MIN];
+      },
+    ),
   );
 
   layers: LayerInfo[] = $state(
