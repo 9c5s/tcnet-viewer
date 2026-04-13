@@ -7,6 +7,7 @@
   import TableLayout from "./components/TableLayout.svelte";
   import PlayerStatusLayout from "./components/player-status/PlayerStatusLayout.svelte";
   import LayoutSwitcher from "./components/LayoutSwitcher.svelte";
+  import FpsCounter from "./components/FpsCounter.svelte";
 
   $effect(() => {
     document.documentElement.dataset.theme = store.theme;
@@ -29,3 +30,5 @@
 {:else}
   <Dashboard />
 {/if}
+
+<FpsCounter />
