@@ -72,6 +72,8 @@ export type PacketLogEntry = {
   summary: string;
 };
 
+export type Arrangement = "stack" | "row" | "grid";
+
 export const LAYER_NAMES = ["L1", "L2", "L3", "L4", "LA", "LB", "LM", "LC"] as const;
 
 export const STATUS_MAP: Record<number, LayerStatus> = {
