@@ -201,6 +201,39 @@ export class TCNetBridge {
     }
   }
 
+  /**
+   * BeatGridDataをリトライ付きで要求しbroadcastする。
+   * Bridge が Layer によっては初回応答を返さないことがあるためリトライで救う。
+   */
+  private async requestBeatGridWithRetry(
+    layer: number,
+    generation: number,
+    maxAttempts: number,
+  ): Promise<void> {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      if (this.layerGeneration[layer] !== generation) return;
+      try {
+        const packet = await this.client.requestData(TCNetDataPacketType.BeatGridData, layer);
+        if (this.layerGeneration[layer] !== generation) return;
+        if (packet instanceof TCNetDataPacketBeatGrid && packet.data) {
+          this.broadcast({
+            type: "beatgrid",
+            timestamp: Date.now(),
+            layer,
+            data: packet.data,
+          });
+          return;
+        }
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : String(err);
+        console.log(
+          `[TCNet] BeatGrid取得失敗 (レイヤー${layer}, 試行${attempt}/${maxAttempts}): ${reason}`,
+        );
+      }
+      if (attempt < maxAttempts) await this.sleep(500);
+    }
+  }
+
   private setAuthState(state: AuthState, connected: boolean): void {
     this.authState = state;
     this.onStatusChange(connected, state);
@@ -542,28 +575,18 @@ export class TCNetBridge {
     this.client.requestData(TCNetDataPacketType.SmallWaveFormData, layer).catch(() => {});
 
     // BigWaveForm, BeatGridはマルチパケットだがBridgeは要求されなければ送信しない。
-    // node-tcnet側でアセンブル済みpacketをPromiseで返すため、そのdataを直接broadcastする
-    // BigWaveFormはCDJ側のロード状況によって中間パケットが空応答になることがあるため
-    // 初回3回リトライに加え、5秒後の遅延再要求でCDJロード完了後のデータに上書きする
+    // node-tcnet側でアセンブル済みpacketをPromiseで返すため、そのdataを直接broadcastする。
+    // CDJ側のロード状況やLayer によっては初回応答が Timeout/空応答になることがあるため、
+    // 初回 3 回リトライに加え、5 秒後の遅延再要求で CDJ ロード完了後のデータに上書きする
     void this.requestBigWaveFormWithRetry(layer, generation, 3);
+    void this.requestBeatGridWithRetry(layer, generation, 3);
     void (async () => {
       await this.sleep(5000);
       if (this.layerGeneration[layer] !== generation) return;
       await this.requestBigWaveFormWithRetry(layer, generation, 1);
+      if (this.layerGeneration[layer] !== generation) return;
+      await this.requestBeatGridWithRetry(layer, generation, 1);
     })();
-    this.client
-      .requestData(TCNetDataPacketType.BeatGridData, layer)
-      .then((packet) => {
-        if (this.layerGeneration[layer] !== generation) return;
-        if (!(packet instanceof TCNetDataPacketBeatGrid) || !packet.data) return;
-        this.broadcast({
-          type: "beatgrid",
-          timestamp: Date.now(),
-          layer,
-          data: packet.data,
-        });
-      })
-      .catch(() => {});
 
     // Artwork (マルチパケットのためパケットロス/タイムアウトが起きやすい、リトライする)
     // dataイベントではなくrequestDataの戻り値から直接処理する
