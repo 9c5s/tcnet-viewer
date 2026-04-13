@@ -13,7 +13,7 @@ export type WindowResult = {
 
 export const ZOOM_MIN = 8;
 export const ZOOM_MAX = 32;
-export const CURSOR_ANCHOR_RATIO = 0.25;
+export const CURSOR_ANCHOR_RATIO = 0.2;
 
 function clamp(v: number, min: number, max: number): number {
   return Math.min(Math.max(v, min), max);
@@ -21,7 +21,9 @@ function clamp(v: number, min: number, max: number): number {
 
 /**
  * ズーム波形の表示範囲とカーソルX座標を計算する。
- * 通常時はカーソル左25%固定、曲頭・曲末ではwindowLeftをclampする。
+ * カーソルは常に canvasWidth * CURSOR_ANCHOR_RATIO に固定し、曲頭・曲末でも
+ * スクロールしない。波形は現在位置に追従して左右に移動し、描画範囲外の領域は
+ * 呼び出し側で空白として扱う。
  */
 export function calcWindow(p: WindowParams): WindowResult {
   if (p.trackLengthMs <= 0) {
@@ -29,19 +31,9 @@ export function calcWindow(p: WindowParams): WindowResult {
   }
   const zoom = clamp(p.zoomScale, ZOOM_MIN, ZOOM_MAX);
   const windowMs = p.trackLengthMs / zoom;
-  const anchor = windowMs * CURSOR_ANCHOR_RATIO;
   const current = clamp(p.currentMs, 0, p.trackLengthMs);
-
-  let windowLeft: number;
-  if (current < anchor) {
-    windowLeft = 0;
-  } else if (current > p.trackLengthMs - (windowMs - anchor)) {
-    windowLeft = p.trackLengthMs - windowMs;
-  } else {
-    windowLeft = current - anchor;
-  }
-
-  const cursorX = ((current - windowLeft) / windowMs) * p.canvasWidth;
+  const windowLeft = current - windowMs * CURSOR_ANCHOR_RATIO;
+  const cursorX = p.canvasWidth * CURSOR_ANCHOR_RATIO;
   return { windowLeft, windowMs, cursorX };
 }
 
