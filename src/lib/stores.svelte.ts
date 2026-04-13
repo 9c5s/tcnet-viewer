@@ -15,6 +15,16 @@ import type {
 import { getLocalStorageValue } from "./storage.js";
 import { ZOOM_MAX, ZOOM_MIN } from "./player-status/waveform-canvas/draw-math.js";
 
+/**
+ * 配列の index 位置に値を入れた新しい配列を返す。
+ * $state.raw なストア配列の要素更新に使う。
+ */
+export function replaceAt<T>(arr: readonly T[], index: number, value: T): T[] {
+  const next = arr.slice();
+  next[index] = value;
+  return next;
+}
+
 export type LayoutMode = "cards" | "detail" | "table" | "player-status";
 
 export type Theme = "tokyo-night" | "tokyo-night-storm" | "tokyo-night-light";
@@ -68,7 +78,11 @@ export class ViewerStore {
     }),
   );
 
-  playerStatusZoom: number[] = $state(
+  // 要素書き換え時に新配列を代入する運用のため $state.raw を使う。
+  // $state で deep proxy 化すると巨大な bars 配列 (40000+ 要素) や
+  // レイヤ毎のメタデータが大量の proxy ラッパーを生み、トラック変更を
+  // 繰り返すと proxy が GC されずメモリリークする問題があった (実測 800MB)
+  playerStatusZoom: number[] = $state.raw(
     getLocalStorageValue<number[]>(
       "playerStatusZoom",
       [ZOOM_MIN, ZOOM_MIN, ZOOM_MIN, ZOOM_MIN],
@@ -90,7 +104,7 @@ export class ViewerStore {
     ),
   );
 
-  layers: LayerInfo[] = $state(
+  layers: LayerInfo[] = $state.raw(
     Array.from({ length: 8 }, () => ({
       source: 0,
       status: "IDLE" as const,
@@ -98,25 +112,27 @@ export class ViewerStore {
       name: "",
     })),
   );
-  time: (TimeInfo | null)[] = $state(Array.from({ length: 8 }, (): TimeInfo | null => null));
-  metrics: (MetricsData | null)[] = $state(
+  time: (TimeInfo | null)[] = $state.raw(Array.from({ length: 8 }, (): TimeInfo | null => null));
+  metrics: (MetricsData | null)[] = $state.raw(
     Array.from({ length: 8 }, (): MetricsData | null => null),
   );
-  metadata: (MetadataData | null)[] = $state(
+  metadata: (MetadataData | null)[] = $state.raw(
     Array.from({ length: 8 }, (): MetadataData | null => null),
   );
-  cues: (CuePoint[] | null)[] = $state(Array.from({ length: 8 }, (): CuePoint[] | null => null));
-  waveformSmall: (WaveformBar[] | null)[] = $state(
+  cues: (CuePoint[] | null)[] = $state.raw(
+    Array.from({ length: 8 }, (): CuePoint[] | null => null),
+  );
+  waveformSmall: (WaveformBar[] | null)[] = $state.raw(
     Array.from({ length: 8 }, (): WaveformBar[] | null => null),
   );
-  waveformBig: (WaveformBar[] | null)[] = $state(
+  waveformBig: (WaveformBar[] | null)[] = $state.raw(
     Array.from({ length: 8 }, (): WaveformBar[] | null => null),
   );
-  artwork: ({ base64: string; mimeType: string } | null)[] = $state(
+  artwork: ({ base64: string; mimeType: string } | null)[] = $state.raw(
     Array.from({ length: 8 }, (): { base64: string; mimeType: string } | null => null),
   );
-  artworkFailed: boolean[] = $state(Array.from({ length: 8 }, () => false));
-  beatgrid: (BeatGridEntry[] | null)[] = $state(
+  artworkFailed: boolean[] = $state.raw(Array.from({ length: 8 }, () => false));
+  beatgrid: (BeatGridEntry[] | null)[] = $state.raw(
     Array.from({ length: 8 }, (): BeatGridEntry[] | null => null),
   );
   mixer: MixerData | null = $state(null);
@@ -126,17 +142,18 @@ export class ViewerStore {
   // layer-resetハンドラはトラック変更時にmetadataを保持してレイアウト崩れを防ぐが、
   // 再接続時はサーバーからキャッシュ済みデータが再送されるため全てクリアする
   resetLayerData(): void {
-    for (let i = 0; i < 8; i++) {
-      this.metadata[i] = null;
-      this.metrics[i] = null;
-      this.time[i] = null;
-      this.artwork[i] = null;
-      this.artworkFailed[i] = false;
-      this.cues[i] = null;
-      this.waveformSmall[i] = null;
-      this.waveformBig[i] = null;
-      this.beatgrid[i] = null;
-    }
+    this.metadata = Array.from({ length: 8 }, (): MetadataData | null => null);
+    this.metrics = Array.from({ length: 8 }, (): MetricsData | null => null);
+    this.time = Array.from({ length: 8 }, (): TimeInfo | null => null);
+    this.artwork = Array.from(
+      { length: 8 },
+      (): { base64: string; mimeType: string } | null => null,
+    );
+    this.artworkFailed = Array.from({ length: 8 }, () => false);
+    this.cues = Array.from({ length: 8 }, (): CuePoint[] | null => null);
+    this.waveformSmall = Array.from({ length: 8 }, (): WaveformBar[] | null => null);
+    this.waveformBig = Array.from({ length: 8 }, (): WaveformBar[] | null => null);
+    this.beatgrid = Array.from({ length: 8 }, (): BeatGridEntry[] | null => null);
   }
 
   selectedLayer = $state(0);

@@ -13,6 +13,7 @@ import type {
 } from "./types.js";
 import { STATUS_MAP } from "./types.js";
 import { formatBPM, formatHex } from "./formatting.js";
+import { replaceAt } from "./stores.svelte.js";
 
 // ストアのinterface (テスト時にmockオブジェクトを注入可能にする)
 export interface MessageHandlerStore {
@@ -78,29 +79,34 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
       store.addLogEntry(msg.type, undefined, `node left`);
     },
     status: (msg) => {
+      // 配列は $state.raw なので要素代入ではなく新配列を一括で代入する
+      const next = store.layers.slice();
       for (let i = 0; i < msg.data.layers.length; i++) {
         const l = msg.data.layers[i];
-        store.layers[i] = {
+        next[i] = {
           source: l.source,
           status: STATUS_MAP[l.status] ?? "IDLE",
           trackID: l.trackID,
           name: l.name,
         };
       }
+      store.layers = next;
       // APP SPECIFIC が取得できた場合のみ末尾に追記する (ログの肥大化を避けるため先頭32文字で切り詰める)
       const app = msg.data.appSpecific;
       const appSuffix = app ? ` app="${app.length > 32 ? `${app.slice(0, 32)}…` : app}"` : "";
       store.addLogEntry(msg.type, undefined, `nodes=${msg.data.nodeCount}${appSuffix}`);
     },
     time: (msg) => {
+      const next = store.time.slice();
       for (let i = 0; i < msg.data.layers.length; i++) {
-        store.time[i] = msg.data.layers[i] as TimeInfo | null;
+        next[i] = msg.data.layers[i] as TimeInfo | null;
       }
+      store.time = next;
       store.generalSMPTEMode = msg.data.generalSMPTEMode;
       store.addLogEntry(msg.type, undefined, `smpte=${msg.data.generalSMPTEMode}`);
     },
     metrics: (msg) => {
-      store.metrics[msg.layer] = msg.data;
+      store.metrics = replaceAt(store.metrics, msg.layer, msg.data);
       store.addLogEntry(
         msg.type,
         msg.layer,
@@ -108,19 +114,23 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
       );
     },
     metadata: (msg) => {
-      store.metadata[msg.layer] = msg.data;
+      store.metadata = replaceAt(store.metadata, msg.layer, msg.data);
       store.addLogEntry(msg.type, msg.layer, `"${msg.data.trackTitle}"`);
     },
     cue: (msg) => {
-      store.cues[msg.layer] = msg.data.cues;
+      store.cues = replaceAt(store.cues, msg.layer, msg.data.cues);
       store.addLogEntry(msg.type, msg.layer, `${msg.data.cues?.length ?? 0} cues`);
     },
     "waveform-small": (msg) => {
-      store.waveformSmall[msg.layer] = msg.data.bars;
+      store.waveformSmall = replaceAt(store.waveformSmall, msg.layer, msg.data.bars);
       store.addLogEntry(msg.type, msg.layer, `${msg.data.bars?.length ?? 0} bars`);
     },
     "waveform-big": (msg) => {
-      store.waveformBig[msg.layer] = normalizeWaveformBars(msg.data.bars);
+      store.waveformBig = replaceAt(
+        store.waveformBig,
+        msg.layer,
+        normalizeWaveformBars(msg.data.bars),
+      );
       store.addLogEntry(msg.type, msg.layer, `${msg.data.bars?.length ?? 0} bars`);
     },
     mixer: (msg) => {
@@ -128,31 +138,34 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
       store.addLogEntry(msg.type, undefined, `master=${msg.data.masterAudioLevel}`);
     },
     artwork: (msg) => {
-      store.artwork[msg.layer] = { base64: msg.data.base64, mimeType: msg.data.mimeType };
-      store.artworkFailed[msg.layer] = false;
+      store.artwork = replaceAt(store.artwork, msg.layer, {
+        base64: msg.data.base64,
+        mimeType: msg.data.mimeType,
+      });
+      store.artworkFailed = replaceAt(store.artworkFailed, msg.layer, false);
       const sizeKB = Math.round((msg.data.base64.length * 3) / 4 / 1024);
       store.addLogEntry(msg.type, msg.layer, `${sizeKB}KB ${msg.data.mimeType}`);
     },
     "artwork-failed": (msg) => {
-      store.artworkFailed[msg.layer] = true;
-      store.artwork[msg.layer] = null;
+      store.artworkFailed = replaceAt(store.artworkFailed, msg.layer, true);
+      store.artwork = replaceAt(store.artwork, msg.layer, null);
       store.addLogEntry(msg.type, msg.layer, "artwork fetch failed");
     },
     "layer-reset": (msg) => {
       const i = msg.layer;
       // metadataは保持 (trackIDで整合性チェックしてUI側でフィルタ)
-      store.metrics[i] = null;
-      store.time[i] = null;
-      store.artwork[i] = null;
-      store.artworkFailed[i] = false;
-      store.cues[i] = null;
-      store.waveformSmall[i] = null;
-      store.waveformBig[i] = null;
-      store.beatgrid[i] = null;
+      store.metrics = replaceAt(store.metrics, i, null);
+      store.time = replaceAt(store.time, i, null);
+      store.artwork = replaceAt(store.artwork, i, null);
+      store.artworkFailed = replaceAt(store.artworkFailed, i, false);
+      store.cues = replaceAt(store.cues, i, null);
+      store.waveformSmall = replaceAt(store.waveformSmall, i, null);
+      store.waveformBig = replaceAt(store.waveformBig, i, null);
+      store.beatgrid = replaceAt(store.beatgrid, i, null);
       store.addLogEntry(msg.type, i, "layer data cleared");
     },
     beatgrid: (msg) => {
-      store.beatgrid[msg.layer] = msg.data.entries;
+      store.beatgrid = replaceAt(store.beatgrid, msg.layer, msg.data.entries);
       store.addLogEntry(msg.type, msg.layer, `${msg.data.entries?.length ?? 0} beats`);
     },
     "tcnet-status": (msg) => {
