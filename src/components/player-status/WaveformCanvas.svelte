@@ -23,15 +23,6 @@
   let canvasWidth = $state(800);
   let win = $derived(calcWindow({ currentMs: currentTimeMs, trackLengthMs, zoomScale, canvasWidth }));
 
-  // BWFはBridgeが返すlevelのダイナミックレンジが狭い (max 48 前後) ため、
-  // bars 全体の max level で正規化して視認性を確保する。0 除算回避の下限を設ける
-  let levelScale = $derived.by(() => {
-    if (!bars || bars.length === 0) return 1;
-    let maxLevel = 0;
-    for (const b of bars) if (b.level > maxLevel) maxLevel = b.level;
-    return 255 / Math.max(maxLevel, 1);
-  });
-
   function draw() {
     if (!canvasEl) return;
     const ctx = canvasEl.getContext("2d");
@@ -54,7 +45,7 @@
       const barStartMs = i * barDurationMs;
       const x = timeToX(barStartMs, windowLeft, windowMs, canvasWidth);
       const w = Math.max((barDurationMs / windowMs) * canvasWidth, 1);
-      const level = Math.min((bar.level * levelScale) / 255, 1) * height;
+      const level = (bar.level / 255) * height;
       ctx.globalAlpha = Math.max(bar.color / 255, 0.1);
       ctx.fillStyle = "rgb(122,162,247)";
       ctx.fillRect(x, height - level, w, level);
@@ -102,19 +93,20 @@
     return () => ro.disconnect();
   });
 
-  // 描画ループは RAF 1本に集約する。
-  // props (bars/cues/beatgrid/zoomScale/trackLengthMs/currentTimeMs) の変化は
-  // draw() 内で参照するため、Svelte のリアクティビティにより $effect が再実行され
-  // 新しい tick が開始される (古い tick は cleanup で cancel される)。
+  // props 変更に追従して描画する。Svelte のリアクティビティにより
+  // 依存値 (bars/cues/beatgrid/zoomScale/trackLengthMs/currentTimeMs/canvasWidth)
+  // のいずれかが変わったときに再実行される。
+  // 再生中の currentTimeMs は time パケット到着 (約 30Hz) ごとに更新されるため、
+  // RAF ループで毎フレーム再描画するより CPU コストが低い
   $effect(() => {
-    void bars; void cues; void beatgrid; void zoomScale; void trackLengthMs; void currentTimeMs;
-    let handle: number;
-    const tick = () => {
-      draw();
-      handle = requestAnimationFrame(tick);
-    };
-    handle = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(handle);
+    void bars;
+    void cues;
+    void beatgrid;
+    void zoomScale;
+    void trackLengthMs;
+    void currentTimeMs;
+    void canvasWidth;
+    draw();
   });
 </script>
 

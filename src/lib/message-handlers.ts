@@ -40,6 +40,23 @@ type HandlerMap = {
 
 export type { HandlerMap };
 
+/**
+ * Bridge (BRIDGE64) が返す BigWaveForm は level のダイナミックレンジが狭い (max 48 程度) ため、
+ * 受信時に bars 全体の最大 level で 0-255 に正規化して視認性を確保する。
+ * maxLevel が 0 もしくは既に 255 の場合は変換せず元の参照を返す。
+ */
+function normalizeWaveformBars(bars: WaveformBar[]): WaveformBar[] {
+  if (bars.length === 0) return bars;
+  let maxLevel = 0;
+  for (const b of bars) if (b.level > maxLevel) maxLevel = b.level;
+  if (maxLevel === 0 || maxLevel >= 255) return bars;
+  const scale = 255 / maxLevel;
+  return bars.map((b) => ({
+    color: b.color,
+    level: Math.min(Math.round(b.level * scale), 255),
+  }));
+}
+
 export function createHandlers(store: MessageHandlerStore): HandlerMap {
   return {
     optin: (msg) => {
@@ -103,7 +120,7 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
       store.addLogEntry(msg.type, msg.layer, `${msg.data.bars?.length ?? 0} bars`);
     },
     "waveform-big": (msg) => {
-      store.waveformBig[msg.layer] = msg.data.bars;
+      store.waveformBig[msg.layer] = normalizeWaveformBars(msg.data.bars);
       store.addLogEntry(msg.type, msg.layer, `${msg.data.bars?.length ?? 0} bars`);
     },
     mixer: (msg) => {
