@@ -452,3 +452,84 @@ test("layer-reset: artworkFailedフラグをfalseにクリアする", () => {
   handlers["layer-reset"]({ type: "layer-reset", timestamp: 1000, layer: 1 });
   expect(store.artworkFailed[1]).toBe(false);
 });
+
+test("layer-reset: metricsとtimeもnullクリアする", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+  handlers.metrics({
+    type: "metrics",
+    timestamp: 0,
+    layer: 2,
+    data: {
+      state: 3,
+      syncMaster: 0,
+      beatMarker: 1,
+      trackLength: 180_000,
+      currentPosition: 0,
+      speed: 0,
+      beatNumber: 0,
+      bpm: 12000,
+      pitchBend: 0,
+      trackID: 42,
+    },
+  });
+  handlers.time({
+    type: "time",
+    timestamp: 0,
+    data: {
+      layers: Array.from({ length: 8 }, (_, i) =>
+        i === 2
+          ? { currentTimeMillis: 30_000, totalTimeMillis: 0, beatMarker: 1, state: 3, onAir: 1 }
+          : { currentTimeMillis: 0, totalTimeMillis: 0, beatMarker: 0, state: 0, onAir: 0 },
+      ),
+      generalSMPTEMode: 0,
+    },
+  });
+  expect(store.metrics[2]?.trackID).toBe(42);
+  expect(store.time[2]?.currentTimeMillis).toBe(30_000);
+
+  handlers["layer-reset"]({ type: "layer-reset", timestamp: 0, layer: 2 });
+
+  expect(store.metrics[2]).toBeNull();
+  expect(store.time[2]).toBeNull();
+});
+
+test("race回帰: layer-reset後にmetrics先着・time未着でtimeはnullのまま", () => {
+  const store = createMockStore();
+  const handlers = createHandlers(store);
+
+  handlers.time({
+    type: "time",
+    timestamp: 0,
+    data: {
+      layers: Array.from({ length: 8 }, (_, i) =>
+        i === 2
+          ? { currentTimeMillis: 100_000, totalTimeMillis: 0, beatMarker: 1, state: 3, onAir: 1 }
+          : { currentTimeMillis: 0, totalTimeMillis: 0, beatMarker: 0, state: 0, onAir: 0 },
+      ),
+      generalSMPTEMode: 0,
+    },
+  });
+
+  handlers["layer-reset"]({ type: "layer-reset", timestamp: 0, layer: 2 });
+  handlers.metrics({
+    type: "metrics",
+    timestamp: 0,
+    layer: 2,
+    data: {
+      state: 3,
+      syncMaster: 0,
+      beatMarker: 1,
+      trackLength: 240_000,
+      currentPosition: 0,
+      speed: 0,
+      beatNumber: 0,
+      bpm: 13000,
+      pitchBend: 0,
+      trackID: 99,
+    },
+  });
+
+  expect(store.metrics[2]?.trackID).toBe(99);
+  expect(store.time[2]).toBeNull();
+});

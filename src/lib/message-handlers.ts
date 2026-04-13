@@ -123,7 +123,9 @@ export function createHandlers(store: MessageHandlerStore): HandlerMap {
     },
     "layer-reset": (msg) => {
       const i = msg.layer;
-      // metadataはクリアしない (新データで上書きされるまで前曲を表示し、レイアウトの崩れを防ぐ)
+      // metadataは保持 (trackIDで整合性チェックしてUI側でフィルタ)
+      store.metrics[i] = null;
+      store.time[i] = null;
       store.artwork[i] = null;
       store.artworkFailed[i] = false;
       store.cues[i] = null;
