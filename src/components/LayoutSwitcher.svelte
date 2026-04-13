@@ -6,6 +6,7 @@
     { key: "detail", label: "Detail", icon: "\u25A3" },
     { key: "cards", label: "Cards", icon: "\u25A6" },
     { key: "table", label: "Table", icon: "\u2261" },
+    { key: "player-status", label: "Player", icon: "\u25B6" },
   ];
 
   const themes: { key: Theme; label: string; icon: string }[] = [
