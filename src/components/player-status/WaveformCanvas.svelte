@@ -93,12 +93,12 @@
     return () => ro.disconnect();
   });
 
+  // 描画ループは RAF 1本に集約する。
+  // props (bars/cues/beatgrid/zoomScale/trackLengthMs/currentTimeMs) の変化は
+  // draw() 内で参照するため、Svelte のリアクティビティにより $effect が再実行され
+  // 新しい tick が開始される (古い tick は cleanup で cancel される)。
   $effect(() => {
-    void bars; void cues; void beatgrid; void zoomScale; void trackLengthMs;
-    draw();
-  });
-
-  $effect(() => {
+    void bars; void cues; void beatgrid; void zoomScale; void trackLengthMs; void currentTimeMs;
     let handle: number;
     const tick = () => {
       draw();
