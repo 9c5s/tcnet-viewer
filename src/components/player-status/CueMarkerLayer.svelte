@@ -54,7 +54,10 @@
             style:background-color="rgb({cue.color.r}, {cue.color.g}, {cue.color.b})"
           >
             {#if cue.type >= 1 && cue.type <= 8}
-              <span class="font-mono text-[7px] leading-none font-bold text-base-100">
+              <span
+                class="font-mono text-[8px] leading-none font-bold text-base-100"
+                style:text-shadow="0 0 1.5px rgba(255, 255, 255, 0.9)"
+              >
                 {String.fromCharCode(64 + cue.type)}
               </span>
             {/if}
