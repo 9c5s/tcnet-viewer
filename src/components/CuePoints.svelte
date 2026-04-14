@@ -1,6 +1,6 @@
 <script lang="ts">
   import { store } from "$lib/stores.svelte.js";
-  import { formatMmSs } from "$lib/formatting.js";
+  import { cueLabel, formatMmSs } from "$lib/formatting.js";
 
   interface Props {
     layer: number;
@@ -8,17 +8,6 @@
   let { layer }: Props = $props();
 
   let cues = $derived(store.cues[layer]);
-
-  // CUEタイプ名を返す
-  function cueTypeName(type: number): string {
-    switch (type) {
-      case 0: return "CUE";
-      case 1: return "IN";
-      case 2: return "OUT";
-      case 3: return "LOOP";
-      default: return `T${type}`;
-    }
-  }
 
   // RGB値を0-255の範囲に制限する
   const clamp = (v: number) => Math.max(0, Math.min(255, v));
@@ -35,7 +24,7 @@
               <span class="inline-block size-2.5 rounded-full" style="background: rgb({clamp(cue.color.r)}, {clamp(cue.color.g)}, {clamp(cue.color.b)})"></span>
             </td>
             <td class="px-1 text-base-content/70">#{cue.index}</td>
-            <td class="px-1 text-base-content/70">{cueTypeName(cue.type)}</td>
+            <td class="px-1 text-base-content/70">{cueLabel(cue.type)}</td>
             <td class="text-base-content tabular-nums">{cue.inTime > 0 ? formatMmSs(cue.inTime) : "--:--.---"}</td>
             <td class="text-base-content/40 tabular-nums">
               {cue.outTime > 0 ? `- ${formatMmSs(cue.outTime)}` : ""}

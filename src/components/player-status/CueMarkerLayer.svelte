@@ -48,11 +48,17 @@
           ></div>
         {:else}
           <div
-            class="absolute top-0 size-2"
+            class="absolute top-0 flex size-2 items-center justify-center"
             style:left="{pct}%"
             style:transform="translateX(-50%)"
             style:background-color="rgb({cue.color.r}, {cue.color.g}, {cue.color.b})"
-          ></div>
+          >
+            {#if cue.type >= 1 && cue.type <= 8}
+              <span class="font-mono text-[7px] leading-none font-bold text-base-100">
+                {String.fromCharCode(64 + cue.type)}
+              </span>
+            {/if}
+          </div>
         {/if}
       {/if}
     {/each}

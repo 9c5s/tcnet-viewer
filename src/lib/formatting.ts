@@ -74,3 +74,14 @@ export function formatSpeedPercent(speed: number): string {
 export function formatHex(value: number, width: number): string {
   return value.toString(16).padStart(width, "0");
 }
+
+/**
+ * CuePoint.type から表示ラベルを生成する。
+ * 実機 (Pioneer CDJ + Bridge) では type=0 が Memory Cue、type=1-8 が
+ * Hot Cue A-H に1対1で対応する。
+ */
+export function cueLabel(type: number): string {
+  if (type === 0) return "Memory";
+  if (type >= 1 && type <= 8) return `Hot ${String.fromCharCode(64 + type)}`;
+  return `T${type}`;
+}
