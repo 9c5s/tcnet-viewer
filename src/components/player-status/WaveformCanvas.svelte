@@ -42,8 +42,8 @@
     const { windowLeft, windowMs } = win;
     if (windowMs <= 0) return;
 
-    // 波形コントラスト強調目的の半透明黒。テーマ非依存
-    ctx.fillStyle = "rgba(0,0,0,0.25)";
+    // 波形コントラスト強調用の暗面。Tokyo-Nightの最暗背景(base-300)を半透明で重ねる
+    ctx.fillStyle = themeRgba("base-300", 0.5);
     ctx.fillRect(0, 0, canvasWidth, height);
 
     const waveformColor = themeColor("accent");

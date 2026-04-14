@@ -25,9 +25,8 @@
   --color-success: #9ece6a;
   --color-warning: #e0af68;
   --color-error: #f7768e;
-  /* Tokyo-Night拡張色 (DaisyUI標準外) */
+  /* Tokyo-Night拡張色 (DaisyUI標準外、公式パレットのOrangeを採用) */
   --color-orange: #ff9e64;
-  --color-pink: #f7c8d4;
 }
 
 @plugin "daisyui/theme" {
@@ -49,9 +48,8 @@
   --color-success: #9ece6a;
   --color-warning: #e0af68;
   --color-error: #f7768e;
-  /* Tokyo-Night拡張色 (DaisyUI標準外) */
+  /* Tokyo-Night拡張色 (DaisyUI標準外、公式パレットのOrangeを採用) */
   --color-orange: #ff9e64;
-  --color-pink: #f7c8d4;
 }
 
 @plugin "daisyui/theme" {
@@ -73,15 +71,13 @@
   --color-success: #385f0d;
   --color-warning: #8f5e15;
   --color-error: #942f2f;
-  /* Tokyo-Night拡張色 (ライトテーマ用に沈めた値) */
-  --color-orange: #b15c00;
-  --color-pink: #c94b64;
+  /* Tokyo-Night Light公式パレットのBrown-Orange */
+  --color-orange: #965027;
 }
 
-/* Tailwind に orange/pink ユーティリティを生成させるための登録。値は実行時にテーマCSS変数へ解決される */
+/* Tailwind にorangeユーティリティを生成させるための登録。値は実行時にテーマCSS変数へ解決される */
 @theme inline {
   --color-orange: var(--color-orange);
-  --color-pink: var(--color-pink);
 }
 
 @layer components {

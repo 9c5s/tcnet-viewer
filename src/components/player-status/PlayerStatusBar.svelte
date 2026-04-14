@@ -59,13 +59,13 @@
   <div class="flex items-baseline gap-6 font-mono">
     <div>
       <span class="block text-[9px] tracking-widest text-base-content/40 uppercase">Time</span>
-      <span class="text-[26px] leading-none font-semibold text-white">
+      <span class="text-[26px] leading-none font-semibold text-base-content">
         {timeParts[0]}<span class="text-[18px]">{timeParts[1]}</span>
       </span>
     </div>
     <div>
       <span class="block text-[9px] tracking-widest text-base-content/40 uppercase">Remain</span>
-      <span class="text-[26px] leading-none font-semibold text-pink">
+      <span class="text-[26px] leading-none font-semibold text-error">
         {remainParts[0]}<span class="text-[18px]">{remainParts[1]}</span>
       </span>
     </div>
