@@ -36,3 +36,6 @@ docs/
 
 # Superpowers
 .superpowers/
+
+# Playwright
+.playwright-mcp

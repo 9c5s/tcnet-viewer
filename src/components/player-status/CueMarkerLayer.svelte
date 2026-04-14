@@ -55,7 +55,7 @@
           >
             {#if cue.type >= 1 && cue.type <= 8}
               <span
-                class="font-mono text-[8px] leading-none font-bold text-base-100"
+                class="font-mono text-[9px] leading-none font-black text-base-100"
                 style:text-shadow="0 0 1.5px rgba(255, 255, 255, 0.9)"
               >
                 {String.fromCharCode(64 + cue.type)}
