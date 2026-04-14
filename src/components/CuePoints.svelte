@@ -26,13 +26,12 @@
             </td>
             <td class="px-1 text-base-content/70">#{cue.index}</td>
             <td class="px-1 text-base-content/70">
-              {cueLabel(cue.type)}{#if cue.outTime > 0} Loop{/if}
+              {`${cueLabel(cue.type)}${cue.outTime > 0 ? " Loop" : ""}`}
             </td>
-            <td class="pr-0 text-base-content tabular-nums">
-              {cue.inTime > 0 ? formatMmSs(cue.inTime) : "--:--.---"}
-            </td>
-            <td class="pl-1 text-base-content tabular-nums">
-              {cue.outTime > 0 ? `- ${formatMmSs(cue.outTime)}` : ""}
+            <td class="text-base-content tabular-nums">
+              {cue.inTime > 0 ? formatMmSs(cue.inTime) : "--:--.---"}{cue.outTime > 0
+                ? ` - ${formatMmSs(cue.outTime)}`
+                : ""}
             </td>
           </tr>
         {/each}
