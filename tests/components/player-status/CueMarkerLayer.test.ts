@@ -6,7 +6,7 @@ import type { CuePoint } from "../../../src/lib/types.js";
 
 const cue = (over: Partial<CuePoint> = {}): CuePoint => ({
   index: 0,
-  type: 0,
+  type: 1,
   inTime: 60_000,
   outTime: 0,
   color: { r: 122, g: 162, b: 247 },
@@ -14,17 +14,17 @@ const cue = (over: Partial<CuePoint> = {}): CuePoint => ({
 });
 
 describe("CueMarkerLayer", () => {
-  test("hot cue は rgb 色の四角で描画される", () => {
+  test("hot cue (type !== 0) は rgb 色の四角で描画される", () => {
     const { container } = render(CueMarkerLayer, {
-      props: { cues: [cue({ type: 0 })], trackLengthMs: 180_000 },
+      props: { cues: [cue({ type: 1 })], trackLengthMs: 180_000 },
     });
     const box = container.querySelector('[style*="background-color"]') as HTMLElement;
     expect(box).toBeTruthy();
     expect(box.getAttribute("style")).toContain("rgb(122, 162, 247)");
   });
-  test("memory cue は赤逆三角 (border-top: error色)", () => {
+  test("memory cue (type === 0) は赤逆三角 (border-top: error色)", () => {
     const { container } = render(CueMarkerLayer, {
-      props: { cues: [cue({ type: 1 })], trackLengthMs: 180_000 },
+      props: { cues: [cue({ type: 0 })], trackLengthMs: 180_000 },
     });
     const tri = container.querySelector('[style*="border-top"]') as HTMLElement;
     expect(tri).toBeTruthy();

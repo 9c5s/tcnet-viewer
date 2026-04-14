@@ -27,9 +27,9 @@
     return pct;
   }
 
-  // CuePoint.type の値: 0=HotCue, 1=MemoryCue (server/parsers/cue-data.ts 参照)
-  const TYPE_HOT_CUE = 0;
-  const TYPE_MEMORY_CUE = 1;
+  // CuePoint.type の値: 0=Memory Cue、1以上 (IN/OUT/LOOP 等) =Hot Cue
+  // (Bridge実機ではMemory Cueの色は常に(0,0,0)、Hot Cueの色のみ転送される)
+  const TYPE_MEMORY_CUE = 0;
 </script>
 
 <div class="relative h-2.5 {className}">
@@ -46,7 +46,7 @@
             style:border-right="5px solid transparent"
             style:border-top="8px solid var(--color-error)"
           ></div>
-        {:else if cue.type === TYPE_HOT_CUE}
+        {:else}
           <div
             class="absolute top-0 size-2"
             style:left="{pct}%"
