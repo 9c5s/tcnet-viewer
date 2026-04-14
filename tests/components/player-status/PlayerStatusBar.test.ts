@@ -42,25 +42,31 @@ describe("PlayerStatusBar", () => {
     });
     expect(getByText("OFF AIR")).toBeTruthy();
   });
-  test("Time/Remain を MM:SS:FF.F で表示", () => {
-    const { getByText } = render(PlayerStatusBar, {
+  test("Time/Remain を MM:SS.FFF で表示 (.FFF 部分は分割span)", () => {
+    const { container } = render(PlayerStatusBar, {
       props: { layer, time: time(1, 30_000), metrics: metrics({ trackLength: 180_000 }) },
     });
-    expect(getByText("00:30:00.0")).toBeTruthy();
-    expect(getByText("02:30:00.0")).toBeTruthy();
+    // 外側span.textContent は分割された子spanも連結されるため MM:SS.FFF として取得できる
+    const text = container.textContent ?? "";
+    expect(text).toContain("00:30.000");
+    expect(text).toContain("02:30.000");
   });
   test("metrics=nullでTime/Remain placeholderを表示", () => {
-    const { getAllByText } = render(PlayerStatusBar, {
+    const { container } = render(PlayerStatusBar, {
       props: { layer, time: time(1, 30_000), metrics: null },
     });
-    expect(getAllByText("--:--:--.-").length).toBeGreaterThanOrEqual(2);
+    const text = container.textContent ?? "";
+    const matches = text.match(/--:--\.---/g) ?? [];
+    expect(matches.length).toBeGreaterThanOrEqual(2);
   });
   test("metrics.trackID不一致でBPM/Pitch/Time placeholder", () => {
-    const { getAllByText, queryByText } = render(PlayerStatusBar, {
+    const { container, queryByText } = render(PlayerStatusBar, {
       props: { layer, time: time(1, 30_000), metrics: metrics({ trackID: 99 }) },
     });
-    expect(getAllByText("--:--:--.-").length).toBeGreaterThanOrEqual(2);
-    expect(queryByText("126.00")).toBeNull();
+    const text = container.textContent ?? "";
+    const matches = text.match(/--:--\.---/g) ?? [];
+    expect(matches.length).toBeGreaterThanOrEqual(2);
+    expect(queryByText("126.0")).toBeNull();
   });
   test("MASTER バッジ (syncMaster=1) 点灯", () => {
     const { getByText } = render(PlayerStatusBar, {
@@ -74,7 +80,7 @@ describe("PlayerStatusBar", () => {
       props: { layer, time: time(1, 30_000), metrics: sparseMetrics },
     });
     expect(getAllByText("—").length).toBeGreaterThanOrEqual(2);
-    expect(queryByText("126.00")).toBeNull();
+    expect(queryByText("126.0")).toBeNull();
   });
   test("Pitch (pitchBend=123、100倍スケール) を +1.23% で表示", () => {
     const { getByText } = render(PlayerStatusBar, {
