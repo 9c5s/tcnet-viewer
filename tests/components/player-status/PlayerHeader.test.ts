@@ -79,7 +79,7 @@ describe("PlayerHeader", () => {
     });
     expect(queryByText("05:34")).toBeNull();
   });
-  test("PLAYING時はPLAYERボックスがaccent", () => {
+  test("PLAYING時はPLAYERボックスがsuccess (緑)", () => {
     const { container } = render(PlayerHeader, {
       props: {
         layer: baseLayer,
@@ -91,7 +91,7 @@ describe("PlayerHeader", () => {
       },
     });
     const box = container.querySelector('[data-testid="player-box"]');
-    expect(box?.className).toContain("text-accent");
+    expect(box?.className).toContain("text-success");
   });
   test("IDLE時はPLAYERボックスがmuted", () => {
     const { container } = render(PlayerHeader, {

@@ -18,7 +18,7 @@
   let metricsOk = $derived(isMetricsConsistent(layer, metrics));
   let boxColor = $derived(
     layer.status === "PLAYING" || layer.status === "LOOPING"
-      ? "text-accent border-accent"
+      ? "text-success border-success"
       : "text-base-content/40 border-base-content/40",
   );
 </script>
