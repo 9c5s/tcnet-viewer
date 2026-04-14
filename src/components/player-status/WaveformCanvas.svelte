@@ -7,6 +7,7 @@
     ZOOM_MAX,
     ZOOM_MIN,
   } from "$lib/player-status/waveform-canvas/draw-math.js";
+  import { themeColor, themeRgba } from "$lib/player-status/theme-color.js";
   import CueMarkerLayer from "./CueMarkerLayer.svelte";
 
   interface Props {
@@ -41,9 +42,11 @@
     const { windowLeft, windowMs } = win;
     if (windowMs <= 0) return;
 
+    // 波形コントラスト強調目的の半透明黒。テーマ非依存
     ctx.fillStyle = "rgba(0,0,0,0.25)";
     ctx.fillRect(0, 0, canvasWidth, height);
 
+    const waveformColor = themeColor("accent");
     const firstIdx = Math.max(0, Math.floor(windowLeft / barDurationMs));
     const lastIdx = Math.min(bars.length - 1, Math.ceil((windowLeft + windowMs) / barDurationMs));
     for (let i = firstIdx; i <= lastIdx; i++) {
@@ -53,20 +56,22 @@
       const w = Math.max((barDurationMs / windowMs) * canvasWidth, 1);
       const level = (bar.level / 255) * height;
       ctx.globalAlpha = Math.max(bar.color / 255, 0.1);
-      ctx.fillStyle = "rgb(122,162,247)";
+      ctx.fillStyle = waveformColor;
       ctx.fillRect(x, height - level, w, level);
     }
     ctx.globalAlpha = 1;
 
     if (beatgrid && beatgrid.length > 0) {
+      const downbeatColor = themeRgba("error", 0.6);
+      const beatColor = themeRgba("primary-content", 0.25);
       for (const b of beatgrid) {
         if (b.timestampMs < windowLeft || b.timestampMs > windowLeft + windowMs) continue;
         const x = timeToX(b.timestampMs, windowLeft, windowMs, canvasWidth);
         if (b.beatType === 1) {
-          ctx.strokeStyle = "rgba(247,118,142,0.6)";
+          ctx.strokeStyle = downbeatColor;
           ctx.lineWidth = 1.5;
         } else {
-          ctx.strokeStyle = "rgba(192,202,245,0.25)";
+          ctx.strokeStyle = beatColor;
           ctx.lineWidth = 1;
         }
         ctx.beginPath();
@@ -76,8 +81,8 @@
       }
     }
 
-    ctx.strokeStyle = "rgb(247,118,142)";
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = themeColor("error");
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(win.cursorX, 0);
     ctx.lineTo(win.cursorX, height);
