@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { BeatGridEntry, CuePoint, LayerStatus, WaveformBar } from "$lib/types.js";
   import {
+    BAR_DURATION_MS,
+    BIGWAVEFORM_OFFSET_MS,
     calcWindow,
     stepToWindowMs,
     timeToX,
@@ -40,7 +42,10 @@
 
     if (!bars || bars.length === 0 || trackLengthMs <= 0) return;
 
-    const barDurationMs = trackLengthMs / bars.length;
+    // rekordbox waveform の 150Hz 固定仕様に従い barDurationMs は定数化する。
+    // trackLength / bars.length による逆算は Bridge の末尾無音トリムや padding の
+    // 影響で誤差が出るため採用しない。
+    const barDurationMs = BAR_DURATION_MS;
     const { windowLeft, windowMs } = win;
     if (windowMs <= 0) return;
 
@@ -49,11 +54,18 @@
     ctx.fillRect(0, 0, canvasWidth, height);
 
     const waveformColor = themeColor("accent");
-    const firstIdx = Math.max(0, Math.floor(windowLeft / barDurationMs));
-    const lastIdx = Math.min(bars.length - 1, Math.ceil((windowLeft + windowMs) / barDurationMs));
+    // bar の表す実音源時刻は `i * barDurationMs - BIGWAVEFORM_OFFSET_MS`。
+    // 先頭の preamble ぶんだけ描画時刻を手前にずらすため、index 探索時も
+    // windowLeft + OFFSET を使って逆算する
+    const offsetWindowLeft = windowLeft + BIGWAVEFORM_OFFSET_MS;
+    const firstIdx = Math.max(0, Math.floor(offsetWindowLeft / barDurationMs));
+    const lastIdx = Math.min(
+      bars.length - 1,
+      Math.ceil((offsetWindowLeft + windowMs) / barDurationMs),
+    );
     for (let i = firstIdx; i <= lastIdx; i++) {
       const bar = bars[i]!;
-      const barStartMs = i * barDurationMs;
+      const barStartMs = i * barDurationMs - BIGWAVEFORM_OFFSET_MS;
       const x = timeToX(barStartMs, windowLeft, windowMs, canvasWidth);
       const w = Math.max((barDurationMs / windowMs) * canvasWidth, 1);
       const level = (bar.level / 255) * height;

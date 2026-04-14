@@ -21,6 +21,20 @@ export const ZOOM_DEFAULT = 8;
 export const ZOOM_WINDOW_MIN_MS = 5_000;
 export const ZOOM_WINDOW_MAX_MS = 60_000;
 export const CURSOR_ANCHOR_RATIO = 0.2;
+// rekordbox の波形サンプリングレート (half-frame 単位、150Hz 固定仕様)。
+// Bridge は曲長や pitch と無関係にこの解像度で BigWaveForm を送信するため、
+// `trackLength / bars.length` による逆算は誤差を生じる (末尾無音トリムや
+// 固定長バッファの padding により bars.length が実データ長とズレるため)。
+// BLT (beat-link-trigger) の wave-detail の scale=4 (4 half-frames/pixel) と
+// 整合する定数値。
+export const BAR_DURATION_MS = 1000 / 150;
+
+// BRIDGE64 から届く BigWaveForm は先頭に約 100ms (≒ 15 half-frame) の preamble
+// 領域を含む。実測で複数の楽曲 (リトルリドル / 未来ハーモニー) の beat grid と
+// 波形ピーク位置を照合した結果、どの曲でも一定量 (約 80-100ms) のオフセットが
+// 発生していた。BLT や CDJ では beat grid と波形が完全に揃って見えるため、
+// 描画時にこの量だけ波形を手前 (負方向) にずらして整合させる。
+export const BIGWAVEFORM_OFFSET_MS = 100;
 
 function clamp(v: number, min: number, max: number): number {
   return Math.min(Math.max(v, min), max);
