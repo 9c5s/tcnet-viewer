@@ -106,6 +106,8 @@
             {#if waveform}
               <WaveformSvg
                 bars={waveform}
+                cues={store.cues[i]}
+                status={layer.status}
                 currentPosition={timeInfo?.currentTimeMillis ?? 0}
                 trackLength={metrics?.trackLength ?? 0}
                 height={36}

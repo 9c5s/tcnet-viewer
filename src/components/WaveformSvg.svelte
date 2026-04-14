@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { CuePoint, WaveformBar } from "$lib/types.js";
+  import type { CuePoint, LayerStatus, WaveformBar } from "$lib/types.js";
+  import { selectActiveLoop } from "$lib/player-status/loop-mask.js";
   import CueMarkerLayer from "./player-status/CueMarkerLayer.svelte";
 
   interface Props {
@@ -8,6 +9,7 @@
     trackLength: number;
     height?: number;
     cues?: CuePoint[] | null;
+    status?: LayerStatus;
     class?: string;
   }
   let {
@@ -16,12 +18,17 @@
     trackLength,
     height = 80,
     cues = null,
+    status,
     class: className = "",
   }: Props = $props();
 
   const VIEW_WIDTH = 400;
   let barWidth = $derived(bars && bars.length > 0 ? VIEW_WIDTH / bars.length : 0);
   let posX = $derived(trackLength > 0 ? (currentPosition / trackLength) * VIEW_WIDTH : 0);
+  // ループ中は全曲表示上でも該当範囲を半透明オレンジでマスクする
+  let activeLoop = $derived(
+    status ? selectActiveLoop(status, cues ?? null, currentPosition) : null,
+  );
 </script>
 
 <div class="border-b border-base-content/20 px-2 py-1 {className}">
@@ -48,6 +55,19 @@
           rx="0.5"
         />
       {/each}
+
+      {#if activeLoop && trackLength > 0}
+        {@const loopX = (activeLoop.inTime / trackLength) * VIEW_WIDTH}
+        {@const loopW = ((activeLoop.outTime - activeLoop.inTime) / trackLength) * VIEW_WIDTH}
+        <rect
+          x={loopX}
+          y="0"
+          width={loopW}
+          {height}
+          fill="var(--color-orange)"
+          fill-opacity="0.35"
+        />
+      {/if}
 
       {#if trackLength > 0}
         <line

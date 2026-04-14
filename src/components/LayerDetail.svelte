@@ -25,6 +25,8 @@
     <MetadataView {layer} />
     <WaveformSvg
       bars={waveform}
+      cues={store.cues[layer]}
+      status={store.layers[layer].status}
       currentPosition={timeInfo?.currentTimeMillis ?? 0}
       trackLength={metrics?.trackLength ?? 0}
     />

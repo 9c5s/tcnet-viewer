@@ -65,6 +65,7 @@
       bars={waveformBig}
       {cues}
       {beatgrid}
+      status={layer.status}
       currentTimeMs={position.clampedElapsedMs}
       trackLengthMs={position.trackLengthMs}
       {zoomScale}
@@ -81,6 +82,7 @@
     <WaveformSvg
       bars={waveformSmall}
       {cues}
+      status={layer.status}
       currentPosition={position.clampedElapsedMs}
       trackLength={position.trackLengthMs}
       height={36}

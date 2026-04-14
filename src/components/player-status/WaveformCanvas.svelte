@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { BeatGridEntry, CuePoint, WaveformBar } from "$lib/types.js";
+  import type { BeatGridEntry, CuePoint, LayerStatus, WaveformBar } from "$lib/types.js";
   import {
     calcWindow,
     stepToWindowMs,
@@ -8,12 +8,14 @@
     ZOOM_MIN,
   } from "$lib/player-status/waveform-canvas/draw-math.js";
   import { themeColor, themeRgba } from "$lib/player-status/theme-color.js";
+  import { selectActiveLoop } from "$lib/player-status/loop-mask.js";
   import CueMarkerLayer from "./CueMarkerLayer.svelte";
 
   interface Props {
     bars: WaveformBar[] | null;
     cues: CuePoint[] | null;
     beatgrid: BeatGridEntry[] | null;
+    status: LayerStatus;
     currentTimeMs: number;
     trackLengthMs: number;
     zoomScale: number;
@@ -21,7 +23,7 @@
     height?: number;
   }
   let {
-    bars, cues, beatgrid, currentTimeMs, trackLengthMs, zoomScale, onZoomChange,
+    bars, cues, beatgrid, status, currentTimeMs, trackLengthMs, zoomScale, onZoomChange,
     height = 80,
   }: Props = $props();
 
@@ -60,6 +62,19 @@
       ctx.fillRect(x, height - level, w, level);
     }
     ctx.globalAlpha = 1;
+
+    // ループ中は in/out 範囲を半透明オレンジでマスクする (波形の上、beatgrid/カーソルの下)
+    const activeLoop = selectActiveLoop(status, cues, currentTimeMs);
+    if (activeLoop) {
+      const maskLeftMs = Math.max(activeLoop.inTime, windowLeft);
+      const maskRightMs = Math.min(activeLoop.outTime, windowLeft + windowMs);
+      if (maskRightMs > maskLeftMs) {
+        const x1 = timeToX(maskLeftMs, windowLeft, windowMs, canvasWidth);
+        const x2 = timeToX(maskRightMs, windowLeft, windowMs, canvasWidth);
+        ctx.fillStyle = themeRgba("orange", 0.35);
+        ctx.fillRect(x1, 0, x2 - x1, height);
+      }
+    }
 
     if (beatgrid && beatgrid.length > 0) {
       const downbeatColor = themeRgba("error", 0.6);
@@ -113,6 +128,7 @@
     void bars;
     void cues;
     void beatgrid;
+    void status;
     void zoomScale;
     void trackLengthMs;
     void currentTimeMs;
