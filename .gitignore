@@ -25,6 +25,7 @@ Thumbs.db
 *.png
 
 # Playwright
+.playwright-mcp
 test-results/
 
 # Environment
@@ -36,6 +37,3 @@ docs/
 
 # Superpowers
 .superpowers/
-
-# Playwright
-.playwright-mcp
