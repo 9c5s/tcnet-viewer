@@ -29,8 +29,8 @@ test("PacketLog: ログエントリのタイプとサマリーが表示される
 
 test("PacketLog: レイヤー名が表示される", () => {
   store.packetLog.push(
-    { id: 1, timestamp: Date.now(), type: "metrics", layer: 0, summary: "test" },
-    { id: 2, timestamp: Date.now(), type: "metrics", layer: 4, summary: "test2" },
+    { id: 1, timestamp: Date.now(), type: "metadata", layer: 0, summary: "test" },
+    { id: 2, timestamp: Date.now(), type: "metadata", layer: 4, summary: "test2" },
   );
   render(PacketLog);
   screen.getByText("L1");

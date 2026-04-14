@@ -154,10 +154,10 @@ test("toggleHideIdleLayers: 切り替え後にlocalStorageへ保存する", asyn
 
 test("toggleLogFilter: 指定キーをtrueからfalseに切り替える", async () => {
   const store = await loadResetStore();
-  // metricsはDEFAULT_LOG_FILTERSでtrueである
-  expect(store.logFilters["metrics"]).toBe(true);
-  store.toggleLogFilter("metrics");
-  expect(store.logFilters["metrics"]).toBe(false);
+  // metadata は DEFAULT_LOG_FILTERS で true である
+  expect(store.logFilters["metadata"]).toBe(true);
+  store.toggleLogFilter("metadata");
+  expect(store.logFilters["metadata"]).toBe(false);
 });
 
 test("toggleLogFilter: 指定キーをfalseからtrueに切り替える", async () => {
@@ -170,9 +170,9 @@ test("toggleLogFilter: 指定キーをfalseからtrueに切り替える", async 
 
 test("toggleLogFilter: 切り替え後にlocalStorageへ保存する", async () => {
   const store = await loadResetStore();
-  store.toggleLogFilter("metrics");
+  store.toggleLogFilter("metadata");
   const saved = JSON.parse(localStorage.getItem("logFilters") ?? "{}") as Record<string, boolean>;
-  expect(saved["metrics"]).toBe(false);
+  expect(saved["metadata"]).toBe(false);
 });
 
 test("toggleLogFilter: 他のキーには影響しない", async () => {
