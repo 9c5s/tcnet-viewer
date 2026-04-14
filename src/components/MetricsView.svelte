@@ -8,6 +8,8 @@
   let { layer }: Props = $props();
 
   let metrics = $derived(store.metrics[layer]);
+  // syncMaster は master deck の player number (1-4) を各 layer に共通配信する
+  let isMasterDeck = $derived(metrics != null && metrics.syncMaster === layer + 1);
 </script>
 
 <div class="border-b border-base-content/20 p-3">
@@ -49,8 +51,8 @@
       </div>
       <div class="flex justify-between">
         <span class="text-base-content/40">Sync</span>
-        <span class:font-bold={metrics.syncMaster === 1} class:text-warning={metrics.syncMaster === 1} class:text-base-content={metrics.syncMaster !== 1}>
-          {metrics.syncMaster === 1 ? "Master" : "Slave"}
+        <span class:font-bold={isMasterDeck} class:text-warning={isMasterDeck} class:text-base-content={!isMasterDeck}>
+          {isMasterDeck ? "Master" : "Slave"}
         </span>
       </div>
     </div>

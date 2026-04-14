@@ -73,7 +73,7 @@
   </div>
 
   <div data-testid="player-status-bar">
-    <PlayerStatusBar {layer} {time} {metrics} />
+    <PlayerStatusBar {layer} {playerNumber} {time} {metrics} />
   </div>
 
   <div data-testid="player-full" class="px-5 pb-4">

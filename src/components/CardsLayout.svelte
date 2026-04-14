@@ -118,7 +118,8 @@
                 <span class="status-badge" class:badge-success={timeInfo.onAir === 1}>{timeInfo.onAir === 1 ? "ON AIR" : "OFF AIR"}</span>
               {/if}
               {#if metrics?.syncMaster != null}
-                <span class="status-badge" class:badge-warning={metrics.syncMaster === 1}>{metrics.syncMaster === 1 ? "MASTER" : "SLAVE"}</span>
+                {@const isMasterDeck = metrics.syncMaster === i + 1}
+                <span class="status-badge" class:badge-warning={isMasterDeck}>{isMasterDeck ? "MASTER" : "SLAVE"}</span>
               {/if}
             </div>
           </div>

@@ -38,7 +38,10 @@
       case "Beat":
         return metrics?.beatNumber != null && metrics?.beatMarker != null ? `${metrics.beatNumber} [${metrics.beatMarker}/4]` : "-";
       case "Sync":
-        return metrics?.syncMaster != null ? (metrics.syncMaster === 1 ? "Master" : "Slave") : "-";
+        // syncMaster はmaster deckの player number (1-4) を各layerに共通配信する
+        return metrics?.syncMaster != null
+          ? (metrics.syncMaster === layerIndex + 1 ? "Master" : "Slave")
+          : "-";
       case "OnAir":
         return timeInfo ? (timeInfo.onAir === 1 ? "ON" : "OFF") : "-";
       case "TrackID":

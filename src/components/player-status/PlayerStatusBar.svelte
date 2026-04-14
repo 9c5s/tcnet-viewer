@@ -6,10 +6,11 @@
 
   interface Props {
     layer: LayerInfo;
+    playerNumber: number;
     time: TimeInfo | null;
     metrics: MetricsData | null;
   }
-  let { layer, time, metrics }: Props = $props();
+  let { layer, playerNumber, time, metrics }: Props = $props();
 
   let metricsOk = $derived(isMetricsConsistent(layer, metrics));
   let position = $derived(derivePlaybackPosition(time, metricsOk ? metrics : null));
@@ -34,7 +35,11 @@
     const sign = percent > 0 ? "+" : "";
     return `${sign}${percent.toFixed(2)}%`;
   });
-  let isMaster = $derived(metricsOk && metrics?.syncMaster === 1);
+  // TCNet byte29 (syncMaster) は Pioneer BRIDGE/CDJ 実装では "master deck の
+  // player number (1-4)" が全layerに共通でbroadcastされる。spec記載の
+  // `0=Slave, 1=Master` (layer単位のflag) とは異なる挙動のため、自分の
+  // playerNumber と一致するかで判定する
+  let isMaster = $derived(metricsOk && metrics?.syncMaster === playerNumber);
   let beatIndex = $derived(
     metricsOk && metrics?.beatMarker !== undefined
       ? Math.min(Math.max((metrics.beatMarker - 1) | 0, 0), 3)
