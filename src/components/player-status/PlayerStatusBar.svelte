@@ -47,56 +47,56 @@
   );
 </script>
 
-<div class="grid grid-cols-[auto_1fr_auto_auto] items-center gap-5 border-y border-base-content/20 p-3.5 px-5">
+<div class="grid grid-cols-[auto_1fr_auto_auto] items-center gap-3 border-y border-base-content/20 p-2 px-3">
   {#if onAir}
-    <div class="rounded-sm border-2 border-error px-3 py-1 font-mono text-[11px] font-bold tracking-widest text-error">
+    <div class="rounded-sm border-2 border-error px-2 py-0.5 font-mono text-[9px] font-bold tracking-widest text-error">
       ON AIR
     </div>
   {:else}
     <div class="
-      rounded-sm border-2 border-base-content/40 px-3 py-1 font-mono text-[11px] font-bold tracking-widest
+      rounded-sm border-2 border-base-content/40 px-2 py-0.5 font-mono text-[9px] font-bold tracking-widest
       text-base-content/40
     ">
       OFF AIR
     </div>
   {/if}
 
-  <div class="flex items-baseline gap-6 font-mono">
+  <div class="flex items-baseline gap-4 font-mono">
     <div>
-      <span class="block text-[9px] tracking-widest text-base-content/40 uppercase">Time</span>
-      <span class="text-[26px] leading-none font-semibold text-base-content">
-        {timeParts[0]}<span class="text-[18px]">{timeParts[1]}</span>
+      <span class="block text-[8px] tracking-widest text-base-content/40 uppercase">Time</span>
+      <span class="text-[20px] leading-none font-semibold text-base-content">
+        {timeParts[0]}<span class="text-[14px]">{timeParts[1]}</span>
       </span>
     </div>
     <div>
-      <span class="block text-[9px] tracking-widest text-base-content/40 uppercase">Remain</span>
-      <span class="text-[26px] leading-none font-semibold text-error">
-        {remainParts[0]}<span class="text-[18px]">{remainParts[1]}</span>
+      <span class="block text-[8px] tracking-widest text-base-content/40 uppercase">Remain</span>
+      <span class="text-[20px] leading-none font-semibold text-error">
+        {remainParts[0]}<span class="text-[14px]">{remainParts[1]}</span>
       </span>
     </div>
   </div>
 
   <div class="text-right font-mono">
-    <span class="block text-[9px] tracking-widest text-base-content/40 uppercase">Tempo</span>
-    <div class="text-[24px] leading-[1.1] font-semibold text-base-content">{bpmText}</div>
-    <div class="text-[18px] leading-[1.1] font-semibold text-warning">{pitchText}</div>
+    <span class="block text-[8px] tracking-widest text-base-content/40 uppercase">Tempo</span>
+    <div class="text-[18px] leading-[1.1] font-semibold text-base-content">{bpmText}</div>
+    <div class="text-[13px] leading-[1.1] font-semibold text-warning">{pitchText}</div>
   </div>
 
-  <div class="flex flex-col items-end gap-1.5">
-    <div class="flex gap-1.5">
+  <div class="flex flex-col items-end gap-1">
+    <div class="flex gap-1">
       {#if isMaster}
-        <span class="rounded-sm bg-orange px-2.5 py-0.5 font-mono text-[10px] font-bold tracking-widest text-base-100">MASTER</span>
+        <span class="rounded-sm bg-orange px-2 py-0.5 font-mono text-[9px] font-bold tracking-widest text-base-100">MASTER</span>
       {:else}
         <span class="
-          rounded-sm border border-base-content/40 px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest
+          rounded-sm border border-base-content/40 px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-widest
           text-base-content/40
         ">MASTER</span>
       {/if}
     </div>
-    <div class="flex gap-[3px]">
+    <div class="flex gap-[2px]">
       {#each [0, 1, 2, 3] as i}
         <div
-          class="h-1 w-3.5 rounded-sm"
+          class="h-[3px] w-3 rounded-sm"
           class:bg-accent={beatIndex === i}
           class:shadow-[0_0_4px_color-mix(in_oklab,var(--color-success)_50%,transparent)]={beatIndex === i}
           class:bg-base-content={beatIndex !== i}

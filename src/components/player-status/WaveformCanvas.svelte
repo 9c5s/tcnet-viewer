@@ -26,7 +26,7 @@
   }
   let {
     bars, cues, beatgrid, status, currentTimeMs, trackLengthMs, zoomScale, onZoomChange,
-    height = 80,
+    height = 64,
   }: Props = $props();
 
   // Svelte 5 の bind:this は $state でないと reactive にならない
@@ -149,11 +149,11 @@
   });
 </script>
 
-<div class="px-5 pb-3">
-  <div class="mb-1 flex items-center justify-between gap-4">
-    <span class="text-[9px] tracking-widest text-base-content/40 uppercase">Zoom</span>
+<div class="px-3 pb-2">
+  <div class="mb-0.5 flex items-center justify-between gap-3">
+    <span class="text-[8px] tracking-widest text-base-content/40 uppercase">Zoom</span>
     <div class="flex items-center gap-2 font-mono">
-      <span class="text-[9px] tracking-widest text-base-content/40 uppercase">Scale</span>
+      <span class="text-[8px] tracking-widest text-base-content/40 uppercase">Scale</span>
       <input
         type="range"
         min={ZOOM_MIN}
@@ -163,9 +163,9 @@
         oninput={(e) => onZoomChange(Number(e.currentTarget.value))}
         onpointerdown={(e) => e.stopPropagation()}
         ontouchstart={(e) => e.stopPropagation()}
-        class="range w-36 range-primary range-xs"
+        class="range w-28 range-primary range-xs"
       />
-      <span class="w-10 text-right text-[11px] text-base-content"
+      <span class="w-8 text-right text-[10px] text-base-content"
         >{Math.round(stepToWindowMs(zoomScale) / 1000)}s</span
       >
     </div>
@@ -181,7 +181,7 @@
   {#if bars && bars.length > 0 && trackLengthMs > 0}
     <canvas bind:this={canvasEl} class="block w-full rounded-sm" style:height="{height}px"></canvas>
   {:else}
-    <div class="flex items-center justify-center rounded-sm bg-base-100 text-[11px] text-base-content/40" style:height="{height}px">
+    <div class="flex items-center justify-center rounded-sm bg-base-100 text-[10px] text-base-content/40" style:height="{height}px">
       No waveform data
     </div>
   {/if}

@@ -14,13 +14,13 @@
   ];
 </script>
 
-<div class="mb-4 flex items-center rounded-md border border-base-content/20 bg-base-100 p-3 px-4">
-  <div class="flex items-center gap-3">
-    <span class="text-[10px] tracking-widest text-base-content/40 uppercase">Arrange</span>
+<div class="mb-3 flex items-center rounded-md border border-base-content/20 bg-base-100 p-2 px-3">
+  <div class="flex items-center gap-2">
+    <span class="text-[9px] tracking-widest text-base-content/40 uppercase">Arrange</span>
     <div class="join">
       {#each modes as mode}
         <button
-          class="btn join-item btn-sm"
+          class="btn join-item btn-xs"
           class:btn-primary={arrangement === mode.key}
           class:btn-ghost={arrangement !== mode.key}
           onclick={() => onChange(mode.key)}

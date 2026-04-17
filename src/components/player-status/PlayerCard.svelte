@@ -77,15 +77,15 @@
     <PlayerStatusBar {layer} {playerNumber} {time} {metrics} />
   </div>
 
-  <div data-testid="player-full" class="px-5 pb-4">
-    <span class="mb-1 block text-[9px] tracking-widest text-base-content/40 uppercase">Full Track</span>
+  <div data-testid="player-full" class="px-3 pb-2">
+    <span class="mb-0.5 block text-[8px] tracking-widest text-base-content/40 uppercase">Full Track</span>
     <WaveformSvg
       bars={waveformSmall}
       {cues}
       status={layer.status}
       currentPosition={position.clampedElapsedMs}
       trackLength={position.trackLengthMs}
-      height={36}
+      height={28}
     />
   </div>
 </div>

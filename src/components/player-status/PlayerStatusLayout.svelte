@@ -23,9 +23,9 @@
   );
 
   function arrangeClass(a: Arrangement, count: number): string {
-    if (a === "row") return "flex flex-row gap-5";
-    if (a === "grid" && count >= 2) return "grid grid-cols-2 gap-5";
-    return "flex flex-col gap-5";
+    if (a === "row") return "flex flex-row gap-3";
+    if (a === "grid" && count >= 2) return "grid grid-cols-2 gap-3";
+    return "flex flex-col gap-3";
   }
 
   // grid 3枚時のみ 3枚目を横2列に伸ばしてバランスを取る
@@ -54,7 +54,7 @@
   }
 </script>
 
-<div class="min-h-screen bg-base-300 p-5">
+<div class="min-h-screen bg-base-300 p-3">
   <PlayerToolbar arrangement={store.playerStatusArrange} onChange={onArrangeChange} />
 
   {#if activeIndexes.length === 0}
