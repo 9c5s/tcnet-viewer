@@ -33,10 +33,10 @@ function resetStore() {
 }
 
 describe("PlayerStatusLayout", () => {
-  test("L1-L4全IDLEでエンプティステート", () => {
+  test("L1-L4全IDLEかつ非接続でエンプティステート", () => {
     resetStore();
     const { getByText } = render(PlayerStatusLayout);
-    expect(getByText("No active players")).toBeTruthy();
+    expect(getByText("No connected players")).toBeTruthy();
   });
 
   test("一部activeならそのカードのみ描画", () => {
@@ -45,6 +45,21 @@ describe("PlayerStatusLayout", () => {
     store.layers[2] = { source: 0, status: "PLAYING", trackID: 43, name: "L3" };
     const { queryAllByTestId } = render(PlayerStatusLayout);
     expect(queryAllByTestId("player-card").length).toBe(2);
+  });
+
+  test("IDLEでも source !== 0 なら接続済みCDJとして描画", () => {
+    resetStore();
+    // 接続済みだがトラック未ロードの CDJ1 (source が割り当て済みで IDLE)
+    store.layers[0] = { source: 1, status: "IDLE", trackID: 0, name: "CDJ-1" };
+    const { queryAllByTestId } = render(PlayerStatusLayout);
+    expect(queryAllByTestId("player-card").length).toBe(1);
+  });
+
+  test("IDLEでも trackID !== 0 ならトラック保持中として描画", () => {
+    resetStore();
+    store.layers[1] = { source: 0, status: "IDLE", trackID: 99, name: "" };
+    const { queryAllByTestId } = render(PlayerStatusLayout);
+    expect(queryAllByTestId("player-card").length).toBe(1);
   });
 
   test("カードは L1-L4 の番号順に並ぶ", () => {

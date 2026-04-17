@@ -9,11 +9,16 @@
   import PlayerCard from "./PlayerCard.svelte";
   import PlayerToolbar from "./PlayerToolbar.svelte";
 
-  // L1-L4 (index 0-3) のうち status !== "IDLE" の index を L1->L4 順で抽出する
+  // L1-L4 (index 0-3) のうち接続されているCDJの index を L1->L4 順で抽出する。
+  // 接続判定は以下のいずれかを満たす場合とする:
+  // - status !== "IDLE" (再生/ポーズ等の動作中)
+  // - trackID !== 0 (トラックがロード済み)
+  // - source !== 0 (Bridgeがレイヤーにソースを割り当て済み)
+  // これによりトラック未ロードでもCDJ接続中であればカード表示する
   let activeIndexes = $derived(
     store.layers
       .slice(0, 4)
-      .map((l, i) => (l.status !== "IDLE" ? i : -1))
+      .map((l, i) => (l.status !== "IDLE" || l.trackID !== 0 || l.source !== 0 ? i : -1))
       .filter((i) => i >= 0),
   );
 
@@ -54,8 +59,8 @@
 
   {#if activeIndexes.length === 0}
     <div class="mt-20 flex flex-col items-center gap-2 text-base-content/40">
-      <p class="text-lg">No active players</p>
-      <p class="text-sm">Load a track on CDJ 1-4</p>
+      <p class="text-lg">No connected players</p>
+      <p class="text-sm">Connect CDJ 1-4 to the TCNet network</p>
     </div>
   {:else}
     <div class={arrangeClass(store.playerStatusArrange, activeIndexes.length)}>
