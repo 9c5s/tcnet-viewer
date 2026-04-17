@@ -28,9 +28,11 @@ function generateBeatGrid(trackLengthMs: number, bpm: number): BeatGridEntry[] {
   const totalBeats = Math.floor(trackLengthMs / beatMs);
   const entries: BeatGridEntry[] = [];
   for (let i = 0; i < totalBeats; i++) {
+    // 実機 Bridge の挙動を模倣: 4 拍に 1 つだけ beatType=20 (小節境界)、
+    // それ以外は beatType=10 (通常拍)。beatNumber は通し番号。
     entries.push({
-      beatNumber: (i % 4) + 1,
-      beatType: i % 4 === 0 ? 1 : 0,
+      beatNumber: i,
+      beatType: i % 4 === 3 ? 20 : 10,
       timestampMs: Math.round(i * beatMs),
     });
   }

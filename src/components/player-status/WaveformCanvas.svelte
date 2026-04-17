@@ -13,6 +13,10 @@
   import { selectActiveLoop } from "$lib/player-status/loop-mask.js";
   import CueMarkerLayer from "./CueMarkerLayer.svelte";
 
+  // Bridge 実機 (TCNet 3.5) で小節境界拍 (downbeat) を表す beatType。
+  // 通常拍は 10、4 拍に 1 つだけ 20 が混じる。仕様書未記載で実機キャプチャから確定した値。
+  const DOWNBEAT_BEAT_TYPE = 20;
+
   interface Props {
     bars: WaveformBar[] | null;
     cues: CuePoint[] | null;
@@ -94,7 +98,7 @@
       for (const b of beatgrid) {
         if (b.timestampMs < windowLeft || b.timestampMs > windowLeft + windowMs) continue;
         const x = timeToX(b.timestampMs, windowLeft, windowMs, canvasWidth);
-        if (b.beatType === 1) {
+        if (b.beatType === DOWNBEAT_BEAT_TYPE) {
           ctx.strokeStyle = downbeatColor;
           ctx.lineWidth = 1.5;
         } else {
