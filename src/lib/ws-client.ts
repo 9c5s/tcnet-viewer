@@ -1,12 +1,19 @@
 import { store } from "./stores.svelte.js";
 import type { WSMessage } from "./types.js";
 import { createHandlers, dispatchMessage } from "./message-handlers.js";
+import { isMockMode, seedMockData } from "./mock-data.js";
 
 let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout>;
 const handlers = createHandlers(store);
 
 export function connect(): void {
+  // ?mock を付けてアクセスした場合は WS 接続せずデザイン確認用モックを投入する
+  if (isMockMode()) {
+    seedMockData();
+    return;
+  }
+
   const protocol = location.protocol === "https:" ? "wss:" : "ws:";
   ws = new WebSocket(`${protocol}//${location.host}/ws`);
 
@@ -45,6 +52,7 @@ export function connect(): void {
 }
 
 export function disconnect(): void {
+  if (isMockMode()) return;
   clearTimeout(reconnectTimer);
   ws?.close();
 }
