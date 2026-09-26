@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
         ].join(""),
         "bash -c '! git check-ignore'",
         "vp check --fix",
-        "vp lint --deny-warnings",
+        "vp lint --deny-warnings --no-error-on-unmatched-pattern",
       ],
       "*.svelte": ["npx eslint --fix", "npx svelte-check --fail-on-warnings"],
       ".github/workflows/*.{yml,yaml}": ["npx actionlint", "npx zizmor --fix --pedantic"],
