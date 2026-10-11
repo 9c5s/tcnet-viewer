@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 // 末尾のnullバイト (0x00) を除去した終端位置を返す
 function findNonNullEnd(data: Buffer): number {
   let end = data.length - 1;
@@ -92,6 +94,20 @@ function removeBridgeChunkGaps(data: Buffer): Buffer {
     chunks.push(data.subarray(offset, offset + BRIDGE_CHUNK_SIZE));
   }
   return Buffer.concat(chunks);
+}
+
+// Bridge がアートワークのない曲に返す代わりの画像 (灰色の円盤) の SHA-256。Windows 版と Mac 版でエンコードが異なる
+const BRIDGE_PLACEHOLDER_DIGESTS: ReadonlySet<string> = new Set([
+  "b0c95000fbaacad523ad20aa5e0336cb8ff95897eb05c8b7354cf79f499ea72d",
+  "ae1c1f9b3c8f03ae63ededed0f8cd7830a366c495f8661e4511a89ccd15a45a7",
+]);
+
+export function isBridgePlaceholderArtwork(
+  imageData: Buffer,
+  placeholderDigests: ReadonlySet<string> = BRIDGE_PLACEHOLDER_DIGESTS,
+): boolean {
+  const digest = createHash("sha256").update(trimJpegPadding(imageData)).digest("hex");
+  return placeholderDigests.has(digest);
 }
 
 // node-tcnetがアセンブル済みの画像バッファからブロードキャスト用ペイロードを生成する

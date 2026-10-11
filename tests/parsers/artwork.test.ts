@@ -1,7 +1,9 @@
+import { createHash } from "node:crypto";
 import { expect, test, describe } from "vite-plus/test";
 import {
   artworkToBase64,
   detectArtworkMimeType,
+  isBridgePlaceholderArtwork,
   isValidImageData,
   processArtworkPacket,
   trimJpegPadding,
@@ -261,5 +263,22 @@ describe("processArtworkPacket", () => {
     const result = processArtworkPacket(padded)!;
     expect(result).not.toBeNull();
     expect(Buffer.from(result.base64, "base64")).toEqual(jpeg);
+  });
+});
+
+describe("isBridgePlaceholderArtwork", () => {
+  const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x01, 0x02, 0xff, 0xd9]);
+  const digests = new Set([createHash("sha256").update(jpeg).digest("hex")]);
+
+  test("代わりの画像と同じ内容なら true を返す", () => {
+    expect(isBridgePlaceholderArtwork(jpeg, digests)).toBe(true);
+  });
+
+  test("末尾の null パディングを除いて判定する", () => {
+    expect(isBridgePlaceholderArtwork(Buffer.concat([jpeg, Buffer.alloc(54)]), digests)).toBe(true);
+  });
+
+  test("代わりの画像でなければ false を返す", () => {
+    expect(isBridgePlaceholderArtwork(jpeg)).toBe(false);
   });
 });

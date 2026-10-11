@@ -77,7 +77,7 @@ for (const key of expectedTcnetDataPacketTypeKeys) {
   }
 }
 
-import { processArtworkPacket } from "./parsers/artwork.js";
+import { isBridgePlaceholderArtwork, processArtworkPacket } from "./parsers/artwork.js";
 import { repairBeatGridEntries } from "./parsers/beat-grid.js";
 import { parseCueData } from "./parsers/cue-data.js";
 import { parseMixerData } from "./parsers/mixer.js";
@@ -598,7 +598,7 @@ export class TCNetBridge {
     // Artwork (マルチパケットのためパケットロス/タイムアウトが起きやすい、リトライする)
     // dataイベントではなくrequestDataの戻り値から直接処理する
     // (timeout後に届く未アセンブルの断片パケットを誤処理しないため)
-    let artworkSuccess = false;
+    let artworkSettled = false;
     for (let attempt = 1; attempt <= 3; attempt++) {
       if (this.layerGeneration[layer] !== generation) return;
       try {
@@ -608,7 +608,14 @@ export class TCNetBridge {
           console.log(`[TCNet] アートワーク応答が不正なパケット型 (レイヤー${layer})`);
           continue;
         }
-        const artworkData = processArtworkPacket(packet.data?.jpeg);
+        const jpeg = packet.data?.jpeg;
+        if (jpeg && isBridgePlaceholderArtwork(jpeg)) {
+          // 代わりの画像は要求し直しても変わらないため、アートワークなしとして何も表示しない
+          console.log(`[TCNet] アートワークなし (レイヤー${layer})`);
+          artworkSettled = true;
+          break;
+        }
+        const artworkData = processArtworkPacket(jpeg);
         if (artworkData) {
           this.broadcast({
             type: "artwork",
@@ -616,7 +623,7 @@ export class TCNetBridge {
             layer,
             data: artworkData,
           });
-          artworkSuccess = true;
+          artworkSettled = true;
           break;
         }
         // 不完全なJPEG (EOIマーカーなし) の場合は再送要求する
@@ -629,7 +636,7 @@ export class TCNetBridge {
       }
       if (attempt < 3) await this.sleep(500);
     }
-    if (!artworkSuccess && this.layerGeneration[layer] === generation) {
+    if (!artworkSettled && this.layerGeneration[layer] === generation) {
       this.broadcast({
         type: "artwork-failed",
         timestamp: Date.now(),
