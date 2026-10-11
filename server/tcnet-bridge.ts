@@ -78,7 +78,7 @@ for (const key of expectedTcnetDataPacketTypeKeys) {
 }
 
 import { processArtworkPacket } from "./parsers/artwork.js";
-import { dropCorruptedBeatGridEntries } from "./parsers/beat-grid.js";
+import { repairBeatGridEntries } from "./parsers/beat-grid.js";
 import { parseCueData } from "./parsers/cue-data.js";
 import { parseMixerData } from "./parsers/mixer.js";
 import { decodeAppSpecific } from "./parsers/status.js";
@@ -217,10 +217,10 @@ export class TCNetBridge {
         const packet = await this.client.requestData(TCNetDataPacketType.BeatGridData, layer);
         if (this.layerGeneration[layer] !== generation) return;
         if (packet instanceof TCNetDataPacketBeatGrid && packet.data) {
-          const entries = dropCorruptedBeatGridEntries(packet.data.entries);
-          if (entries.length < packet.data.entries.length) {
+          const { entries, interpolated, dropped } = repairBeatGridEntries(packet.data.entries);
+          if (interpolated > 0 || dropped > 0) {
             console.log(
-              `[TCNet] BeatGrid の破損部分を除外 (レイヤー${layer}, ${packet.data.entries.length} 件中 ${entries.length} 件を使用)`,
+              `[TCNet] BeatGrid を補修 (レイヤー${layer}, 欠けた ${interpolated} 拍を補間、破損した ${dropped} 件を除外)`,
             );
           }
           this.broadcast({

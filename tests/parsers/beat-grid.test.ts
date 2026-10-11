@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vite-plus/test";
-import { dropCorruptedBeatGridEntries, parseBeatGrid } from "../../server/parsers/beat-grid.js";
+import { parseBeatGrid, repairBeatGridEntries } from "../../server/parsers/beat-grid.js";
 import type { BeatGridEntry } from "../../server/parsers/types.js";
 import { BeatGridBuilder } from "./builders.js";
 
@@ -57,23 +57,65 @@ test("parseBeatGrid: 不完全な末尾データは無視する", () => {
   expect(parseBeatGrid(buffer)).toHaveLength(1);
 });
 
-describe("dropCorruptedBeatGridEntries", () => {
-  function entries(beatNumbers: number[]): BeatGridEntry[] {
-    return beatNumbers.map((beatNumber) => ({
-      beatNumber,
-      beatType: 0,
-      timestampMs: beatNumber * 400,
-    }));
+describe("repairBeatGridEntries", () => {
+  const INTERVAL = 400;
+
+  // 4 拍ごとに downbeat (20) を置いた一定テンポの拍を作る
+  function beats(from: number, to: number): BeatGridEntry[] {
+    const result: BeatGridEntry[] = [];
+    for (let n = from; n <= to; n++) {
+      result.push({
+        beatNumber: n,
+        beatType: (n - 1) % 4 === 0 ? 20 : 10,
+        timestampMs: n * INTERVAL,
+      });
+    }
+    return result;
   }
 
-  test("beatNumber が連続しなくなった位置以降のエントリを除外する", () => {
-    const valid = entries(Array.from({ length: 137 }, (_, i) => i + 1));
-    const corrupted = entries([171, 172, 173]);
-    expect(dropCorruptedBeatGridEntries([...valid, ...corrupted])).toEqual(valid);
+  test("欠けのない BeatGrid はそのまま返す", () => {
+    const all = beats(1, 600);
+    expect(repairBeatGridEntries(all)).toEqual({ entries: all, interpolated: 0, dropped: 0 });
   });
 
-  test("beatNumber が連続していればすべてのエントリを返す", () => {
-    const all = entries([1, 2, 3, 4]);
-    expect(dropCorruptedBeatGridEntries(all)).toEqual(all);
+  test("CDJ-3000 で 1 chunk 分 (171 拍) 欠けた区間を補間し、後ろの拍を残す", () => {
+    const result = repairBeatGridEntries([...beats(1, 170), ...beats(342, 617)]);
+    expect(result.entries).toEqual(beats(1, 617));
+    expect(result.interpolated).toBe(171);
+    expect(result.dropped).toBe(0);
+  });
+
+  test("離れた複数の欠けをそれぞれ補間する", () => {
+    const result = repairBeatGridEntries([
+      ...beats(1, 170),
+      ...beats(342, 512),
+      ...beats(684, 800),
+    ]);
+    expect(result.entries).toEqual(beats(1, 800));
+    expect(result.interpolated).toBe(342);
+  });
+
+  test("CDJ-3000X で欠けの後ろの時刻が破損した区間以降を除外する", () => {
+    // 欠けの後ろは拍番号が連続するが、レコード境界のずれで時刻が前後する
+    const corrupted = [7012356, 1507329, 12845058, 7340035].map((timestampMs, i) => ({
+      beatNumber: 171 + i,
+      beatType: 0,
+      timestampMs,
+    }));
+    const result = repairBeatGridEntries([...beats(1, 137), ...corrupted]);
+    expect(result).toEqual({ entries: beats(1, 137), interpolated: 0, dropped: 4 });
+  });
+
+  test("欠けの前後で拍の間隔がつながらない区間以降を除外する", () => {
+    const shifted = beats(342, 400).map((entry) => ({
+      ...entry,
+      timestampMs: entry.timestampMs * 10,
+    }));
+    const result = repairBeatGridEntries([...beats(1, 170), ...shifted]);
+    expect(result).toEqual({ entries: beats(1, 170), interpolated: 0, dropped: shifted.length });
+  });
+
+  test("空の BeatGrid は空のまま返す", () => {
+    expect(repairBeatGridEntries([])).toEqual({ entries: [], interpolated: 0, dropped: 0 });
   });
 });
