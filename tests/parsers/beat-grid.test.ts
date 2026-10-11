@@ -1,5 +1,6 @@
-import { expect, test } from "vite-plus/test";
-import { parseBeatGrid } from "../../server/parsers/beat-grid.js";
+import { describe, expect, test } from "vite-plus/test";
+import { dropCorruptedBeatGridEntries, parseBeatGrid } from "../../server/parsers/beat-grid.js";
+import type { BeatGridEntry } from "../../server/parsers/types.js";
 import { BeatGridBuilder } from "./builders.js";
 
 test("parseBeatGrid: 単一エントリをパースする", () => {
@@ -54,4 +55,25 @@ test("parseBeatGrid: 不完全な末尾データは無視する", () => {
   const buffer = Buffer.alloc(13);
   full.copy(buffer);
   expect(parseBeatGrid(buffer)).toHaveLength(1);
+});
+
+describe("dropCorruptedBeatGridEntries", () => {
+  function entries(beatNumbers: number[]): BeatGridEntry[] {
+    return beatNumbers.map((beatNumber) => ({
+      beatNumber,
+      beatType: 0,
+      timestampMs: beatNumber * 400,
+    }));
+  }
+
+  test("beatNumber が連続しなくなった位置以降のエントリを除外する", () => {
+    const valid = entries(Array.from({ length: 137 }, (_, i) => i + 1));
+    const corrupted = entries([171, 172, 173]);
+    expect(dropCorruptedBeatGridEntries([...valid, ...corrupted])).toEqual(valid);
+  });
+
+  test("beatNumber が連続していればすべてのエントリを返す", () => {
+    const all = entries([1, 2, 3, 4]);
+    expect(dropCorruptedBeatGridEntries(all)).toEqual(all);
+  });
 });
