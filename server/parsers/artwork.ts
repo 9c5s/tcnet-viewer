@@ -78,13 +78,31 @@ export function trimJpegPadding(data: Buffer): Buffer {
   return data;
 }
 
+// Bridge V1.1.8 は CDJ-3000X から 1106 バイトずつ届く chunk を 1368 バイト間隔に置き、間をゼロで埋めて送信する
+const BRIDGE_BLOCK_SIZE = 1368;
+const BRIDGE_CHUNK_SIZE = 1106;
+
+// Bridge の配置で挟まったゼロを取り除く。配置に該当しないデータはそのまま返す
+function removeBridgeChunkGaps(data: Buffer): Buffer {
+  if (data.length % BRIDGE_BLOCK_SIZE !== 0) return data;
+  const chunks: Buffer[] = [];
+  for (let offset = 0; offset < data.length; offset += BRIDGE_BLOCK_SIZE) {
+    const gap = data.subarray(offset + BRIDGE_CHUNK_SIZE, offset + BRIDGE_BLOCK_SIZE);
+    if (gap.some((byte) => byte !== 0x00)) return data;
+    chunks.push(data.subarray(offset, offset + BRIDGE_CHUNK_SIZE));
+  }
+  return Buffer.concat(chunks);
+}
+
 // node-tcnetがアセンブル済みの画像バッファからブロードキャスト用ペイロードを生成する
 // 無効なデータの場合はnullを返す
 export function processArtworkPacket(
   imageData: Buffer | undefined,
 ): { base64: string; mimeType: string } | null {
-  if (!imageData || imageData.length === 0 || !isValidImageData(imageData)) return null;
-  const trimmed = trimJpegPadding(imageData);
+  if (!imageData || imageData.length === 0) return null;
+  const repaired = removeBridgeChunkGaps(imageData);
+  if (!isValidImageData(repaired)) return null;
+  const trimmed = trimJpegPadding(repaired);
   return {
     base64: artworkToBase64(trimmed),
     mimeType: detectArtworkMimeType(trimmed),

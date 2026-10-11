@@ -216,6 +216,45 @@ describe("processArtworkPacket", () => {
     expect(Buffer.from(result.base64, "base64")).toEqual(jpeg);
   });
 
+  describe("Bridge の 1368 バイト間隔の配置", () => {
+    // CDJ-3000X から 1106 バイトずつ届く chunk を、Bridge V1.1.8 と同じく 1368 バイト間隔に置いてゼロで埋める
+    function layoutLikeBridge(jpeg: Buffer): Buffer {
+      const chunkCount = Math.ceil(jpeg.length / 1106);
+      const out = Buffer.alloc(chunkCount * 1368);
+      for (let i = 0; i < chunkCount; i++) {
+        jpeg.copy(out, i * 1368, i * 1106, (i + 1) * 1106);
+      }
+      return out;
+    }
+
+    function createJpeg(length: number): Buffer {
+      const jpeg = Buffer.alloc(length, 0xaa);
+      jpeg[0] = 0xff;
+      jpeg[1] = 0xd8;
+      jpeg[length - 2] = 0xff;
+      jpeg[length - 1] = 0xd9;
+      return jpeg;
+    }
+
+    test("配置で挟まったゼロを取り除き、元の JPEG を返す", () => {
+      const jpeg = createJpeg(2500);
+      const result = processArtworkPacket(layoutLikeBridge(jpeg))!;
+      expect(Buffer.from(result.base64, "base64")).toEqual(jpeg);
+    });
+
+    test("長さが 1368 の倍数でない JPEG はそのまま返す", () => {
+      const jpeg = createJpeg(5702);
+      const result = processArtworkPacket(jpeg)!;
+      expect(Buffer.from(result.base64, "base64")).toEqual(jpeg);
+    });
+
+    test("隙間の位置にゼロ以外のバイトがある JPEG はそのまま返す", () => {
+      const jpeg = createJpeg(1368 * 2);
+      const result = processArtworkPacket(jpeg)!;
+      expect(Buffer.from(result.base64, "base64")).toEqual(jpeg);
+    });
+  });
+
   test("nullパディング付きJPEGはトリミングされたbase64を返す", () => {
     const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0xff, 0xd9]);
     const padded = Buffer.concat([jpeg, Buffer.alloc(100)]);
