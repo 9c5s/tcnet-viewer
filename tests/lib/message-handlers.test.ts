@@ -74,6 +74,23 @@ test("status: レイヤー情報を更新しSTATUS_MAPで変換する", () => {
   expect(store.layers[0].trackID).toBe(100);
 });
 
+test.each([
+  { status: 2, expected: "LOADING" },
+  { status: 17, expected: "ENDED" },
+])(
+  "status: Bridge が転送する仕様外の値 $status を $expected に変換する",
+  ({ status, expected }) => {
+    const store = createMockStore();
+    const handlers = createHandlers(store);
+    handlers.status({
+      type: "status",
+      timestamp: 1000,
+      data: { nodeCount: 1, layers: [{ source: 1, status, trackID: 100, name: "Track" }] },
+    });
+    expect(store.layers[0].status).toBe(expected);
+  },
+);
+
 test("status: 未知のステータス値はIDLEにフォールバックする", () => {
   const store = createMockStore();
   const handlers = createHandlers(store);

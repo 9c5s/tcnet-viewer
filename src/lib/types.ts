@@ -1,5 +1,6 @@
 export type LayerStatus =
   | "IDLE"
+  | "LOADING"
   | "PLAYING"
   | "LOOPING"
   | "PAUSED"
@@ -8,7 +9,8 @@ export type LayerStatus =
   | "PLATTERDOWN"
   | "FFWD"
   | "FFRV"
-  | "HOLD";
+  | "HOLD"
+  | "ENDED";
 
 export type LayerInfo = {
   source: number;
@@ -78,6 +80,7 @@ export const LAYER_NAMES = ["L1", "L2", "L3", "L4", "LA", "LB", "LM", "LC"] as c
 
 export const STATUS_MAP: Record<number, LayerStatus> = {
   0: "IDLE",
+  2: "LOADING",
   3: "PLAYING",
   4: "LOOPING",
   5: "PAUSED",
@@ -87,6 +90,7 @@ export const STATUS_MAP: Record<number, LayerStatus> = {
   9: "FFWD",
   10: "FFRV",
   11: "HOLD",
+  17: "ENDED",
 };
 
 // server/types.ts からWSMessage型とAuthState型を再エクスポートする
